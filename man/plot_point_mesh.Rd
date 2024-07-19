@@ -59,11 +59,15 @@ Function for plotting a mesh of points  (not only) created by point_mesh() funct
 }
 \examples{
 # 2D polygon point mesh with plotted sensors and default settings
+par(mar = c(0,0,0,0))
 M <- point_mesh(dim = 2, n = 4000, type = 'polygon')
 plot_point_mesh(M, sensors = T)
+dev.off()
 
 # Plotting 2D circle point mesh with sensors as orange points
+par(mar = c(0,0,0,0))
 M <- point_mesh(dim = 2, n = 4000, type = 'circle')
 plot_point_mesh(M, sensors = T, col.sensors = "orange")
+dev.off()
 
 }

@@ -13,8 +13,6 @@
 #' @return A data frame with number of columns according to selected dimension of coordinates of mesh points.
 #'
 #' @import sf
-#' @import sp
-#' @import concaveman
 #'
 #' @export
 #'
@@ -130,41 +128,3 @@ make_polygon <- function(locations, mesh) {
   return(mesh.inside)
 
 }
-
-
-
-
-
-make_polygon_old <- function(locations, mesh, N) {
-  ## exclude points outside the defined polygon
-  N <- dim(mesh)[1]
-  coord.sf <- st_as_sf(locations, coords = c("x","y"))
-  concave.sf <- coord.sf %>%
-    summarise() %>%
-    concaveman::concaveman(concavity = 2)
-  polyg <- st_zm(concave.sf)
-  polyg.sp <- as_Spatial(polyg) # spatial polygon
-  coord.sp <- as_Spatial(coord.sf) # spatial points
-  square.sp <- sp::SpatialPoints(na.omit(mesh))
-  mesh.poly <- sp::point.in.polygon(square.sp@coords[,1], square.sp@coords[,2],
-                                    polyg.sp@polygons[[1]]@Polygons[[1]]@coords[,1],
-                                    polyg.sp@polygons[[1]]@Polygons[[1]]@coords[,2])
-
-  idx <- which(mesh.poly == 1)
-  mesh.wrap <- na.omit(mesh)[idx,]
-
-  mesh.polygon <- matrix(NA, N, 2)
-  mesh.poly.NA <- rep(0,N)
-  mesh.poly.NA[-which(is.na(mesh[,1]))] <- mesh.poly
-  mesh.polygon[which(mesh.poly.NA == 1),1] <- mesh.wrap$x
-  mesh.polygon[which(mesh.poly.NA == 1),2] <- mesh.wrap$y
-
-  return(mesh.polygon)
-}
-
-
-# stara verze
-mesh.polygon <- matrix(NA, N, 2)
-mesh.poly.NA <- matrix(NA, N, 2)
-mesh.poly.NA[-which(is.na(mesh[,1])),] <- mesh.poly
-mesh.polygon[which(mesh.poly.NA[,1] == 1),] <- mesh.wrap
