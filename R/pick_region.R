@@ -48,3 +48,16 @@ ROIs <- c(rep('frontal', 6), rep('central', 3), rep('frontal', 6), rep('central'
           rep('parietal',3), rep('central',2), rep('occipital', 2), rep('parietal',2), rep('temporal',2),
           rep('central',6), 'occipital', 'parietal', rep('temporal', 4), rep('central',5), rep('temporal', 4), rep('central',4),
           rep('temporal', 2), rep('central', 4), 'temporal', rep('frontal', 4), 'central')
+
+make_rect_polygon <- function(mesh) {
+  x <- unique(mesh[,1])
+  y <- unique(mesh[,2])
+  nx <- length(x)
+  ny <- length(y)
+
+  x.seq <- rep(x, ny)
+  y.seq <- rep(y, each = nx)
+  rectangle <- cbind(x.seq, y.seq)
+
+  return(rectangle)
+}
