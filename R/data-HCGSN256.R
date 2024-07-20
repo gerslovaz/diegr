@@ -12,6 +12,9 @@
 #'   \item{number}{Number of sensor (according to EGI GSN Technical Manual)}
 #'   \item{D2}{A tibble with 2 columns containing x and y coordinates of sensors in 2D}
 #'   \item{D3}{A tibble with 3 columns containing x, y and z coordinates of sensors in 3D}
+#'   \item{ROI}{Factor containing the name of the region to which the corresponding sensor belongs.
+#'   The levels are: "central", "frontal", "occipital", "parietal", "temporal".
+#'   The regions were determined by an expert from Central European Institute of Technology, Masaryk University, Brno, Czech Republic.}
 #' }
 #'
 #' @keywords dataset

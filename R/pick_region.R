@@ -22,7 +22,7 @@ pick_region <- function(coords = NULL, hemisphere = NULL, region = NULL, ROI = N
   }
 
   if (missing(ROI)) {
-    ROI <- ROIs
+    ROI <- HCGSN256$ROI
   }
 
   idx.reg <- grep(paste(region, collapse = "|"), ROI)
@@ -54,18 +54,6 @@ pick_region <- function(coords = NULL, hemisphere = NULL, region = NULL, ROI = N
 
   return(new.coords)
 }
-
-ROIs <- c(rep('frontal', 6), rep('central', 3), rep('frontal', 6), rep('central', 2),
-          rep('frontal', 6), 'central', rep('frontal',5), 'central', rep('frontal', 9), rep('central', 5),
-          rep('frontal', 3), rep('central', 5), rep('frontal', 2), rep('central', 5), rep('temporal',3),
-          rep('central', 3), rep('temporal',3), rep('central', 2), rep('temporal',2), rep('central',6),
-          rep('temporal',2), rep('parietal',6), rep('temporal',2), rep('parietal',7), 'temporal',
-          rep('parietal',7), rep('occipital', 7), 'parietal', rep('occipital', 7), rep('parietal',3),
-          rep('central',2), rep('occipital', 6), rep('parietal',3), rep('central',2), rep('occipital', 5),
-          rep('parietal',3), rep('central',2), rep('occipital', 4), rep('parietal',3), rep('central',2), rep('occipital', 3),
-          rep('parietal',3), rep('central',2), rep('occipital', 2), rep('parietal',2), rep('temporal',2),
-          rep('central',6), 'occipital', 'parietal', rep('temporal', 4), rep('central',5), rep('temporal', 4), rep('central',4),
-          rep('temporal', 2), rep('central', 4), 'temporal', rep('frontal', 4), 'central')
 
 make_rect_polygon <- function(mesh) {
   x <- unique(mesh[,1])
