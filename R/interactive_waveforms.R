@@ -1,8 +1,23 @@
+#' Plot interactive waveform graph
+#'
+#' @description Function for plotting time series of EEG signal color-coded by epoch in interactive plotly graph.
+#'
+#' @param data A data frame with input data, must contain at least following columns: subject, electrode, time, signal, epoch.
+#' @param subject A subject chosen to plot.
+#' @param sensor An electrode to plot.
+#' @param FS The sampling frequency. Default value is 250.
+#' @param t0 Index of the zero time point, i.e. point, where 0 ms should be marked (e.g. time of stimulus or time of response).
+#' @param col.palette Optionally, color palette for plotting lines. If missing, the rainbow palette is used.
+#'
+#' @return A plotly graph.
+#' @export
+#'
+#' @examples
+#' # Plot waveforms for subject 1 and electrode "E65" with 250 sampling frequency rate and 251 zero time point
+#' interactive_waveforms(epochdata, subject = 1, sensor = "E65", t0 = 251)
 interactive_waveforms <- function(data, subject, sensor, FS = 250, t0 = 251, col.palette) {
-  ## pridat argument na vyber barevne palety - nebo zjisit, jestli to jde pak predelat pridanim
-  ## jako v gglotu
 
-  if(missing(col.palette)) {
+  if (missing(col.palette)) {
     n <- length(levels(data$epoch))
     col.palette <- rainbow(n)
   }
