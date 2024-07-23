@@ -37,9 +37,10 @@ point_mesh <- function(dim, n = 10000, r, template = 'HCGSN256', type = 'circle'
   eu.vec <- edist0(x.vec, y.vec)
   out.vec <- which(eu.vec > r)
   mesh.circle[out.vec,] <- NA
+  mesh.circle <- data.frame(x = mesh.circle[,1], y = mesh.circle[,2])
 
   if (dim == 2) {
-    mesh.out <- data.frame(x = mesh.circle[,1], y = mesh.circle[,2])
+    mesh.out <- mesh.circle
   }
 
   if (type == 'polygon') {

@@ -13,6 +13,8 @@
 #' @return A plot.
 #' @export
 #'
+#' @import ggplot2
+#'
 #' @examples
 #' # Plot average topographic map of signal for subject 1 from the time point 251
 #' # the outliers - epoch 47 and 48 are extracted before computing average
@@ -41,27 +43,51 @@ topo_plot <- function(data, mesh, coords = HCGSN256$D2,
     mesh <- point_mesh(dim = 2)
   }
 
+  #mesh <- make_rect_polygon(mesh)
+
   mesh.mat <- as.matrix(na.omit(mesh))
-  mx <- sort(na.omit(unique(mesh$x)))
-  my <- sort(na.omit(unique(mesh$y)))
-  N <- max(length(mx), length(my))
+  #mx <- sort(na.omit(unique(mesh[,1])))
+  #my <- sort(na.omit(unique(mesh[,2])))
+  #N <- max(length(mx), length(my))
 
   beta.hat <- IM(coords, data)
   X.Pcp <- XP_IM(coords, mesh.mat)
   y.Pcp <- X.Pcp %*% beta.hat
-  ycp.IM2 <- mesh$x
+  ycp.IM2 <- mesh[,1]
   ycp.IM2[-which(is.na(ycp.IM2))] <- y.Pcp[1:dim(mesh.mat)[1]]
-  ycp.IM2 <- matrix(ycp.IM2, nrow = N)
+  #ycp.IM2 <- matrix(ycp.IM2, nrow = length(mx))
 
-  plot_point_mesh(mesh, sensors = FALSE, type = "n")
+  y.col <- cut(ycp.IM2, breaks = col.scale$breaks, include.lowest = TRUE, labels = FALSE)
+  interp_data <- cbind(mesh, ycp.IM2, y.col)
 
-  image(mx, my, ycp.IM2,
-    xlab = "", ylab = "", xaxt = "n", yaxt = "n",
-    col = col.scale$colors, breaks = col.scale$breaks,
-    bty = "n", add = T
+  g <- ggplot(interp_data, aes(x = x, y = y, fill = factor(yfac))) +
+    geom_raster() +
+    coord_fixed(ratio = 1) +
+    theme_minimal() +
+    scale_fill_manual(values = col.scale$colors,
+                      breaks = seq_along(CS1$colors))
+
+  g + theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    legend.position = "none"
   )
-  lvl <- col.scale$breaks[seq(1, length(col.scale$breaks), 2)]
-  contour(mx, my, ycp.IM2, add = T, col = "gray", levels = lvl)
+
+  # works for circle, needs adjustment for polygon mesh
+
+
+  # using base plot
+  #plot_point_mesh(mesh, sensors = FALSE, type = "n")
+
+  #image(mx, my, ycp.IM2,
+  #  xlab = "", ylab = "", xaxt = "n", yaxt = "n",
+  #  col = col.scale$colors, breaks = col.scale$breaks,
+  #  bty = "n", add = T
+  #)
+  #lvl <- col.scale$breaks[seq(1, length(col.scale$breaks), 2)]
+  #contour(mx, my, ycp.IM2, add = T, col = "gray", levels = lvl)
 }
 
 IM <- function(X, y) {

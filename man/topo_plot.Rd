@@ -21,7 +21,7 @@ topo_plot(data, mesh, coords = HCGSN256$D2, col.range = NULL, col.scale = NULL)
 A plot.
 }
 \description{
-Plot topographic map of EEG signal
+Doplnit podrobnosti o skale atd.
 }
 \examples{
 # Plot average topographic map of signal for subject 1 from the time point 251
