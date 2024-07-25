@@ -52,7 +52,8 @@ topo_plot <- function(data, mesh, coords = HCGSN256$D2,
   ycp.IM2 <- y.Pcp[1:dim(mesh.mat)[1]]
 
   y.col <- cut(ycp.IM2, breaks = col.scale$breaks, include.lowest = TRUE, labels = FALSE)
-  interp_data <- cbind(mesh, ycp.IM2, y.col)
+  y.col2 <- col.scale$colors[y.col]
+  interp_data <- cbind(na.omit(mesh), ycp.IM2, y.col, y.col2)
 
 
   g <- ggplot(interp_data, aes(x = x, y = y, fill = factor(y.col))) +
@@ -62,13 +63,21 @@ topo_plot <- function(data, mesh, coords = HCGSN256$D2,
     scale_fill_manual(values = col.scale$colors,
                       breaks = seq_along(col.scale$colors))
 
-  g + theme(
+  g <- g + theme(
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     axis.text = element_blank(),
     axis.title = element_blank(),
     legend.position = "none"
   )
+
+  g1 <- ggplot(interp_data, aes(x = x, y = y, fill = y.col2)) +
+    geom_raster() +
+    coord_fixed(ratio = 1) +
+    theme_minimal() +
+    scale_fill_identity()
+
+  g1 + geom_contour(aes(x = x, y = y, z = ycp.IM2, group = factor(y.col)), color = "black")
 }
 
 IM <- function(X, y) {

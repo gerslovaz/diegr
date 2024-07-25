@@ -86,9 +86,17 @@ spline_matrix <- function(X, Xcp = X) {
   return(S)
 }
 
-XP_IM <- function(X, Xcp = X) {
+XP_IM <- function(X, Xcp) {
   ## computing X_p for interpolation spline method
-  X <- as.matrix(X)
+  if (!is.matrix(X)) {
+    X <- as.matrix(X)
+  }
+  if (missing(Xcp)) {
+    Xcp <- X
+  }
+  if (!is.matrix(Xcp)) {
+    Xcp <- as.matrix(Xcp)
+  }
   k <- dim(X)[1]
   kcp <- dim(Xcp)[1]
   d <- dim(X)[2]
@@ -97,7 +105,7 @@ XP_IM <- function(X, Xcp = X) {
   X.P[1:kcp, k + 1] <- 1
   X.P[kcp + 1, 1:k] <- 1
   X.P[1:kcp, (k + 2):(k + d + 1)] <- Xcp
-  X.P[(kcp + 2):(kcp + d + 1), 1:k] <- t(X)
+  X.P[(kcp+2):(kcp+d+1), 1:k] <- t(X)
   return(X.P)
 }
 
@@ -106,13 +114,13 @@ recompute_3d <- function(X2D, X3D, mesh) {
   ## recomputing 3D net from 2D coordinates
   X3D <- as.matrix(X3D)
   mesh <- na.omit(mesh)
-  k <- dim(mesh)[1]
+  k.m <- dim(mesh)[1]
   X.P <- XP_IM(X2D)
   Y.P <- rbind(X3D, matrix(0, 3, 3))
   beta.hat <- solve(X.P) %*% Y.P
   X.Pcp <- XP_IM(X2D, mesh)
   Y.Pcp <- X.Pcp %*% beta.hat
-  Y <- data.frame(x = Y.Pcp[1:k, 1], y = Y.Pcp[1:k, 2], z = Y.Pcp[1:k, 3])
+  Y <- data.frame(x = Y.Pcp[1:k.m, 1], y = Y.Pcp[1:k.m, 2], z = Y.Pcp[1:k.m, 3])
   return(Y)
 }
 
