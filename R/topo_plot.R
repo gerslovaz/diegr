@@ -43,8 +43,9 @@ topo_plot <- function(data, mesh, coords = HCGSN256$D2,
     mesh <- point_mesh(dim = 2)
   }
 
+  ## pridat kontrolu, ze mesh ma 2 dimenze
 
-  mesh.mat <- as.matrix(na.omit(mesh))
+  mesh.mat <- as.matrix(mesh)
 
   beta.hat <- IM(coords, data)
   X.Pcp <- XP_IM(coords, mesh.mat)
@@ -63,7 +64,7 @@ topo_plot <- function(data, mesh, coords = HCGSN256$D2,
     scale_fill_manual(values = col.scale$colors,
                       breaks = seq_along(col.scale$colors))
 
-  g <- g + theme(
+  g + theme(
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     axis.text = element_blank(),
@@ -71,13 +72,14 @@ topo_plot <- function(data, mesh, coords = HCGSN256$D2,
     legend.position = "none"
   )
 
-  g1 <- ggplot(interp_data, aes(x = x, y = y, fill = y.col2)) +
-    geom_raster() +
-    coord_fixed(ratio = 1) +
-    theme_minimal() +
-    scale_fill_identity()
 
-  g1 + geom_contour(aes(x = x, y = y, z = ycp.IM2, group = factor(y.col)), color = "black")
+  #g1 <- ggplot(interp_data, aes(x = x, y = y, fill = y.col2)) +
+  #  geom_raster() +
+  #  coord_fixed(ratio = 1) +
+  #  theme_minimal() +
+  #  scale_fill_identity()
+
+  #g1 + geom_contour(aes(x = x, y = y, z = ycp.IM2, group = factor(y.col)), color = "black")
 }
 
 IM <- function(X, y) {
