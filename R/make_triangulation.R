@@ -1,3 +1,21 @@
+#' Make triangulation of 2D point mesh
+#'
+#' @description
+#' Popsat triangulaci, prip. dolu pridat odkazy na literaturu...
+#'
+#'
+#' @param mesh A data frame with named columns: x, y (required) and index (optionally).
+#'
+#' @return A three column matrix with indices of the vertices of the triangles.
+#' @export
+#'
+#' @examples
+#'
+#' # Create small mesh for triangulation example
+#' M <- point_mesh(dim = 2, n = 500, type = "polygon")
+#' # Make triangulation on this mesh
+#' TRI <- make_triangulation(M)
+#' head(TRI)
 make_triangulation <- function(mesh) {
 
   if (is.null(mesh$index)) {
@@ -36,3 +54,4 @@ make_triangulation <- function(mesh) {
   return(TRIMAT)
 }
 
+# prejmenovat sloupce vystupni matice, uvazit jeji tvar - do shape3d musi jit transponovana - podivat se, jak je to jinde, a prip. ji rovnou transponovat do vystupu

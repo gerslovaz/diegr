@@ -2,6 +2,7 @@
 
 export(boxplot_epoch)
 export(interactive_waveforms)
+export(make_triangulation)
 export(pick_region)
 export(plot_point_mesh)
 export(point_mesh)
