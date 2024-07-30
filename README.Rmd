@@ -12,6 +12,7 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+library(plotly)
 ```
 
 # diegr
@@ -47,9 +48,14 @@ boxplot_epoch(epochdata, subject = 1, channel = "E3", time_lim = c(260:270))
 
 <!-- What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so: -->
 
-<!-- ```{r cars} -->
-<!-- summary(cars) -->
-<!-- ``` -->
+```{r}
+data("HCGSN256")
+M1 <- point_mesh(2, type = "polygon")
+signal <- epochdata |>
+  dplyr::filter(subject == 1 & epoch == 10 & time == 255) 
+signal <- signal$signal
+topo_plot(signal, M1)
+```
 
 <!-- You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. -->
 
