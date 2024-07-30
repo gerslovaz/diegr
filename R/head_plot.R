@@ -29,6 +29,10 @@ head_plot <- function(mesh, tri, mesh2d = NULL, signal = NULL, col.scale) {
     tri <- make_triangulation(mesh2d)
   }
 
+  if (missing(col.scale)) {
+    col.scale <- create_scale(range(signal))
+  }
+
   y.col <- cut_signal(signal = signal, mesh = mesh2d, col.scale = col.scale)
 
   open3d()
