@@ -46,7 +46,7 @@ data(epochdata)
 boxplot_epoch(epochdata, subject = 1, channel = "E3", time_lim = c(260:270))
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, eval = FALSE}
 knitr::include_graphics("./man/figures/README-boxplot.png")
 ```
 

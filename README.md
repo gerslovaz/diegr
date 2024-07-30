@@ -42,8 +42,6 @@ boxplot_epoch(epochdata, subject = 1, channel = "E3", time_lim = c(260:270))
 
 <img src="man/figures/README-boxplot-1.png" width="100%" />
 
-<img src="./man/figures/README-boxplot.png" width="100%" />
-
 <!-- What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so: -->
 
 ``` r
