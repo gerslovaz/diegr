@@ -13,9 +13,9 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 library(plotly)
-library(htmlwidgets)
-library(webshot)
-webshot::install_phantomjs()
+#library(htmlwidgets)
+#library(webshot)
+#webshot::install_phantomjs()
 ```
 
 # diegr
@@ -47,10 +47,10 @@ This is a basic example which shows you how to plot interactive epoch boxplots i
 library(diegr)
 data(epochdata)
 p <- boxplot_epoch(epochdata, subject = 1, channel = "E3", time_lim = c(260:270))
-saveWidget(p, "./man/figures/README-boxplot.html", selfcontained = TRUE)
+#saveWidget(p, "./man/figures/README-boxplot.html", selfcontained = TRUE)
 
 # Konverze HTML souboru na PNG obrázek
-webshot("./man/figures/README-boxplot.html", file = "./man/figures/README-boxplot.png", vwidth = 800, vheight = 600, delay = 0.2)
+#webshot("./man/figures/README-boxplot.html", file = "./man/figures/README-boxplot.png", vwidth = 800, vheight = 600, delay = 0.2)
 
 # Vložení PNG obrázku do R Markdown dokumentu
 knitr::include_graphics("./man/figures/README-boxplot.png")
