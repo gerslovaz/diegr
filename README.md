@@ -9,9 +9,10 @@
 The name diegr comes from Dynamic and Interactive EEG Graphics using R.
 The package is developed to display high-density electroencephalography
 (HD-EEG) data in different ways using interactive elements or animations
-for a comprehensive overview of data. The package diegr includes: -
-interactive boxplots - interactive epoch waveforms - topographic maps
-(2D projection) - head plots in 3D
+for a comprehensive overview of data.
+
+The package diegr includes: – interactive boxplots – interactive epoch
+waveforms – topographic maps (2D projection) – head plots in 3D
 
 ## Installation
 
@@ -36,15 +37,10 @@ library(diegr)
 
 ``` r
 data(epochdata)
-p <- boxplot_epoch(epochdata, subject = 1, channel = "E3", time_lim = c(260:270))
-#saveWidget(p, "./man/figures/README-boxplot.html", selfcontained = TRUE)
-
-# Konverze HTML souboru na PNG obrázek
-#webshot("./man/figures/README-boxplot.html", file = "./man/figures/README-boxplot.png", vwidth = 800, vheight = 600, delay = 0.2)
-
-# Vložení PNG obrázku do R Markdown dokumentu
-knitr::include_graphics("./man/figures/README-boxplot.png")
+boxplot_epoch(epochdata, subject = 1, channel = "E3", time_lim = c(260:270))
 ```
+
+<img src="man/figures/README-boxplot-1.png" width="100%" />
 
 <img src="./man/figures/README-boxplot.png" width="100%" />
 

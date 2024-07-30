@@ -12,10 +12,6 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
-library(plotly)
-#library(htmlwidgets)
-#library(webshot)
-#webshot::install_phantomjs()
 ```
 
 # diegr
@@ -24,11 +20,12 @@ library(plotly)
 <!-- badges: end -->
 
 The name diegr comes from Dynamic and Interactive EEG Graphics using R. The package is developed to display high-density electroencephalography (HD-EEG) data in different ways using interactive elements or animations for a comprehensive overview of data.
+
 The package diegr includes: 
- - interactive boxplots 
- - interactive epoch waveforms
- - topographic maps (2D projection) 
- - head plots in 3D
+ -- interactive boxplots 
+ -- interactive epoch waveforms
+ -- topographic maps (2D projection) 
+ -- head plots in 3D
 
 ## Installation
 
@@ -43,18 +40,16 @@ devtools::install_github("gerslovaz/diegr")
 
 This is a basic example which shows you how to plot interactive epoch boxplots in different time points for one subject:
 
-```{r boxplot}
+```{r boxplot, fig.show='hide'}
 library(diegr)
 data(epochdata)
-p <- boxplot_epoch(epochdata, subject = 1, channel = "E3", time_lim = c(260:270))
-#saveWidget(p, "./man/figures/README-boxplot.html", selfcontained = TRUE)
+boxplot_epoch(epochdata, subject = 1, channel = "E3", time_lim = c(260:270))
+```
 
-# Konverze HTML souboru na PNG obrázek
-#webshot("./man/figures/README-boxplot.html", file = "./man/figures/README-boxplot.png", vwidth = 800, vheight = 600, delay = 0.2)
-
-# Vložení PNG obrázku do R Markdown dokumentu
+```{r echo=FALSE}
 knitr::include_graphics("./man/figures/README-boxplot.png")
 ```
+
 
 <!-- What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so: -->
 
