@@ -70,12 +70,19 @@ edist0 <- function(x1, x2){
 
 spline_matrix <- function(X, Xcp = X) {
   ## computing S matrix to using in spline methods for d = 2 or d = 3
-  X <- as.matrix(X)
+  if (!is.matrix(X)) {
+    X <- as.matrix(X)
+  }
+  if (!is.matrix(Xcp)) {
+    Xcp <- as.matrix(Xcp)
+  }
+
   k <- dim(X)[1]
   kcp <- dim(Xcp)[1]
   d <- dim(X)[2]
   X1 <- t(matrix(rep(t(Xcp), k), nrow = d))
   X2 <- matrix(rep(X, each = kcp), ncol = d)
+
   diff.sq <- (X1 - X2)^2
   argument <- rowSums(diff.sq)
   if (d == 2) {
@@ -97,30 +104,37 @@ XP_IM <- function(X, Xcp) {
   if (!is.matrix(Xcp)) {
     Xcp <- as.matrix(Xcp)
   }
+
   k <- dim(X)[1]
   kcp <- dim(Xcp)[1]
   d <- dim(X)[2]
-  X.P <- matrix(0, kcp + 1 + d, k + 1 + d)
-  X.P[1:kcp, 1:k] <- spline_matrix(X, Xcp)
-  X.P[1:kcp, k + 1] <- 1
-  X.P[kcp + 1, 1:k] <- 1
-  X.P[1:kcp, (k + 2):(k + d + 1)] <- Xcp
-  X.P[(kcp+2):(kcp+d+1), 1:k] <- t(X)
+  S <- spline_matrix(X, Xcp)
+  kcp.block <- cbind(1, Xcp)
+  k.block <- rbind(1, t(X))
+  zero.block <- matrix(0, d + 1, d + 1)
+  X.P <- cbind(rbind(S, k.block), rbind(kcp.block, zero.block))
+
   return(X.P)
 }
 
 
 recompute_3d <- function(X2D, X3D, mesh) {
   ## recomputing 3D net from 2D coordinates
-  X3D <- as.matrix(X3D)
-  mesh <- na.omit(mesh)
-  k.m <- dim(mesh)[1]
-  X.P <- XP_IM(X2D)
+  if (!is.matrix(X3D)) {
+    X3D <- as.matrix(X3D)
+  }
+
+  if (any(is.na(mesh))) {
+    mesh <- na.omit(mesh)
+  }
+
+  k.cp <- dim(mesh)[1]
+  X.P <- XP_IM(X2D, X2D)
   Y.P <- rbind(X3D, matrix(0, 3, 3))
   beta.hat <- solve(X.P) %*% Y.P
   X.Pcp <- XP_IM(X2D, mesh)
   Y.Pcp <- X.Pcp %*% beta.hat
-  Y <- data.frame(x = Y.Pcp[1:k.m, 1], y = Y.Pcp[1:k.m, 2], z = Y.Pcp[1:k.m, 3])
+  Y <- data.frame(x = Y.Pcp[1:k.cp, 1], y = Y.Pcp[1:k.cp, 2], z = Y.Pcp[1:k.cp, 3])
   return(Y)
 }
 
