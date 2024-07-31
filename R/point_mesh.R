@@ -36,8 +36,6 @@ point_mesh <- function(dim, n = 10000, r, template = 'HCGSN256', type = 'circle'
 
   eu.vec <- edist0(x.vec, y.vec)
   index <- which(eu.vec <= r)
-  #out.vec <- which(eu.vec > r)
-  #mesh.circle[out.vec,] <- NA
   mesh.circle <- mesh.circle[index,]
   mesh.circle <- data.frame(x = mesh.circle[,1], y = mesh.circle[,2])
 
