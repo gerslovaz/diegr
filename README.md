@@ -11,8 +11,8 @@ R**. The package is developed to display high-density
 electroencephalography (HD-EEG) data in different ways using interactive
 elements or animations for a comprehensive overview of data.
 
-The package diegr includes: - interactive boxplots - interactive epoch
-waveforms - topographic maps (2D projection) - head plots in 3D
+The package diegr includes: \* interactive boxplots \* interactive epoch
+waveforms \* topographic maps (2D projection) \* head plots in 3D
 
 ## Installation
 
