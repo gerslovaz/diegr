@@ -27,29 +27,34 @@ devtools::install_github("gerslovaz/diegr")
 ## Example
 
 This is a basic example which shows you how to plot interactive epoch
-boxplots in different time points for one subject:
+boxplots from chosen electrode in different time points for one subject:
 
 ``` r
 library(diegr)
-#> Warning: replacing previous import 'ggplot2::last_plot' by 'plotly::last_plot'
-#> when loading 'diegr'
+data("epochdata")
 ```
 
 ``` r
-data(epochdata)
 boxplot_epoch(epochdata, subject = 1, channel = "E3", time_lim = c(260:270))
 ```
 
-<img src="man/figures/README-boxplot-1.png" width="100%" />
+<img src="./man/figures/README-boxplot.png" width="100%" />
 
-<!-- What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so: -->
+Note: The README format does not allow the inclusion of plotly
+interactive elements, only the static preview of the result is shown.
+(here add a link on Github Pages for complete graph)
+
+#### Topographic map
 
 ``` r
 data("HCGSN256")
+# creating a mesh
 M1 <- point_mesh(2, type = "polygon")
+# filtering a subset of data to display 
 signal <- epochdata |>
   dplyr::filter(subject == 1 & epoch == 10 & time == 255) 
 signal <- signal$signal
+# function for displaying a topographic map of the chosen signal on the created mesh M1
 topo_plot(signal, M1)
 ```
 
