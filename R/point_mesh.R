@@ -35,8 +35,10 @@ point_mesh <- function(dim, n = 10000, r, template = 'HCGSN256', type = 'circle'
   mesh.circle <- cbind(x.vec, y.vec)
 
   eu.vec <- edist0(x.vec, y.vec)
-  out.vec <- which(eu.vec > r)
-  mesh.circle[out.vec,] <- NA
+  index <- which(eu.vec <= r)
+  #out.vec <- which(eu.vec > r)
+  #mesh.circle[out.vec,] <- NA
+  mesh.circle <- mesh.circle[index,]
   mesh.circle <- data.frame(x = mesh.circle[,1], y = mesh.circle[,2])
 
   if (dim == 2) {
@@ -69,7 +71,7 @@ edist0 <- function(x1, x2){
 }
 
 spline_matrix <- function(X, Xcp = X) {
-  ## computing S matrix to using in spline methods for d = 2 or d = 3
+  ## compute S matrix to using in spline methods for d = 2 or d = 3
   if (!is.matrix(X)) {
     X <- as.matrix(X)
   }
@@ -94,7 +96,7 @@ spline_matrix <- function(X, Xcp = X) {
 }
 
 XP_IM <- function(X, Xcp) {
-  ## computing X_p for interpolation spline method
+  ## compute X_p for interpolation spline method
   if (!is.matrix(X)) {
     X <- as.matrix(X)
   }
@@ -119,7 +121,7 @@ XP_IM <- function(X, Xcp) {
 
 
 recompute_3d <- function(X2D, X3D, mesh) {
-  ## recomputing 3D net from 2D coordinates
+  ## recompute 3D net from 2D coordinates
   if (!is.matrix(X3D)) {
     X3D <- as.matrix(X3D)
   }
@@ -139,11 +141,15 @@ recompute_3d <- function(X2D, X3D, mesh) {
 }
 
 make_polygon <- function(locations, mesh) {
+  # create polygon mesh as convex hull of locations
+  if (any(is.na(mesh))) {
+    mesh <- na.omit(mesh)
+  }
+
   roi <- st_as_sf(locations, coords = c("x", "y"))
   roi.mp <- st_combine(roi)
   roi.poly <- st_convex_hull(roi.mp) # Define convex hull
 
-  mesh <- na.omit(mesh)
   mesh.sf <- st_as_sf(mesh, coords = c("x", "y"))
   mesh.inside <- st_intersection(mesh.sf, roi.poly)
   mesh.inside <- st_coordinates(mesh.inside)
