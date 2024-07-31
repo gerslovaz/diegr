@@ -77,7 +77,7 @@ spline_matrix <- function(X, Xcp = X) {
   X1 <- t(matrix(rep(t(Xcp), k), nrow = d))
   X2 <- matrix(rep(X, each = kcp), ncol = d)
   diff.sq <- (X1 - X2)^2
-  argument <- apply(diff.sq, 1, sum)
+  argument <- rowSums(diff.sq)
   if (d == 2) {
     S <- 1 / (8 * pi) * (argument) * log(sqrt(argument))
   } else if (d == 3) S <- -1 / (8 * pi) * sqrt(argument)
