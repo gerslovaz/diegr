@@ -1,16 +1,26 @@
 #' Create regular mesh of points
 #'
 #' @description
-#' Function creates a regular (in the sense ...) mesh of points on the space defined by sensor coordinates.
+#' Function creates a data.frame (or list of data.frames) with coordinates of a regular (in the sense of the equidistant distance between mesh nodes) mesh of points on the space defined by sensor coordinates.
 #'
 #'
-#' @param dim A number indicating a dimension of the mesh: 2 for two dimensional and 3 for three dimensional mesh.
-#' @param n Optionally, the required number of mesh points. Default setting is n = 10 000. (doplnit, ze cislo neni presne)
-#' @param r Optionally, desired radius of a circular mesh. If not defined, it is selected according to the sensor locations. (doplnit, kde je nulovy bod)
+#' @param dim A number (or a vector) indicating a dimension of the mesh: 2 for two dimensional, 3 for three dimensional mesh and c(2,3) for both of them in one output.
+#' @param n Optionally, the required number of mesh points. Default setting is n = 10 000.
+#' @param r Optionally, desired radius of a circular mesh. If not defined, it is selected according to the sensor locations. (The (0,0) point corresponds to a reference electrode located at the vertex.)
 #' @param template The kind of sensor template montage used. Default setting 'HCGSN256' denotes the 256-channel HydroCel Geodesic Sensor Net v.1.0.
 #' @param type A character indicating the shape of the mesh with 2 possible values: 'circle' for circular mesh, 'polygon' for irregular polygon shape with boundaries defined by used sensor locations.
 #'
-#' @return A data frame with number of columns according to selected dimension of coordinates of mesh points.
+#' @details
+#'
+#' The number \code{n} for controlling the mesh density is only approximate value. The final number of mesh nodes depends on the exact shape of the polygon (created as a convex hull of the sensor locations), and is only close to, not exactly equal to, the number \code{n}.
+#'
+#' @return Returns an object of class \code{"mesh"}. It is a data frame with mesh coordinates - number of columns corresponds to the selected dimension or a list containing the following components:
+#'
+#' \item{D2}{A data frame with x and y coordinates of the created point mesh.}
+#' \item{D3}{A data frame with x, y and z coordinates of the created point mesh.}
+#' \item{template}{A character indicating the template of the sensor coordinates used for mesh computing.}
+#'
+#' @references EGI Geodesic Sensor Net Technical Manual (2024)
 #'
 #' @import sf
 #'
@@ -19,8 +29,12 @@
 #' @examples
 #' # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template
 #' M <- point_mesh(dim = 2, n = 4000, type = 'circle')
+#'
 #' # Computing polygon 3D mesh with starting number 2000 points for HCGSN256 template
 #' M <- point_mesh(dim = 3, n = 2000, type = 'polygon')
+#'
+#' # Computing coordinates of a polygon mesh in 2D and 3D in one step:
+#' M <- point_mesh(dim = c(2,3), n = 2000, type = 'polygon')
 point_mesh <- function(dim, n = 10000, r, template = 'HCGSN256', type = 'circle') {
   if (template == 'HCGSN256') {
     coordinates <- HCGSN256
@@ -39,24 +53,47 @@ point_mesh <- function(dim, n = 10000, r, template = 'HCGSN256', type = 'circle'
   mesh.circle <- mesh.circle[index,]
   mesh.circle <- data.frame(x = mesh.circle[,1], y = mesh.circle[,2])
 
-  if (dim == 2) {
-    mesh.out <- mesh.circle
+  if (identical(dim, 2)) {
+    switch(type,
+      "circle" = {
+        mesh.out <- mesh.circle
+      },
+      "polygon" = {
+        mesh.polygon <- make_polygon(coordinates$D2, mesh.circle)
+        mesh.out <- data.frame(x = mesh.polygon[,1], y = mesh.polygon[,2])
+      },
+      stop("Invalid type argument")
+    )
+  } else if (identical(dim, 3)) {
+    switch(type,
+           "circle" = {
+             mesh.out <- recompute_3d(coordinates$D2, coordinates$D3, mesh.circle)
+           },
+           "polygon" = {
+             mesh.polygon <- make_polygon(coordinates$D2, mesh.circle)
+             mesh.out <- recompute_3d(coordinates$D2, coordinates$D3, mesh.polygon)
+           },
+           stop("Invalid type argument")
+    )
+  } else if (identical(dim, c(2, 3)) || identical(dim, c(3, 2))) {
+    switch(type,
+           "circle" = {
+             mesh.out <- list(D2 = data.frame(x = mesh.circle[,1], y = mesh.circle[,2]),
+                              D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh.circle))
+           },
+           "polygon" = {
+             mesh.polygon <- make_polygon(coordinates$D2, mesh.circle)
+             mesh.out <- list(D2 = data.frame(x = mesh.polygon[,1], y = mesh.polygon[,2]),
+                              D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh.polygon))
+           },
+           stop("Invalid type argument")
+    )
+  } else {
+    stop("Invalid dim argument")
   }
 
-  if (type == 'polygon') {
-    mesh.polygon <- make_polygon(coordinates$D2 ,mesh.circle)
-    mesh.out <- data.frame(x = mesh.polygon[,1], y = mesh.polygon[,2])
-
-    if (dim == 3) {
-      mesh.out <- recompute_3d(coordinates$D2, coordinates$D3, mesh.polygon)
-    }
-
-  }
-
-  if (dim == 3 && type == 'circle') {
-   mesh.out <- recompute_3d(coordinates$D2, coordinates$D3, mesh.circle)
-  }
-
+  class(mesh.out) <- c("mesh", class(mesh.out))
+  mesh.out$template <- {{ template }}
   return(mesh.out)
 
 }
@@ -75,6 +112,10 @@ spline_matrix <- function(X, Xcp = X) {
   }
   if (!is.matrix(Xcp)) {
     Xcp <- as.matrix(Xcp)
+  }
+
+  if (ncol(X) != ncol(Xcp)) {
+    stop("The matrices X and Xcp for spline matrix computing must have the same number of columns")
   }
 
   k <- dim(X)[1]
@@ -103,6 +144,10 @@ XP_IM <- function(X, Xcp) {
   }
   if (!is.matrix(Xcp)) {
     Xcp <- as.matrix(Xcp)
+  }
+
+  if (ncol(X) != ncol(Xcp)) {
+    stop("The matrices X and Xcp for X.P computing must have the same number of columns")
   }
 
   k <- dim(X)[1]
@@ -140,6 +185,20 @@ recompute_3d <- function(X2D, X3D, mesh) {
 
 make_polygon <- function(locations, mesh) {
   # create polygon mesh as convex hull of locations
+  if (is.list(mesh) && "D2" %in% names(mesh)) {
+    mesh <- mesh$D2
+  }
+
+  if (dim(mesh)[2] > 2) {
+    mesh <- mesh[,1:2]
+    warning("The number of input mesh columns > 2. The first two columns were used for furher computing. You should be careful with the result.")
+  }
+
+  if (!is.data.frame(mesh)) {
+    mesh <- data.frame(x = mesh[,1], y = mesh[,2])
+    warning("The input mesh was not data.frame. The data.frame from first two columns of the input mesh was used for further calculation.")
+  }
+
   if (any(is.na(mesh))) {
     mesh <- na.omit(mesh)
   }
