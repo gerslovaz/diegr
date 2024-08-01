@@ -4,16 +4,24 @@
 #' Function creates a data.frame (or list of data.frames) with coordinates of a regular (in the sense of the equidistant distance between mesh nodes) mesh of points on the space defined by sensor coordinates.
 #'
 #'
-#' @param dim A number (or a vector) indicating a dimension of the mesh: 2 for two dimensional, 3 for three dimensional mesh and c(2,3) for both of them in one output.
+#' @param dim A number (or a vector) indicating a dimension of the mesh: 2 for two dimensional, 3 for three dimensional mesh and c(2,3) for both of them in one output (default setting).
 #' @param n Optionally, the required number of mesh points. Default setting is n = 10 000.
 #' @param r Optionally, desired radius of a circular mesh. If not defined, it is selected according to the sensor locations.
 #' @param template The kind of sensor template montage used. Default setting 'HCGSN256' denotes the 256-channel HydroCel Geodesic Sensor Net v.1.0.
+#' @param own.coordinates A list with own sensor coordinates for mesh building, if no pre-defined template is to be used. See Details for more information.
 #' @param type A character indicating the shape of the mesh with 2 possible values: 'circle' for circular mesh, 'polygon' for irregular polygon shape with boundaries defined by sensor locations.
 #'
 #' @details
 #' In the case of using Geodesic Sensor Net (\code{template = 'HCGSN256'}), the (0,0) point of the resulting mesh corresponds to a reference electrode located at the vertex.
 #'
 #' The number \code{n} for controlling the mesh density is only approximate value. The final number of mesh nodes depends on the exact shape of the polygon (created as a convex hull of the sensor locations), and is only close to, not exactly equal to, the number \code{n}.
+#'
+#' The \code{own.coordinates} enables computing a mesh from your own sensor locations. The input must be a list containing following elements:
+#' \itemize{
+#' \item \code{D2} a tibble or data.frame with sensor coordinates in named x and y columns,
+#' \item \code{D3} a tibble or data.frame with sensor coordinates in named x, y and z columns.
+#' }
+#'
 #'
 #' @return Returns an object of class \code{"mesh"}. It is a data frame with mesh coordinates - number of columns corresponds to the selected dimension or a list containing the following components:
 #'
@@ -36,10 +44,17 @@
 #'
 #' # Computing coordinates of a polygon mesh in 2D and 3D in one step:
 #' M <- point_mesh(dim = c(2,3), n = 2000, type = 'polygon')
-point_mesh <- function(dim, n = 10000, r, template = 'HCGSN256', type = 'circle') {
+point_mesh <- function(dim = c(2,3), n = 10000, r, template = 'HCGSN256', own.coordinates = NULL, type = 'circle') {
   if (template == 'HCGSN256') {
     coordinates <- HCGSN256
   }
+  if (missing(template) && !is.null(own.coordinates)) {
+    if (!"D2" %in% names(own.coordinates)) {
+      stop("There must be an element named D2 in the own.coordinates list.")
+    }
+    coordinates <- {{ own.coordinates }}
+  }
+
   if (missing(r)) {
     r <- ceiling(max(abs(range(coordinates$D2))))
   }

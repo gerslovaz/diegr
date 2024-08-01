@@ -4,16 +4,25 @@
 \alias{point_mesh}
 \title{Create regular mesh of points}
 \usage{
-point_mesh(dim, n = 10000, r, template = "HCGSN256", type = "circle")
+point_mesh(
+  dim = c(2, 3),
+  n = 10000,
+  r,
+  template = "HCGSN256",
+  own.coordinates = NULL,
+  type = "circle"
+)
 }
 \arguments{
-\item{dim}{A number (or a vector) indicating a dimension of the mesh: 2 for two dimensional, 3 for three dimensional mesh and c(2,3) for both of them in one output.}
+\item{dim}{A number (or a vector) indicating a dimension of the mesh: 2 for two dimensional, 3 for three dimensional mesh and c(2,3) for both of them in one output (default setting).}
 
 \item{n}{Optionally, the required number of mesh points. Default setting is n = 10 000.}
 
 \item{r}{Optionally, desired radius of a circular mesh. If not defined, it is selected according to the sensor locations.}
 
 \item{template}{The kind of sensor template montage used. Default setting 'HCGSN256' denotes the 256-channel HydroCel Geodesic Sensor Net v.1.0.}
+
+\item{own.coordinates}{A list with own sensor coordinates for mesh building, if no pre-defined template is to be used. See Details for more information.}
 
 \item{type}{A character indicating the shape of the mesh with 2 possible values: 'circle' for circular mesh, 'polygon' for irregular polygon shape with boundaries defined by sensor locations.}
 }
@@ -31,6 +40,12 @@ Function creates a data.frame (or list of data.frames) with coordinates of a reg
 In the case of using Geodesic Sensor Net (\code{template = 'HCGSN256'}), the (0,0) point of the resulting mesh corresponds to a reference electrode located at the vertex.
 
 The number \code{n} for controlling the mesh density is only approximate value. The final number of mesh nodes depends on the exact shape of the polygon (created as a convex hull of the sensor locations), and is only close to, not exactly equal to, the number \code{n}.
+
+The \code{own.coordinates} enables computing a mesh from your own sensor locations. The input must be a list containing following elements:
+\itemize{
+\item \code{D2} a tibble or data.frame with sensor coordinates in named x and y columns,
+\item \code{D3} a tibble or data.frame with sensor coordinates in named x, y and z columns.
+}
 }
 \examples{
 # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template
