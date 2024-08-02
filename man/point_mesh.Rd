@@ -22,12 +22,12 @@ point_mesh(
 
 \item{template}{The kind of sensor template montage used. Default setting 'HCGSN256' denotes the 256-channel HydroCel Geodesic Sensor Net v.1.0.}
 
-\item{own.coordinates}{A list with own sensor coordinates for mesh building, if no pre-defined template is to be used. See Details for more information.}
+\item{own.coordinates}{Optionally, a list with own sensor coordinates for mesh building, if no pre-defined template is to be used. See Details for more information.}
 
 \item{type}{A character indicating the shape of the mesh with 2 possible values: 'circle' for circular mesh, 'polygon' for irregular polygon shape with boundaries defined by sensor locations.}
 }
 \value{
-Returns an object of class \code{"mesh"}. It is a data frame with mesh coordinates - number of columns corresponds to the selected dimension or a list containing the following components:
+Returns an object of class \code{"mesh"}. It is a data frame with mesh coordinates (with number of columns corresponding to the selected dimension) or a list containing the following components:
 
 \item{D2}{A data frame with x and y coordinates of the created point mesh.}
 \item{D3}{A data frame with x, y and z coordinates of the created point mesh.}
@@ -48,6 +48,7 @@ The \code{own.coordinates} enables computing a mesh from your own sensor locatio
 }
 }
 \examples{
+data(HCGSN256)
 # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template
 M <- point_mesh(dim = 2, n = 4000, type = 'circle')
 

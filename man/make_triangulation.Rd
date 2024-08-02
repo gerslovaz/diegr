@@ -18,6 +18,7 @@ Popsat triangulaci, prip. dolu pridat odkazy na literaturu...
 \examples{
 
 # Create small mesh for triangulation example
+data(HCGSN256)
 M <- point_mesh(dim = 2, n = 500, type = "polygon")
 # Make triangulation on this mesh
 TRI <- make_triangulation(M)

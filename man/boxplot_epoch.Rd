@@ -24,8 +24,9 @@ A plotly object.
 Function for plotting interactive boxplots for selected subject and electrode
 }
 \examples{
-# Interactive boxplots of signal from channel E3 for subject 1 (health control) in choosen time points
-data("epochdata")
+# Interactive boxplots of signal from channel E3 for subject 1 (health control)
+# in chosen time points
+data(epochdata)
 boxplot_epoch(epochdata, subject = 1, channel = "E3", time_lim = c(260:270))
 
 }

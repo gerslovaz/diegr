@@ -26,6 +26,8 @@ A plotly graph.
 Function for plotting time series of EEG signal color-coded by epoch in interactive plotly graph.
 }
 \examples{
-# Plot waveforms for subject 1 and electrode "E65" with 250 sampling frequency rate and 251 zero time point
+# Plot waveforms for subject 1 and electrode "E65" with 250 sampling frequency rate
+# and 251 zero time point
+data(epochdata)
 interactive_waveforms(epochdata, subject = 1, sensor = "E65", t0 = 251)
 }

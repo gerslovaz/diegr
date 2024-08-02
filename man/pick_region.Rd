@@ -24,6 +24,7 @@ Choose region of interest
 \examples{
 
 # Choosing regions from HCGSN256 template
+data(HCGSN256)
 # 1) temporal region in left hemisphere
 pick_region(hemisphere = "left", region = "temporal")
 # 2) frontal and central region (both hemispheres)

@@ -24,13 +24,15 @@ A plot.
 Doplnit podrobnosti o skale atd.
 }
 \examples{
+data(HCGSN256)
+data(epochdata)
 # Plot average topographic map of signal for subject 1 from the time point 251
 # the outliers - epoch 47 and 48 are extracted before computing average
 data <- epochdata |>
 dplyr::filter(time == 251 & subject == 1 & !epoch \%in\% c(47,48)) |>
 dplyr::select(signal, electrode, epoch) |>
 dplyr::group_by(electrode) |>
-mutate(average = mean(signal, na.rm = TRUE))
+dplyr::mutate(average = mean(signal, na.rm = TRUE))
 
 data <- data$average[1:204]
 topo_plot(data = data, col.range = c(-40, 40))

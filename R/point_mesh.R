@@ -8,7 +8,7 @@
 #' @param n Optionally, the required number of mesh points. Default setting is n = 10 000.
 #' @param r Optionally, desired radius of a circular mesh. If not defined, it is selected according to the sensor locations.
 #' @param template The kind of sensor template montage used. Default setting 'HCGSN256' denotes the 256-channel HydroCel Geodesic Sensor Net v.1.0.
-#' @param own.coordinates A list with own sensor coordinates for mesh building, if no pre-defined template is to be used. See Details for more information.
+#' @param own.coordinates Optionally, a list with own sensor coordinates for mesh building, if no pre-defined template is to be used. See Details for more information.
 #' @param type A character indicating the shape of the mesh with 2 possible values: 'circle' for circular mesh, 'polygon' for irregular polygon shape with boundaries defined by sensor locations.
 #'
 #' @details
@@ -23,7 +23,7 @@
 #' }
 #'
 #'
-#' @return Returns an object of class \code{"mesh"}. It is a data frame with mesh coordinates - number of columns corresponds to the selected dimension or a list containing the following components:
+#' @return Returns an object of class \code{"mesh"}. It is a data frame with mesh coordinates (with number of columns corresponding to the selected dimension) or a list containing the following components:
 #'
 #' \item{D2}{A data frame with x and y coordinates of the created point mesh.}
 #' \item{D3}{A data frame with x, y and z coordinates of the created point mesh.}
@@ -32,10 +32,12 @@
 #' @references EGI Geodesic Sensor Net Technical Manual (2024)
 #'
 #' @import sf
+#' @importFrom stats na.omit
 #'
 #' @export
 #'
 #' @examples
+#' data(HCGSN256)
 #' # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template
 #' M <- point_mesh(dim = 2, n = 4000, type = 'circle')
 #'
@@ -109,7 +111,7 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = 'HCGSN256', own.co
   }
 
   class(mesh.out) <- c("mesh", class(mesh.out))
-  mesh.out$template <- {{ template }}
+  mesh.out$template <- {{ template }} # tohle musim nejspis jeste upravit, ted to mam data.frame s tretim sloupcem charakteru a to je blbost
   return(mesh.out)
 
 }

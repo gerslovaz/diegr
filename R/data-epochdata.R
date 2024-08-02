@@ -7,7 +7,7 @@
 #'
 #' @docType data
 #'
-#' @usage epochdata
+#' @usage data(epochdata)
 #'
 #' @format The data frame contains five columns:
 #' \describe{
@@ -22,17 +22,12 @@
 #'
 #' @source Central European Institute of Technology, Masaryk University, Brno, Czech Republic.
 #'
-#' @examples
-#' data("epochdata")
+#' @import ggplot2
+#' @import dplyr
 #'
-#' # A time series plot of all example trials for subject 1 on channel E4
-#'   epochdata |>
-#'     dplyr::filter(subject == 1 & electrode == "E4") |>
-#'     ggplot(aes(time, signal, color = epoch)) +
-#'     geom_path() +
-#'     theme_minimal() +
-#'     xlab("Time point") + ylab("Amplitude (microvolts)") +
-#'     labs(color = "Trial")
+#' @examples
+#' data(epochdata)
+#' head(epochdata)
 #'
 
 "epochdata"

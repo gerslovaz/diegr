@@ -10,10 +10,16 @@
 #' @param col.palette Optionally, color palette for plotting lines. If missing, the rainbow palette is used.
 #'
 #' @return A plotly graph.
+#'
+#' @import ggplot2
+#' @rawNamespace import(plotly, except = last_plot)
+#'
 #' @export
 #'
 #' @examples
-#' # Plot waveforms for subject 1 and electrode "E65" with 250 sampling frequency rate and 251 zero time point
+#' # Plot waveforms for subject 1 and electrode "E65" with 250 sampling frequency rate
+#' # and 251 zero time point
+#' data(epochdata)
 #' interactive_waveforms(epochdata, subject = 1, sensor = "E65", t0 = 251)
 interactive_waveforms <- function(data, subject, sensor, FS = 250, t0 = 251, col.palette) {
 

@@ -6,8 +6,8 @@
 \usage{
 plot_point_mesh(
   mesh,
-  sensors = T,
-  names = F,
+  sensors = TRUE,
+  names = FALSE,
   col.sensors = "green",
   cex.sensors = 0.7,
   pch.sensors = 16,
@@ -15,7 +15,7 @@ plot_point_mesh(
   col = "gray",
   pch = 20,
   cex = 0.4,
-  axes = F,
+  axes = FALSE,
   xlab = "",
   ylab = "",
   ...
@@ -58,16 +58,17 @@ A plot.
 Function for plotting a mesh of points  (not only) created by point_mesh() function.
 }
 \examples{
+data(HCGSN256)
 # 2D polygon point mesh with plotted sensors and default settings
 par(mar = c(0,0,0,0))
 M <- point_mesh(dim = 2, n = 4000, type = 'polygon')
-plot_point_mesh(M, sensors = T)
+plot_point_mesh(M, sensors = TRUE)
 dev.off()
 
 # Plotting 2D circle point mesh with sensors as orange points
 par(mar = c(0,0,0,0))
 M <- point_mesh(dim = 2, n = 4000, type = 'circle')
-plot_point_mesh(M, sensors = T, col.sensors = "orange")
+plot_point_mesh(M, sensors = TRUE, col.sensors = "orange")
 dev.off()
 
 }

@@ -5,7 +5,7 @@
 #'
 #' @docType data
 #'
-#' @usage HCGSN256
+#' @usage data(HCGSN256)
 #'
 #' @format A list with following elements:
 #' \describe{
@@ -24,7 +24,7 @@
 #' @source Central European Institute of Technology, Masaryk University, Brno, Czech Republic.
 #'
 #' @examples
-#' data("HCGSN256")
+#' data(HCGSN256)
 #'
 #' # A simple plot of sensor coordinates as points in 2D
 #' plot(HCGSN256$D2, pch = 16, asp = 1)

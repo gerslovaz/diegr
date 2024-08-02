@@ -7,11 +7,15 @@
 #' @param mesh A data frame with named columns: x, y (required) and index (optionally).
 #'
 #' @return A three column matrix with indices of the vertices of the triangles.
+#'
+#' @importFrom stats na.omit
+#'
 #' @export
 #'
 #' @examples
 #'
 #' # Create small mesh for triangulation example
+#' data(HCGSN256)
 #' M <- point_mesh(dim = 2, n = 500, type = "polygon")
 #' # Make triangulation on this mesh
 #' TRI <- make_triangulation(M)
@@ -50,6 +54,7 @@ make_triangulation <- function(mesh) {
 
     TRI <- cbind(col1, col2, col3)
     TRIMAT <- rbind(TRIMAT, na.omit(TRI))
+    colnames(TRIMAT) <- NULL
   }
   return(TRIMAT)
 }

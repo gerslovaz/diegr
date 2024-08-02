@@ -18,7 +18,7 @@ The data frame contains five columns:
 Central European Institute of Technology, Masaryk University, Brno, Czech Republic.
 }
 \usage{
-epochdata
+data(epochdata)
 }
 \description{
 This dataset is a short slice of a HD-EEG dataset from visual task experiment ...
@@ -27,16 +27,8 @@ The sampling frequency was 250 Hz, so the time interval between two points is 4 
 The experiment was supported by Czech Health Research Council AZV NU21-04-00445.
 }
 \examples{
-data("epochdata")
-
-# A time series plot of all example trials for subject 1 on channel E4
-  epochdata |>
-    dplyr::filter(subject == 1 & electrode == "E4") |>
-    ggplot(aes(time, signal, color = epoch)) +
-    geom_path() +
-    theme_minimal() +
-    xlab("Time point") + ylab("Amplitude (microvolts)") +
-    labs(color = "Trial")
+data(epochdata)
+head(epochdata)
 
 }
 \keyword{dataset}

@@ -19,14 +19,14 @@ The regions were determined by an expert from Central European Institute of Tech
 Central European Institute of Technology, Masaryk University, Brno, Czech Republic.
 }
 \usage{
-HCGSN256
+data(HCGSN256)
 }
 \description{
 A file containing coordinates ....
 The coordinates belong to 256-channel HydroCel Geodesic Sensor Net template montage (averaging ... montages)
 }
 \examples{
-data("HCGSN256")
+data(HCGSN256)
 
 # A simple plot of sensor coordinates as points in 2D
 plot(HCGSN256$D2, pch = 16, asp = 1)
