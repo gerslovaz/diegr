@@ -7,7 +7,7 @@
 boxplot_epoch(data, subject, channel, time_lim, ...)
 }
 \arguments{
-\item{data}{A data frame or a database table with EEG dataset. Required columns: subject, electrode, epoch, time, signal.}
+\item{data}{A data frame or a database table with EEG dataset. Required columns: subject, sensor, epoch, time, signal.}
 
 \item{subject}{An integer or character ID of selected subject to plot.}
 

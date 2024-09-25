@@ -10,7 +10,7 @@ The data frame contains five columns:
 \item{time}{Number of time point. Number 1 indicates the time of stimulus (0 ms) and the interval between two time points corresponds to the time period 4 ms.}
 \item{signal}{HD-EEG signal amplitude (in microvolts)}
 \item{epoch}{Factor variable with epoch number (there are 15 epochs for subject one, 14 epochs for subject two)}
-\item{electrode}{Sensor label (according to labeling used in the EGI Geodesic Sensor Net Technical Manual)}
+\item{sensor}{Sensor label (according to labeling used in the EGI Geodesic Sensor Net Technical Manual)}
 \item{subject}{Factor variable with subject ID, 1 - representative health control subject, 2 - representative patient subject}
 }
 }

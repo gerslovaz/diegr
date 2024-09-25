@@ -3,7 +3,7 @@
 #' @description
 #' Function for plotting interactive boxplots of EEG amplitude in individual epochs for selected subject and channel within the chosen time interval. The interactive plotly output enables to easily determine the epoch number from which outliers come.
 #'
-#' @param data A data frame or a database table with EEG dataset. Required columns: subject, electrode, epoch, time, signal.
+#' @param data A data frame or a database table with EEG dataset. Required columns: subject, sensor, epoch, time, signal.
 #' @param subject An integer or character ID of selected subject to plot.
 #' @param channel An integer or character ID of channel to plot.
 #' @param time_lim A character vector with time range to plot.
@@ -27,7 +27,7 @@ boxplot_epoch <- function(data,
                          time_lim,
                          ...) {
 
-  required_cols <- c("time", "signal", "epoch", "electrode", "subject")
+  required_cols <- c("time", "signal", "epoch", "sensor", "subject")
   missing_cols <- setdiff(required_cols, colnames(data))
 
   if (length(missing_cols) > 0) {
@@ -49,7 +49,7 @@ boxplot_epoch <- function(data,
   }
 
   db_sub <- data |>
-    dplyr::filter(subject == {{ subject }} & (electrode == {{ channel }}) & time %in% time_lim)  |>
+    dplyr::filter(subject == {{ subject }} & (sensor == {{ channel }}) & time %in% time_lim)  |>
     dplyr::select(time, signal, epoch)
   db_df <- as.data.frame(db_sub)
   db_df$epoch <- factor(db_df$epoch)
