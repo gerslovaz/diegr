@@ -2,18 +2,18 @@
 % Please edit documentation in R/boxplot_epoch.R
 \name{boxplot_epoch}
 \alias{boxplot_epoch}
-\title{Plot interactive boxplots of trials}
+\title{Plot interactive boxplots of epochs}
 \usage{
 boxplot_epoch(data, subject, channel, time_lim, ...)
 }
 \arguments{
 \item{data}{A data frame or a database table with EEG dataset. Required columns: subject, electrode, epoch, time, signal.}
 
-\item{subject}{An integer or character ID of choosen subject to plot.}
+\item{subject}{An integer or character ID of selected subject to plot.}
 
 \item{channel}{An integer or character ID of channel to plot.}
 
-\item{time_lim}{A character vector with time-range to plot.}
+\item{time_lim}{A character vector with time range to plot.}
 
 \item{...}{Additional arguments affecting the plot.}
 }
@@ -21,12 +21,12 @@ boxplot_epoch(data, subject, channel, time_lim, ...)
 A plotly object.
 }
 \description{
-Function for plotting interactive boxplots for selected subject and electrode
+Function for plotting interactive boxplots of EEG amplitude in individual epochs for selected subject and channel within the chosen time interval. The interactive plotly output enables to easily determine the epoch number from which outliers come.
 }
 \examples{
 # Interactive boxplots of signal from channel E3 for subject 1 (health control)
 # in chosen time points
 data(epochdata)
-boxplot_epoch(epochdata, subject = 1, channel = "E3", time_lim = c(260:270))
+boxplot_epoch(epochdata, subject = 1, channel = "E3", time_lim = c(10:20))
 
 }
