@@ -1,9 +1,10 @@
 #' @title Example HD-EEG epoched data
 #'
-#' @description This dataset is a short slice of a HD-EEG dataset from visual task experiment ...
-#' Example dataset contains amplitude values measured on 204 channels in 50 time points
-#' The sampling frequency was 250 Hz, so the time interval between two points is 4 ms long (with 0 indicating the time of the stimulus).
-#' The experiment was supported by Czech Health Research Council AZV NU21-04-00445.
+#' @description This dataset is a short slice of a HD-EEG dataset from a study investigating the impact of deep brain stimulation on patients with advanced Parkinson's disease.
+#' During the experiment subjects performed a simple visual motor task (pressing the response button in case of target visual stimulus presentation). The data was measured by 256-channel HydroCel Geodesic Sensor Net and sampling frequency is 250 Hz.
+#' The study was carried out by Central European Institute of Technology in Brno and was supported by Czech Health Research Council AZV NU21-04-00445.
+#'
+#' Example dataset contains amplitude values measured on chosen 204 channels in 50 time points (starting at the time of the stimulus) for 2 representative subjects (one from patient, one from health control group). From the total number of 50 epochs for each subject, 15 (or 14) epochs were selected for the sample dataset.
 #'
 #' @docType data
 #'
@@ -11,14 +12,16 @@
 #'
 #' @format The data frame contains five columns:
 #' \describe{
-#'   \item{time}{Number of time point}
+#'   \item{time}{Number of time point. Number 1 indicates the time of stimulus (0 ms) and the interval between two time points corresponds to the time period 4 ms.}
 #'   \item{signal}{HD-EEG signal amplitude (in microvolts)}
-#'   \item{epoch}{Trial number}
-#'   \item{electrode}{Channel label}
-#'   \item{subject}{Subject ID, 1 - representative health control subject, 2 - representative patient subject}
+#'   \item{epoch}{Factor variable with epoch number (there are 15 epochs for subject one, 14 epochs for subject two)}
+#'   \item{electrode}{Sensor label (according to labeling used in the EGI Geodesic Sensor Net Technical Manual)}
+#'   \item{subject}{Factor variable with subject ID, 1 - representative health control subject, 2 - representative patient subject}
 #' }
 #'
 #' @keywords dataset
+#'
+#' @references EGI Geodesic Sensor Net Technical Manual (2024)
 #'
 #' @source Central European Institute of Technology, Masaryk University, Brno, Czech Republic.
 #'
