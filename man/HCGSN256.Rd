@@ -32,7 +32,7 @@ The reference electrode (Cz) is fixed at point (0, 0, Z), where Z is the positiv
 The 2D coordinates were obtained as a stereographic projection of the sensor positions in 3D space.
 }
 \examples{
-data(HCGSN256)
+data("HCGSN256")
 
 # A simple plot of sensor coordinates as points in 2D
 plot(HCGSN256$D2, pch = 16, asp = 1)
