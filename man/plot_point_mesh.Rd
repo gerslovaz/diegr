@@ -8,6 +8,7 @@ plot_point_mesh(
   mesh,
   sensors = TRUE,
   names = FALSE,
+  names.vec = NULL,
   col.sensors = "green",
   cex.sensors = 0.7,
   pch.sensors = 16,
@@ -22,27 +23,29 @@ plot_point_mesh(
 )
 }
 \arguments{
-\item{mesh}{A coordinate data frame of point mesh to plot.}
+\item{mesh}{A data.frame or tibble with cartesian coordinates of point mesh to plot. It could be D2 or D3 output from point_mesh() function or any data.frame (or tibble) with named x and y (x, y and z, respectively) columns. See Details for more information.}
 
-\item{sensors}{A logical value indicating whether the sensor locations should also be plotted.}
+\item{sensors}{A logical value indicating whether the sensor locations should also be plotted (default value is TRUE).}
 
-\item{names}{A logical value indicating whether the sensor names should also be plotted.}
+\item{names}{A logical value indicating whether the sensor names should also be plotted (default value is FALSE).}
 
-\item{col.sensors}{The color of sensor locations points.}
+\item{names.vec}{A vector with sensor names. The argument is required only when using own.coordinates and setting names = TRUE.}
+
+\item{col.sensors}{The color of sensor locations points (default color is green).}
 
 \item{cex.sensors}{The cex argument for sensor location points.}
 
 \item{pch.sensors}{The pch argument for sensor location points.}
 
-\item{own.coordinates}{A list with coordinates of the sensor locations. If NULL, the HCGSN256 template is used.}
+\item{own.coordinates}{A data.frame or tibble with coordinates of the sensor locations. If NULL, the HCGSN256 template is used.}
 
-\item{col}{The color of mesh points. Default is gray.}
+\item{col}{The color of mesh points (default color is gray).}
 
 \item{pch}{The symbol used for points in the mesh.}
 
 \item{cex}{The cex argument for points of the mesh.}
 
-\item{axes}{A logical value indicating, if axes should be plotted. Default value is FALSE.}
+\item{axes}{A logical value indicating, if axes should be plotted (default value is FALSE).}
 
 \item{xlab}{The label of x axis (default is no label).}
 
@@ -54,21 +57,29 @@ plot_point_mesh(
 A plot.
 }
 \description{
-#' @description
-Function for plotting a mesh of points  (not only) created by point_mesh() function.
+Function for plotting a mesh of points (not only) created by point_mesh() function. The output is two dimensional plot of point mesh or three dimensional rgl plot depending on the input dimension.
+}
+\details{
+The output plot is designed with frontal part of the brain above and occipital part of the brain bottom. The orientation of own.coordinates should be consistent with this, in other case the results could be distorted.
 }
 \examples{
-data(HCGSN256)
+data("HCGSN256")
 # 2D polygon point mesh with plotted sensors and default settings
 par(mar = c(0,0,0,0))
-M <- point_mesh(dim = 2, n = 4000, type = 'polygon')
-plot_point_mesh(M, sensors = TRUE)
+M <- point_mesh(dim = c(2,3), n = 4000, template = 'HCGSN256', type = 'polygon')
+plot_point_mesh(M$D2, sensors = TRUE)
 dev.off()
+
+# Plotting 3D polygon point mesh with default settings
+open3d()
+plot_point_mesh(M$D3, sensors = TRUE)
+close3d()
 
 # Plotting 2D circle point mesh with sensors as orange points
 par(mar = c(0,0,0,0))
-M <- point_mesh(dim = 2, n = 4000, type = 'circle')
-plot_point_mesh(M, sensors = TRUE, col.sensors = "orange")
+M <- point_mesh(dim = 2, n = 4000, template = 'HCGSN256', type = 'circle')
+plot_point_mesh(M$D2, sensors = TRUE, col.sensors = "orange")
 dev.off()
+
 
 }

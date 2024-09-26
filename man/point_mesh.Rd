@@ -54,10 +54,10 @@ data("HCGSN256")
 M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256", type = 'circle')
 
 # Computing polygon 3D mesh with starting number 2000 points for HCGSN256 template
-M <- point_mesh(dim = 3, n = 2000, type = 'polygon')
+M <- point_mesh(dim = 3, n = 2000, template = "HCGSN256", type = 'polygon')
 
 # Computing coordinates of a polygon mesh in 2D and 3D in one step:
-M <- point_mesh(dim = c(2,3), n = 2000, type = 'polygon')
+M <- point_mesh(dim = c(2,3), n = 2000, template = "HCGSN256", type = 'polygon')
 }
 \references{
 EGI Geodesic Sensor Net Technical Manual (2024)
