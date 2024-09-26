@@ -6,7 +6,7 @@
 #' @param data A data frame or a database table with EEG dataset. Required columns: subject, sensor, epoch, time, signal.
 #' @param subject An integer or character ID of selected subject to plot.
 #' @param channel An integer or character ID of channel to plot.
-#' @param time_lim A character vector with time range to plot.
+#' @param time_lim A character vector with time range to plot. If not defined, the first ten time points are plotted.
 #' @param ... Additional arguments affecting the plot.
 #'
 #' @return A plotly object.
@@ -24,8 +24,16 @@
 boxplot_epoch <- function(data,
                          subject,
                          channel,
-                         time_lim,
+                         time_lim = NULL,
                          ...) {
+
+  if (missing(subject)) {
+    stop("Argument 'subject' is missing, with no default.")
+  }
+
+  if (missing(channel)) {
+    stop("Argument 'channel' is missing, with no default.")
+  }
 
   required_cols <- c("time", "signal", "epoch", "sensor", "subject")
   missing_cols <- setdiff(required_cols, colnames(data))
@@ -35,9 +43,10 @@ boxplot_epoch <- function(data,
                paste(missing_cols, collapse = ", ")))
   }
 
-  if (missing(time_lim)) {
+  if (is.null(time_lim)) {
     min.t <- min(data$time)
     time_lim <- c(min.t:(min.t + 9))
+    warning("The argument 'time_lim' was not defined, the first ten time points from data are plotted.")
   }
 
   # check time range

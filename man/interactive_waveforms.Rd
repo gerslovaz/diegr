@@ -4,18 +4,18 @@
 \alias{interactive_waveforms}
 \title{Plot interactive waveform graph}
 \usage{
-interactive_waveforms(data, subject, sensor, FS = 250, t0 = 251, col.palette)
+interactive_waveforms(data, subject, channel, FS = 250, t0 = NULL, col.palette)
 }
 \arguments{
-\item{data}{A data frame with input data, must contain at least following columns: subject, electrode, time, signal, epoch.}
+\item{data}{A data frame, tibble or a database table with input data, must contain at least following columns: subject, sensor, time, signal, epoch.}
 
 \item{subject}{A subject chosen to plot.}
 
-\item{sensor}{An electrode to plot.}
+\item{channel}{A channel to plot.}
 
-\item{FS}{The sampling frequency. Default value is 250.}
+\item{FS}{The sampling frequency. Default value is 250 Hz.}
 
-\item{t0}{Index of the zero time point, i.e. point, where 0 ms should be marked (e.g. time of stimulus or time of response).}
+\item{t0}{Index of the zero time point, i.e. point, where 0 ms should be marked (e.g. time of the stimulus or time of the response).}
 
 \item{col.palette}{Optionally, color palette for plotting lines. If missing, the rainbow palette is used.}
 }
@@ -27,7 +27,8 @@ Function for plotting time series of EEG signal color-coded by epoch in interact
 }
 \examples{
 # Plot waveforms for subject 1 and electrode "E65" with 250 sampling frequency rate
-# and 251 zero time point
-data(epochdata)
-interactive_waveforms(epochdata, subject = 1, sensor = "E65", t0 = 251)
+# and 1 as zero time point
+data("epochdata")
+interactive_waveforms(epochdata, subject = 1, sensor = "E65", t0 = 1)
+
 }

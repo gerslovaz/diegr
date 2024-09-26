@@ -4,7 +4,7 @@
 \alias{boxplot_epoch}
 \title{Plot interactive boxplots of epochs}
 \usage{
-boxplot_epoch(data, subject, channel, time_lim, ...)
+boxplot_epoch(data, subject, channel, time_lim = NULL, ...)
 }
 \arguments{
 \item{data}{A data frame or a database table with EEG dataset. Required columns: subject, sensor, epoch, time, signal.}
@@ -13,7 +13,7 @@ boxplot_epoch(data, subject, channel, time_lim, ...)
 
 \item{channel}{An integer or character ID of channel to plot.}
 
-\item{time_lim}{A character vector with time range to plot.}
+\item{time_lim}{A character vector with time range to plot. If not defined, the first ten time points are plotted.}
 
 \item{...}{Additional arguments affecting the plot.}
 }

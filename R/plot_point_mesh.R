@@ -53,6 +53,13 @@ plot_point_mesh <- function(mesh, sensors = TRUE, names = FALSE, names.vec = NUL
                             col = "gray", pch = 20, cex = 0.4,
                             axes = FALSE, xlab = "", ylab = "", ...){
 
+  if (!(is.logical(sensors))) {
+    stop("Argument 'sensors' has to be logical.")
+  }
+  if (!(is.logical(names))) {
+    stop("Argument 'names' has to be logical.")
+  }
+
   if (names == TRUE && !is.null(own.coordinates) && is.null(names.vec)) {
     stop("With using own.coordinates please define the names.vec or set names to FALSE.")
   }
