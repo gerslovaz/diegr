@@ -7,20 +7,35 @@
 make_triangulation(mesh)
 }
 \arguments{
-\item{mesh}{A data frame with named columns: x, y (required) and index (optionally).}
+\item{mesh}{A data frame or tibble with named columns: x, y (required) and index (optionally).}
 }
 \value{
 A three column matrix with indices of the vertices of the triangles.
 }
 \description{
-Popsat triangulaci, prip. dolu pridat odkazy na literaturu...
+Function for creating Delaunay type-I triangulation (see Schumaker 2007) with consistent oriented edges adapted for a regular point mesh created by point_mesh() function.
+See Details for more information.
+}
+\details{
+The type-I Delaunay triangulation is a triangulation obtained by drawing in the north-east diagonals in all subrectangles of the triangulated area.
+Due to the regularity of the input mesh (in the sense of distances between mesh points), a simplified procedure is used: The triangulation is created within the individual strips and then binded together.
+The order of the vertices is chosen to maintain a consistent orientation of the triangles (for more details see Schneider 2003).
 }
 \examples{
 
 # Create small mesh for triangulation example
-data(HCGSN256)
-M <- point_mesh(dim = 2, n = 500, type = "polygon")
+data("HCGSN25")
+M <- point_mesh(dim = c(2,3), n = 500, template = "HCGSN256", type = "polygon")
 # Make triangulation on this mesh
-TRI <- make_triangulation(M)
+TRI <- make_triangulation(M$D2)
 head(TRI)
+
+# Plot the result triangulation as 3D wire model using rgl
+open3d()
+wire3d(mesh3d(M$D3$x, M$D3$y, M$D3$z, triangles = t(TRI)))
+close3d()
+}
+\references{
+Lai M-J, Schumaker LL. \emph{Spline functions on triangulations.} Cambridge University Press; 2007.
+Schneider PJ, Eberly DH. \emph{Geometric Tools for Computer Graphics.} The Morgan Kaufmann Series in Computer Graphics. San Francisco: Morgan Kaufmann, 2003.
 }
