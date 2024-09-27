@@ -4,19 +4,24 @@
 \alias{pick_region}
 \title{Choose region of interest}
 \usage{
-pick_region(coords = NULL, hemisphere = NULL, region = NULL, ROI = NULL)
+pick_region(
+  coords = NULL,
+  hemisphere = c("left", "right", "midline"),
+  region = c("frontal", "central", "parietal", "occipital", "temporal"),
+  ROI = NULL
+)
 }
 \arguments{
 \item{coords}{A data frame or matrix with two columns of sensor coordinates. If not defined, HCGSN256 template is used.}
 
-\item{hemisphere}{A character vector denoting hemisphere to choose. Possible values: "left", "right" or c("left", "right") for both. If not defined, both hemispheres are chosen.}
+\item{hemisphere}{A character vector denoting hemisphere to choose. Possible values: "left", "right", "midline" or any combination of them. If not defined, both hemispheres with midline are chosen.}
 
 \item{region}{A character vector denoting region to choose. Possible values: "frontal", "central", "parietal", "occipital", "temporal" or any combination of them. If not defined, all regions are chosen.}
 
-\item{ROI}{A character vector with labels of regions. The order and length must be the same as in \code{coords}. If not defined, the predefined vector is used.}
+\item{ROI}{A character vector with labels of regions. The order and length must be the same as in \code{coords}. If not defined, the predefined vector (according to HCGSN256 template determined by an expert from Central European Institute of Technology, Masaryk University, Brno, Czech Republic) is used.}
 }
 \value{
-A subset of coords appropriate to the chosen region/hemisphere.
+A subset of \code{coords} appropriate to the chosen region/hemisphere.
 }
 \description{
 Choose region of interest
@@ -24,10 +29,10 @@ Choose region of interest
 \examples{
 
 # Choosing regions from HCGSN256 template
-data(HCGSN256)
+data("HCGSN256")
 # 1) temporal region in left hemisphere
 pick_region(hemisphere = "left", region = "temporal")
-# 2) frontal and central region (both hemispheres)
+# 2) frontal and central region
 pick_region(region = c("frontal", "central"))
 
 }

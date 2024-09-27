@@ -16,6 +16,7 @@
 #' @return A three column matrix with indices of the vertices of the triangles.
 #'
 #' @references Lai M-J, Schumaker LL. \emph{Spline functions on triangulations.} Cambridge University Press; 2007.
+#'
 #' Schneider PJ, Eberly DH. \emph{Geometric Tools for Computer Graphics.} The Morgan Kaufmann Series in Computer Graphics. San Francisco: Morgan Kaufmann, 2003.
 #'
 #' @importFrom stats na.omit
