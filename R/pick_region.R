@@ -1,9 +1,13 @@
 #' Choose region of interest
 #'
-#' @param coords A data frame or matrix with two columns of sensor coordinates. If not defined, HCGSN256 template is used.
+#' @param coords A data frame, tibble or matrix with two columns of sensor coordinates. If not defined, HCGSN256 template is used. See details for more information about coordinate requirements.
 #' @param hemisphere A character vector denoting hemisphere to choose. Possible values: "left", "right", "midline" or any combination of them. If not defined, both hemispheres with midline are chosen.
 #' @param region A character vector denoting region to choose. Possible values: "frontal", "central", "parietal", "occipital", "temporal" or any combination of them. If not defined, all regions are chosen.
 #' @param ROI A character vector with labels of regions. The order and length must be the same as in \code{coords}. If not defined, the predefined vector (according to HCGSN256 template determined by an expert from Central European Institute of Technology, Masaryk University, Brno, Czech Republic) is used.
+#'
+#' @details
+#' If the \code{coords} input has no named columns, the first column is considered as x coordinate.
+#' For the correct selection of the hemisphere with own coordinates, it is necessary that the 2D layout is oriented with the nose up and that the midline electrodes have a zero x-coordinate.
 #'
 #' @return A subset of \code{coords} appropriate to the chosen region/hemisphere.
 #' @export
@@ -15,9 +19,14 @@
 #' # 1) temporal region in left hemisphere
 #' pick_region(hemisphere = "left", region = "temporal")
 #' # 2) frontal and central region
-#' pick_region(region = c("frontal", "central"))
+#' region_fc <- pick_region(region = c("frontal", "central"))
+#' head(region_fc)
 #'
 pick_region <- function(coords = NULL, hemisphere = c("left", "right", "midline"), region = c("frontal", "central", "parietal", "occipital", "temporal"), ROI = NULL) {
+
+  if (!is.null(coords) && is.null(ROI)) {
+    warning("ROIs are not defined for own coordinates. The results should be carefully reviewed.")
+  }
 
   if (is.null(coords)) {
     coords <- HCGSN256$D2
@@ -31,7 +40,12 @@ pick_region <- function(coords = NULL, hemisphere = c("left", "right", "midline"
   idx.reg <- grep(paste(region, collapse = "|"), ROI)
   new.coords <- coords[idx.reg,]
 
-  x <- new.coords$x
+  if (!"x" %in% colnames(new.coords) ) {
+    x <- new.coords[,1]
+  } else {
+    x <- new.coords$x
+  }
+
 
   idx.l <- c()
   idx.r <- c()

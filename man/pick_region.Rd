@@ -12,7 +12,7 @@ pick_region(
 )
 }
 \arguments{
-\item{coords}{A data frame or matrix with two columns of sensor coordinates. If not defined, HCGSN256 template is used.}
+\item{coords}{A data frame, tibble or matrix with two columns of sensor coordinates. If not defined, HCGSN256 template is used. See details for more information about coordinate requirements.}
 
 \item{hemisphere}{A character vector denoting hemisphere to choose. Possible values: "left", "right", "midline" or any combination of them. If not defined, both hemispheres with midline are chosen.}
 
@@ -26,6 +26,10 @@ A subset of \code{coords} appropriate to the chosen region/hemisphere.
 \description{
 Choose region of interest
 }
+\details{
+If the \code{coords} input has no named columns, the first column is considered as x coordinate.
+For the correct selection of the hemisphere with own coordinates, it is necessary that the 2D layout is oriented with the nose up and that the midline electrodes have a zero x-coordinate.
+}
 \examples{
 
 # Choosing regions from HCGSN256 template
@@ -33,6 +37,7 @@ data("HCGSN256")
 # 1) temporal region in left hemisphere
 pick_region(hemisphere = "left", region = "temporal")
 # 2) frontal and central region
-pick_region(region = c("frontal", "central"))
+region_fc <- pick_region(region = c("frontal", "central"))
+head(region_fc)
 
 }
