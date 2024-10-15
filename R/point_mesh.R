@@ -197,6 +197,10 @@ XP_IM <- function(X, Xcp) {
 
 recompute_3d <- function(X2D, X3D, mesh) {
   ## recompute 3D net from 2D coordinates
+  if (!is.matrix(X2D)) {
+    X2D <- as.matrix(X2D)
+  }
+
   if (!is.matrix(X3D)) {
     X3D <- as.matrix(X3D)
   }
