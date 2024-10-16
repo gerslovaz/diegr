@@ -2,13 +2,16 @@
 #'
 #' @description
 #' Doplnit podrobnosti o skale atd.
+#' The output in the form of a ggplot object allows to easily edit the result image properties.
 #'
 #'
-#' @param data A vector with signal to plot.
-#' @param mesh A data frame with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from point_mesh() function is used.
-#' @param coords Sensor coordinates. If not defined, the HCGSN256 template is used.
-#' @param col.range A vector ... See details.
+#' @param signal A vector with signal to plot.
+#' @param mesh A mesh object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from point_mesh() function is used.
+#' @param coords Sensor coordinates as a tibble or data frame with named x and y columns. If not defined, the HCGSN256 template is used.
+#' @param col.range A vector with minimum and maximum value of the amplitude used in the color palette for plotting.
 #' @param col.scale A color scale which should be used for plotting. If not defined, it is computed from col.range.
+#' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is FALSE.
+#' @param legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is TRUE.
 #'
 #' @return A plot.
 #' @export
@@ -16,25 +19,37 @@
 #' @import ggplot2
 #' @import dplyr
 #' @importFrom grDevices hsv
+#' @importFrom scales rescale
 #'
 #' @examples
-#' data(HCGSN256)
-#' data(epochdata)
-#' # Plot average topographic map of signal for subject 1 from the time point 251
-#' # the outliers - epoch 47 and 48 are extracted before computing average
-#' data <- epochdata |>
-#' dplyr::filter(time == 251 & subject == 1 & !epoch %in% c(47,48)) |>
-#' dplyr::select(signal, electrode, epoch) |>
-#' dplyr::group_by(electrode) |>
+#' data("HCGSN256")
+#' data("epochdata")
+#' # Plot average topographic map of signal for subject 1 from the time point 1 (the time of the stimulus)
+#' # the outliers (epoch 14 and 15) are extracted before computing average
+#'
+#' # a) preparing data
+#' s1 <- epochdata |>
+#' dplyr::filter(time == 1 & subject == 1 & !epoch %in% c(14,15)) |>
+#' dplyr::select(signal, sensor, epoch) |>
+#' dplyr::group_by(sensor) |>
 #' dplyr::mutate(average = mean(signal, na.rm = TRUE))
+#' s1 <- s1$average[1:204]
 #'
-#' data <- data$average[1:204]
-#' topo_plot(data = data, col.range = c(-40, 40))
+#' # b) plotting the topographic map with contours and legend
+#' topo_plot(signal = s1, col.range = c(-40, 40))
 #'
-topo_plot <- function(data, mesh, coords = HCGSN256$D2,
-                      col.range = NULL, col.scale = NULL) {
+topo_plot <- function(signal, mesh, coords = HCGSN256$D2,
+                      col.range = NULL, col.scale = NULL, contour = FALSE, legend = TRUE) {
   ## zamyslet se nad zjednodusenim ohledne n a r, slo by to automaticky vytahnout z mesh > uprava vystupu
   ## takto by bylo nutne pocitat mesh na kazde vykresleni, coz nechceme
+
+  if (!(is.logical(contour))) {
+    stop("Argument 'contour' has to be logical.")
+  }
+
+  if (!(is.logical(legend))) {
+    stop("Argument 'legend' has to be logical.")
+  }
 
   if (is.null(col.range)) {
     col.range <- range(data)
@@ -44,104 +59,79 @@ topo_plot <- function(data, mesh, coords = HCGSN256$D2,
   }
 
   if (missing(mesh)) {
-    mesh <- point_mesh(dim = 2)
+    mesh <- point_mesh(dim = 2, template = "HCGSN256")
   }
 
-  ## pridat kontrolu, ze mesh ma 2 dimenze
+  if (inherits(mesh, "mesh")) {
+    mesh.mat <- mesh$D2
+  } else {
+    mesh.mat <- mesh[,1:2]
+  }
 
-  mesh.mat <- mesh[,1:2] # tohle jeste doladit
+  M <- max(mesh.mat[,2], na.rm = TRUE)
 
-  beta.hat <- IM(coords, data)
+  beta.hat <- IM(coords, signal)
   X.Pcp <- XP_IM(coords, mesh.mat)
   y.Pcp <- X.Pcp %*% beta.hat
   ycp.IM2 <- y.Pcp[1:dim(mesh.mat)[1]]
-
-  y.col <- cut(ycp.IM2, breaks = col.scale$breaks, include.lowest = TRUE, labels = FALSE)
-  y.col2 <- col.scale$colors[y.col]
-  interp_data <- cbind(na.omit(mesh), ycp.IM2, y.col, y.col2)
+  interp_data <- data.frame(x = mesh.mat[,1], y = mesh.mat[,2], ycp.IM2 = ycp.IM2)
 
 
-  g <- ggplot(interp_data, aes(x = x, y = y, fill = factor(y.col))) +
-    geom_raster() +
+  g <- ggplot(interp_data, aes(x = x, y = y)) +
+    geom_raster(aes(fill = ycp.IM2), interpolate = TRUE) +
+    scale_fill_gradientn(
+      colors = col.scale$colors,
+      breaks = col.scale$breaks,
+      limits = range(col.scale$breaks),
+      labels = col.scale$breaks,
+      values = scales::rescale(col.scale$breaks)
+    ) +
     coord_fixed(ratio = 1) +
     theme_minimal() +
-    scale_fill_manual(values = col.scale$colors,
-                      breaks = seq_along(col.scale$colors))
+    theme(
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      axis.text = element_blank(),
+      axis.title = element_blank(),
+      legend.position = "none"
+    )
 
-  g + theme(
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    axis.text = element_blank(),
-    axis.title = element_blank(),
-    legend.position = "none"
-  )
+  if (legend == TRUE) {
+    g <- g  +
+      labs(fill = expression(paste("Amplitude (", mu, "V)"))) +
+      guides(fill = guide_colorbar(barwidth = 0.7, barheight = 20)) +
+      theme(
+        legend.position = "right",
+        legend.text = element_text(size = 7),
+        legend.title = element_text(size = 8)
+      )
+  }
 
+  if (contour == TRUE) {
+   g <- g + geom_contour(aes(z = ycp.IM2), color = "gray", breaks = col.scale$breaks)
+  }
 
-  #g1 <- ggplot(interp_data, aes(x = x, y = y, fill = y.col2)) +
-  #  geom_raster() +
-  #  coord_fixed(ratio = 1) +
-  #  theme_minimal() +
-  #  scale_fill_identity()
+  g +
+    annotate("segment", x = 0, y = 1.07 * M, xend = -0.08 * M, yend = 1.01 * M, col = "gray40") +
+    annotate("segment", x = 0, y = 1.07 * M, xend = 0.08 * M, yend = 1.01 * M, col = "gray40")
 
-  #g1 + geom_contour(aes(x = x, y = y, z = ycp.IM2, group = factor(y.col)), color = "black")
 }
 
 IM <- function(X, y) {
   ## interpolating using spline
-  y <- as.numeric(y)
+  if (!is.matrix(X)) {
+    X <- as.matrix(X)
+  }
+  if (!is.numeric(y)) {
+    y <- as.numeric(y)
+  }
+
   d <- ncol(X)
   X.P <- XP_IM(X)
   beta.hat <- solve(X.P) %*% c(y, rep(0, d + 1))
   return(beta.hat)
 }
 
-TopoColorsNeg <- function(n, alpha = 1) {
-  ## create negative part of color palette
-  if ((n <- as.integer(n[1L])) > 0) {
-    hsv(h = seq.int(from = 43 / 60, to = 31 / 60, length.out = n), alpha = alpha)
-  } else {
-    character()
-  }
-}
-
-TopoColorsPos <- function(n, alpha = 1) {
-  ## create positive part of color palette
-  if ((n <- as.integer(n[1L])) > 0) {
-    j <- n %/% 3
-    k <- n %/% 3
-    i <- n - j - k
-    c(
-      if (i > 0) hsv(h = seq.int(from = 23 / 60, to = 11 / 60, length.out = i), alpha = alpha),
-      if (j > 0 & k > 0) hsv(h = seq.int(from = 10 / 60, to = 0, length.out = (j + k)), alpha = alpha, s = seq.int(from = 1, to = 0.95, length.out = (j + k)), v = seq.int(from = 1, to = 0.6, length.out = (j + k)))
-    )
-    # hsv(h = seq.int(from = 10/60, to = 6/60, length.out = (j + k)), alpha = alpha, s = seq.int(from = 1, to = 0.3, length.out = (j + k)), v = 1))
-  } else {
-    character()
-  }
-}
-
-TopoColorsPos2 <- function(n, alpha = 1) {
-  ## jiny pristup k poz. skale, jasnejsi cervena na konci
-  if ((n <- as.integer(n[1L])) > 0) {
-    hues <- seq(1 / 3, 0, length.out = n)
-    hsv(hues, 1, 1)
-  } else {
-    character()
-  }
-}
-
-create_scale <- function(col.range) {
-  probs <- seq(0, 1, by = 0.02)
-  k_probs <- length(probs)
-  breaks <- unique(pretty(col.range, k_probs))
-  breaks[length(breaks)] <- breaks[length(breaks)] + 1
-  breaks_negative <- which(breaks <= 0)
-  breaks_positive <- which(breaks >= 0)
-  k_negbreaks <- length(breaks_negative)
-  k_posbreaks <- length(breaks_positive)
-  scale_color <- c(TopoColorsNeg(k_negbreaks - 1), TopoColorsPos(k_posbreaks - 1))
-  return(list(colors = scale_color, breaks = breaks))
-}
 
 cut_scale <- function(signal, col.scale) { # asi bude stacit tak easy
 
@@ -150,37 +140,3 @@ cut_scale <- function(signal, col.scale) { # asi bude stacit tak easy
   return(colour)
 }
 
-
-# PlotScale <- function(col.scale) {
-#   breaks <- col.scale$breaks
-#   col.range <- range(col.scale$breaks)
-#
-#   windows(width = 1.2, height = 5)
-#   par(mar = c(1, 1, 1.2, 4))
-#   plot(0, 1,
-#     type = "n", xlim = c(0, 1), ylim = col.range, xaxs = "i", yaxs = "i",
-#     xlab = "", ylab = "", bty = "n", axes = FALSE
-#   )
-#   rect(0, breaks[-length(breaks)], 1, breaks[-1L],
-#     col = col.scale$colors
-#   )
-#   axis(4, breaks, cex.axis = 0.8, las = 1)
-# }
-
-
-# Old version topo_plot using base plot
-#mesh <- make_rect_polygon(mesh)
-#mx <- sort(na.omit(unique(mesh[,1])))
-#my <- sort(na.omit(unique(mesh[,2])))
-#N <- max(length(mx), length(my))
-#ycp.IM2 <- mesh[,1]
-#ycp.IM2 <- matrix(ycp.IM2, nrow = length(mx))
-#plot_point_mesh(mesh, sensors = FALSE, type = "n")
-
-#image(mx, my, ycp.IM2,
-#  xlab = "", ylab = "", xaxt = "n", yaxt = "n",
-#  col = col.scale$colors, breaks = col.scale$breaks,
-#  bty = "n", add = T
-#)
-#lvl <- col.scale$breaks[seq(1, length(col.scale$breaks), 2)]
-#contour(mx, my, ycp.IM2, add = T, col = "gray", levels = lvl)

@@ -4,37 +4,53 @@
 \alias{topo_plot}
 \title{Plot topographic map of EEG signal}
 \usage{
-topo_plot(data, mesh, coords = HCGSN256$D2, col.range = NULL, col.scale = NULL)
+topo_plot(
+  signal,
+  mesh,
+  coords = HCGSN256$D2,
+  col.range = NULL,
+  col.scale = NULL,
+  contour = FALSE,
+  legend = TRUE
+)
 }
 \arguments{
-\item{data}{A vector with signal to plot.}
+\item{signal}{A vector with signal to plot.}
 
-\item{mesh}{A data frame with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from point_mesh() function is used.}
+\item{mesh}{A mesh object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from point_mesh() function is used.}
 
-\item{coords}{Sensor coordinates. If not defined, the HCGSN256 template is used.}
+\item{coords}{Sensor coordinates as a tibble or data frame with named x and y columns. If not defined, the HCGSN256 template is used.}
 
-\item{col.range}{A vector ... See details.}
+\item{col.range}{A vector with minimum and maximum value of the amplitude used in the color palette for plotting.}
 
 \item{col.scale}{A color scale which should be used for plotting. If not defined, it is computed from col.range.}
+
+\item{contour}{Logical. Indicates, whether contours should be plotted in the graph. Default value is FALSE.}
+
+\item{legend}{Logical. Indicates, whether legend should be displayed beside the graph. Default value is TRUE.}
 }
 \value{
 A plot.
 }
 \description{
 Doplnit podrobnosti o skale atd.
+The output in the form of a ggplot object allows to easily edit the result image properties.
 }
 \examples{
-data(HCGSN256)
-data(epochdata)
-# Plot average topographic map of signal for subject 1 from the time point 251
-# the outliers - epoch 47 and 48 are extracted before computing average
-data <- epochdata |>
-dplyr::filter(time == 251 & subject == 1 & !epoch \%in\% c(47,48)) |>
-dplyr::select(signal, electrode, epoch) |>
-dplyr::group_by(electrode) |>
-dplyr::mutate(average = mean(signal, na.rm = TRUE))
+data("HCGSN256")
+data("epochdata")
+# Plot average topographic map of signal for subject 1 from the time point 1 (the time of the stimulus)
+# the outliers (epoch 14 and 15) are extracted before computing average
 
-data <- data$average[1:204]
-topo_plot(data = data, col.range = c(-40, 40))
+# a) preparing data
+s1 <- epochdata |>
+dplyr::filter(time == 1 & subject == 1 & !epoch \%in\% c(14,15)) |>
+dplyr::select(signal, sensor, epoch) |>
+dplyr::group_by(sensor) |>
+dplyr::mutate(average = mean(signal, na.rm = TRUE))
+s1 <- s1$average[1:204]
+
+# b) plotting the topographic map with contours and legend
+topo_plot(signal = s1, col.range = c(-40, 40))
 
 }
