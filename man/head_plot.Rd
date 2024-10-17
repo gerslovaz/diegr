@@ -4,25 +4,51 @@
 \alias{head_plot}
 \title{Plot scalp map of EEG signal}
 \usage{
-head_plot(mesh, tri, mesh2d = NULL, signal = NULL, col.scale)
+head_plot(signal, mesh, tri, coords = NULL, col.range = NULL, col.scale = NULL)
 }
 \arguments{
-\item{mesh}{A data frame with coordinates of 3D point mesh.}
-
-\item{tri}{A matrix with indices of the triangles.}
-
-\item{mesh2d}{A data frame with coordinates of 2D point mesh (needed for triangulation computing, if argument tri is missing).}
-
 \item{signal}{A vector with signal to plot.}
 
-\item{col.scale}{A color scale which should be used for plotting.}
+\item{mesh}{An object of class "mesh" or data frame (matrix) with x, y and z coordinates of a point mesh used for computing IM model. If not defined, the polygon point mesh with default settings from point_mesh() function is used.}
+
+\item{tri}{A matrix with indices of the triangles. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the input mesh object (or a list).}
+
+\item{coords}{Sensor coordinates as a tibble or data frame with named x and y columns. If not defined, the HCGSN256 template is used.}
+
+\item{col.range}{A vector with minimum and maximum value of the amplitude used in the color palette for plotting. If not defined, the range of input signal is used.}
+
+\item{col.scale}{A color scale which should be used for plotting. If not defined, it is computed from col.range.}
 }
 \value{
 A rgl plot of scalp EEG signal.
 }
 \description{
-A short description...
+Plot a scalp polygon map of the EEG signal amplitude using topographic color scale. The thin-plate interpolation spline model (IM) is used for signal interpolation between the sensor locations. The \code{\link[rgl]{shape3d}} function is used for plotting.
+}
+\details{
+The parameter \code{mesh} should optimally be an object of class "mesh" (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
+If the input \code{mesh} is a data frame or a matrix with only 3D coordinates of a point mesh, the use of previously created triangulation (through \code{tri} argument) is necessary.
+To compare results between 2D topographical plot and 3D scalp plot use the same mesh in both cases.
+
+Be careful when choosing the argument \code{col.range}. If the input \code{signal} contains values outside the chosen range, this will cause "holes" in the resulting plot.
+To compare results for different subjects or conditions, set the same values of \code{col.range} and \code{col.scale} arguments in all cases.
+The default used scale is based on topographical colors with zero value always at the border of blue and green shades.
 }
 \examples{
-# Tady potrebujeme doplnit priklad
+data("HCGSN256")
+data("epochdata")
+# Plot average scalp map of signal for subject 1 from the time point 1 (the time of the stimulus)
+# the outliers (epoch 14 and 15) are extracted before computing average
+
+# a) preparing data
+s1 <- epochdata |>
+dplyr::filter(time == 1 & subject == 1 & !epoch \%in\% c(14,15)) |>
+dplyr::select(signal, sensor, epoch) |>
+dplyr::group_by(sensor) |>
+dplyr::mutate(average = mean(signal, na.rm = TRUE))
+s1 <- s1$average[1:204]
+
+# b) plotting the scalp polygon map
+open3d()
+head_plot(signal = s1, col.range = c(-40, 40))
 }

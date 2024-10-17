@@ -1,7 +1,7 @@
 #' Plot topographic map of EEG signal
 #'
 #' @description
-#' Plot a topographic circle or polygon map of the EEG signal amplitude using topographic color scale. The thin-plate interpolation spline model is used for signal interpolation between the sensor locations.
+#' Plot a topographic circle or polygon map of the EEG signal amplitude using topographic color scale. The thin-plate interpolation spline model (IM) is used for signal interpolation between the sensor locations.
 #' The output in the form of a ggplot object allows to easily edit the result image properties.
 #'
 #'
