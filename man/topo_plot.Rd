@@ -7,7 +7,7 @@
 topo_plot(
   signal,
   mesh,
-  coords = HCGSN256$D2,
+  coords = NULL,
   col.range = NULL,
   col.scale = NULL,
   contour = FALSE,
@@ -21,7 +21,7 @@ topo_plot(
 
 \item{coords}{Sensor coordinates as a tibble or data frame with named x and y columns. If not defined, the HCGSN256 template is used.}
 
-\item{col.range}{A vector with minimum and maximum value of the amplitude used in the color palette for plotting.}
+\item{col.range}{A vector with minimum and maximum value of the amplitude used in the color palette for plotting. If not defined, the range of input signal is used.}
 
 \item{col.scale}{A color scale which should be used for plotting. If not defined, it is computed from col.range.}
 
@@ -33,8 +33,13 @@ topo_plot(
 A plot.
 }
 \description{
-Doplnit podrobnosti o skale atd.
+Plot a topographic circle or polygon map of the EEG signal amplitude using topographic color scale. The thin-plate interpolation spline model is used for signal interpolation between the sensor locations.
 The output in the form of a ggplot object allows to easily edit the result image properties.
+}
+\details{
+Be careful when choosing the argument \code{col.range}. If the input \code{signal} contains values outside the chosen range, this will cause "holes" in the resulting plot.
+To compare results for different subjects or conditions, set the same values of \code{col.range} and \code{col.scale} arguments in all cases.
+The default used scale is based on topographical colors with zero value always at the border of blue and green shades.
 }
 \examples{
 data("HCGSN256")
@@ -50,7 +55,7 @@ dplyr::group_by(sensor) |>
 dplyr::mutate(average = mean(signal, na.rm = TRUE))
 s1 <- s1$average[1:204]
 
-# b) plotting the topographic map with contours and legend
+# b) plotting the topographic circle map with contours and legend
 topo_plot(signal = s1, col.range = c(-40, 40))
 
 }
