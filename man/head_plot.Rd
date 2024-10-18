@@ -9,7 +9,7 @@ head_plot(signal, mesh, tri, coords = NULL, col.range = NULL, col.scale = NULL)
 \arguments{
 \item{signal}{A vector with signal to plot.}
 
-\item{mesh}{An object of class "mesh" or data frame (matrix) with x, y and z coordinates of a point mesh used for computing IM model. If not defined, the polygon point mesh with default settings from point_mesh() function is used.}
+\item{mesh}{An object of class \code{"mesh"} used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh()}} function is used. Can also be a data frame or a matrix with x, y and z coordinates of a point mesh. See details for more information about the structure.}
 
 \item{tri}{A matrix with indices of the triangles. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the input mesh object (or a list).}
 
@@ -26,7 +26,7 @@ A rgl plot of scalp EEG signal.
 Plot a scalp polygon map of the EEG signal amplitude using topographic color scale. The thin-plate interpolation spline model (IM) is used for signal interpolation between the sensor locations. The \code{\link[rgl]{shape3d}} function is used for plotting.
 }
 \details{
-The parameter \code{mesh} should optimally be an object of class "mesh" (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
+The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
 If the input \code{mesh} is a data frame or a matrix with only 3D coordinates of a point mesh, the use of previously created triangulation (through \code{tri} argument) is necessary.
 To compare results between 2D topographical plot and 3D scalp plot use the same mesh in both cases.
 
@@ -35,12 +35,12 @@ To compare results for different subjects or conditions, set the same values of 
 The default used scale is based on topographical colors with zero value always at the border of blue and green shades.
 }
 \examples{
-data("HCGSN256")
-data("epochdata")
 # Plot average scalp map of signal for subject 1 from the time point 1 (the time of the stimulus)
 # the outliers (epoch 14 and 15) are extracted before computing average
 
 # a) preparing data
+data("HCGSN256")
+data("epochdata")
 s1 <- epochdata |>
 dplyr::filter(time == 1 & subject == 1 & !epoch \%in\% c(14,15)) |>
 dplyr::select(signal, sensor, epoch) |>

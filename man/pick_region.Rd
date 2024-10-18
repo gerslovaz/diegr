@@ -14,9 +14,9 @@ pick_region(
 \arguments{
 \item{coords}{A data frame, matrix or named tibble with two columns of sensor coordinates. If not defined, HCGSN256 template is used. See details for more information about coordinate requirements.}
 
-\item{hemisphere}{A character vector denoting hemisphere to choose. Possible values: "left", "right", "midline" or any combination of them. If not defined, both hemispheres with midline are chosen.}
+\item{hemisphere}{A character vector denoting hemisphere to choose. Possible values: \code{"left"}, \code{"right"}, \code{"midline"} or any combination of them. If not defined, both hemispheres with midline are chosen.}
 
-\item{region}{A character vector denoting region to choose. Possible values: "frontal", "central", "parietal", "occipital", "temporal" or any combination of them. If not defined, all regions are chosen.}
+\item{region}{A character vector denoting region to choose. Possible values: \code{"frontal"}, \code{"central"}, \code{"parietal"}, \code{"occipital"}, \code{"temporal"} or any combination of them. If not defined, all regions are chosen.}
 
 \item{ROI}{A character vector with labels of regions. The order and length must be the same as in \code{coords}. If not defined, the predefined vector (according to HCGSN256 template determined by an expert from Central European Institute of Technology, Masaryk University, Brno, Czech Republic) is used.}
 }

@@ -17,7 +17,7 @@ topo_plot(
 \arguments{
 \item{signal}{A vector with signal to plot.}
 
-\item{mesh}{A mesh object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from point_mesh() function is used.}
+\item{mesh}{A \code{"mesh"} object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh()}} function is used.}
 
 \item{coords}{Sensor coordinates as a tibble or data frame with named x and y columns. If not defined, the HCGSN256 template is used.}
 
@@ -25,9 +25,9 @@ topo_plot(
 
 \item{col.scale}{A color scale which should be used for plotting. If not defined, it is computed from col.range.}
 
-\item{contour}{Logical. Indicates, whether contours should be plotted in the graph. Default value is FALSE.}
+\item{contour}{Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.}
 
-\item{legend}{Logical. Indicates, whether legend should be displayed beside the graph. Default value is TRUE.}
+\item{legend}{Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.}
 }
 \value{
 A plot.

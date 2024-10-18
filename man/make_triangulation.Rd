@@ -13,12 +13,12 @@ make_triangulation(mesh)
 A three column matrix with indices of the vertices of the triangles.
 }
 \description{
-Function for creating Delaunay type-I triangulation (see Schumaker 2007) with consistent oriented edges adapted for a regular point mesh created by point_mesh() function.
+Function for creating Delaunay type-I triangulation (see Schumaker 2007) with consistent oriented edges adapted for a regular point mesh created by \code{\link{point_mesh()}} function.
 See Details for more information.
 }
 \details{
 The type-I Delaunay triangulation is a triangulation obtained by drawing in the north-east diagonals in all subrectangles of the triangulated area.
-Due to the regularity of the input mesh (in the sense of distances between mesh points), a simplified procedure is used: The triangulation is created within the individual strips and then binded together.
+Due to the regularity of the input mesh (in the sense of distances between mesh points), a simplified procedure is used: The triangulation is created within the individual strips and then bound together.
 The order of the vertices is chosen to maintain a consistent orientation of the triangles (for more details see Schneider 2003).
 }
 \examples{

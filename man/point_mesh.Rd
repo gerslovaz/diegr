@@ -14,17 +14,17 @@ point_mesh(
 )
 }
 \arguments{
-\item{dim}{A number (or a vector) indicating a dimension of the mesh: 2 for two dimensional, 3 for three dimensional mesh and c(2,3) for both of them in one output (default setting).}
+\item{dim}{A number (or a vector) indicating a dimension of the mesh: 2 for two dimensional, 3 for three dimensional mesh and \code{c(2,3)} for both of them in one output (default setting).}
 
-\item{n}{Optionally, the required number of mesh points. Default setting is n = 10 000.}
+\item{n}{Optionally, the required number of mesh points. Default setting is \code{n = 10 000}.}
 
 \item{r}{Optionally, desired radius of a circular mesh. If not defined, it is selected according to the sensor locations.}
 
-\item{template}{The kind of sensor template montage used. Default setting 'HCGSN256' denotes the 256-channel HydroCel Geodesic Sensor Net v.1.0 (currently the only available option).}
+\item{template}{The kind of sensor template montage used. Default setting \code{"HCGSN256"} denotes the 256-channel HydroCel Geodesic Sensor Net v.1.0 (currently the only available option).}
 
 \item{own.coordinates}{Optionally, a list with own sensor coordinates for mesh building, if no pre-defined template is to be used. See Details for more information.}
 
-\item{type}{A character indicating the shape of the mesh with 2 possible values: 'circle' for circular mesh (default), 'polygon' for irregular polygon shape with boundaries defined by sensor locations.}
+\item{type}{A character indicating the shape of the mesh with 2 possible values: \code{"circle"} for circular mesh (default), \code{"polygon"} for irregular polygon shape with boundaries defined by sensor locations.}
 }
 \value{
 Returns an object of class \code{"mesh"}. It is a list containing some (or all) of the following components:
@@ -35,7 +35,7 @@ Returns an object of class \code{"mesh"}. It is a list containing some (or all) 
 \item{r}{A radius of the circle used for mesh creating.}
 }
 \description{
-Function creates an object of class \code{"mesh"}, which is a list of data.frames with coordinates of a regular (in the sense of the equidistant distance between mesh nodes) mesh of points on the space defined by sensor coordinates.
+Function creates an object of class \code{"mesh"}, which is a list of data frames with coordinates of a regular (in the sense of the equidistant distance between mesh nodes) mesh of points on the space defined by sensor coordinates.
 }
 \details{
 In the case of using Geodesic Sensor Net (\code{template = 'HCGSN256'}), the (0,0) point of the resulting 2D mesh corresponds to a reference electrode located at the vertex.
@@ -44,8 +44,8 @@ The number \code{n} for controlling the mesh density is only an approximate valu
 
 The \code{own.coordinates} enables computing a mesh from user's own sensor locations. The input must be a list containing following elements:
 \itemize{
-\item \code{D2} a tibble or data.frame with sensor coordinates in named x and y columns,
-\item \code{D3} a tibble or data.frame with sensor coordinates in named x, y and z columns.
+\item \code{D2} a tibble or data frame with sensor coordinates in named x and y columns,
+\item \code{D3} a tibble or data frame with sensor coordinates in named x, y and z columns.
 }
 }
 \examples{

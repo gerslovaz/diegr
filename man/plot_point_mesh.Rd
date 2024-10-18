@@ -23,44 +23,44 @@ plot_point_mesh(
 )
 }
 \arguments{
-\item{mesh}{A data.frame or tibble with cartesian coordinates of point mesh to plot. It could be D2 or D3 output from point_mesh() function or any data.frame (or tibble) with named x and y (x, y and z, respectively) columns. See Details for more information.}
+\item{mesh}{A data frame or tibble with cartesian coordinates of point mesh to plot. It could be \coe{D2} or \code{D3} element of output from \code{\link{point_mesh()}} function or any data frame (or tibble) with named x and y (x, y and z, respectively) columns. See Details for more information.}
 
-\item{sensors}{A logical value indicating whether the sensor locations should also be plotted (default value is TRUE).}
+\item{sensors}{A logical value indicating whether the sensor locations should also be plotted (default value is \code{TRUE}).}
 
-\item{names}{A logical value indicating whether the sensor names should also be plotted (default value is FALSE).}
+\item{names}{A logical value indicating whether the sensor names should also be plotted (default value is \code{FALSE}).}
 
-\item{names.vec}{A vector with sensor names. The argument is required only when using own.coordinates and setting names = TRUE.}
+\item{names.vec}{A vector with sensor names. The argument is required only when using \code{own.coordinates} and setting \code{names = TRUE}.}
 
 \item{col.sensors}{The color of sensor locations points (default color is green).}
 
-\item{cex.sensors}{The cex argument for sensor location points.}
+\item{cex.sensors}{The \code{cex} argument (size) for sensor location points.}
 
-\item{pch.sensors}{The pch argument for sensor location points.}
+\item{pch.sensors}{The \code{pch} argument (symbol) for sensor location points.}
 
-\item{own.coordinates}{A data.frame or tibble with coordinates of the sensor locations. If NULL, the HCGSN256 template is used.}
+\item{own.coordinates}{A data frame or tibble with coordinates of the sensor locations. If \code{NULL}, the HCGSN256 template is used.}
 
 \item{col}{The color of mesh points (default color is gray).}
 
 \item{pch}{The symbol used for points in the mesh.}
 
-\item{cex}{The cex argument for points of the mesh.}
+\item{cex}{The \code{cex} argument for points of the mesh.}
 
-\item{axes}{A logical value indicating, if axes should be plotted (default value is FALSE).}
+\item{axes}{A logical value indicating, if axes should be plotted (default value is \code{FALSE}).}
 
 \item{xlab}{The label of x axis (default is no label).}
 
 \item{ylab}{The label of y axis (default is no label).}
 
-\item{...}{Further graphical parameters, same as in \link{plot} function.}
+\item{...}{Further graphical parameters, same as in \code{\link{plot}} function.}
 }
 \value{
 A plot.
 }
 \description{
-Function for plotting a mesh of points (not only) created by point_mesh() function. The output is two dimensional plot of point mesh or three dimensional rgl plot depending on the input dimension.
+Function for plotting a mesh of points (not only) created by \code{\link{point_mesh()}} function. The output is two dimensional plot of point mesh or three dimensional \code{rgl} plot depending on the input dimension.
 }
 \details{
-The output plot is designed with frontal part of the brain above and occipital part of the brain bottom. The orientation of own.coordinates should be consistent with this, in other case the results could be distorted.
+The output plot is designed with frontal part of the brain above and occipital part of the brain bottom. The orientation of \code{own.coordinates} should be consistent with this, in other case the results could be distorted.
 }
 \examples{
 data("HCGSN256")

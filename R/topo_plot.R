@@ -6,12 +6,12 @@
 #'
 #'
 #' @param signal A vector with signal to plot.
-#' @param mesh A mesh object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from point_mesh() function is used.
+#' @param mesh A \code{"mesh"} object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh()}} function is used.
 #' @param coords Sensor coordinates as a tibble or data frame with named x and y columns. If not defined, the HCGSN256 template is used.
 #' @param col.range A vector with minimum and maximum value of the amplitude used in the color palette for plotting. If not defined, the range of input signal is used.
 #' @param col.scale A color scale which should be used for plotting. If not defined, it is computed from col.range.
-#' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is FALSE.
-#' @param legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is TRUE.
+#' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.
+#' @param legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.
 #'
 #' @details
 #' Be careful when choosing the argument \code{col.range}. If the input \code{signal} contains values outside the chosen range, this will cause "holes" in the resulting plot.
