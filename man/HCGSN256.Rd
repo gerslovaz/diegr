@@ -7,7 +7,7 @@
 \format{
 A list with following elements:
 \describe{
-\item{number}{Number of sensor (according to EGI GSN Technical Manual)}
+\item{sensor}{Sensor label (according to EGI GSN Technical Manual)}
 \item{D2}{A tibble with 2 columns containing x and y coordinates of sensors in 2D}
 \item{D3}{A tibble with 3 columns containing x, y and z coordinates of sensors in 3D. See 'Details' for more information.}
 \item{ROI}{Factor containing the name of the region to which the corresponding sensor belongs.
@@ -19,7 +19,7 @@ The regions were determined by an expert from Central European Institute of Tech
 Central European Institute of Technology, Masaryk University, Brno, Czech Republic.
 }
 \usage{
-data(HCGSN256)
+data("HCGSN256")
 }
 \description{
 A file containing the Cartesian coordinates of high-density EEG sensor positions in 3D space on the scalp surface and their projection into 2D space.

@@ -57,7 +57,7 @@ topo_plot <- function(signal, mesh, coords = NULL,
   }
 
   if (is.null(col.range)) {
-    col.range <- range(data)
+    col.range <- 1.1 * range(signal)
   }
   if (is.null(col.scale)) {
     col.scale <- create_scale(col.range)
