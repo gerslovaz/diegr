@@ -68,31 +68,44 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own.coordina
     }
   }
 
+  coords <- coordinates$D2
+  conv_hull <- chull(coords$x, coords$y)
+  ch_x <- coords$x[conv_hull]
+  ch_y <- coords$y[conv_hull]
+
+  x0 <- mean(ch_x)
+  y0 <- mean(ch_y)
 
   if (missing(r)) {
-    r <- ceiling(max(abs(range(coordinates$D2))))
+    Edist <- sqrt((ch_x - x0)^2 + (ch_y - y0)^2)
+    r <- ceiling(max(Edist))
   }
 
   N <- round(sqrt(2*n))
-  x.vec <- rep(seq(-r, r, length.out = N), N)
-  y.vec <- rep(seq(-r, r, length.out = N), each = N)
+  x.vec <- rep(seq(x0 - r, x0 + r, length.out = N), N)
+  y.vec <- rep(seq(y0 - r, y0 + r, length.out = N), each = N)
   mesh.circle <- cbind(x.vec, y.vec)
 
-  eu.vec <- edist0(x.vec, y.vec)
+  eu.vec <- sqrt((x.vec - x0)^2 + (y.vec - y0)^2)
   index <- which(eu.vec <= r)
   mesh.circle <- mesh.circle[index,]
   mesh.circle <- data.frame(x = mesh.circle[,1], y = mesh.circle[,2])
 
+  coords.ch <- coords[conv_hull,]
+  coords.ch <- rbind(coords.ch, coords.ch[1,])
+
   if (identical(dim, 2)) {
+
     switch(type,
-      "circle" = {
-        mesh.out <- list(D2 = mesh.circle)
-      },
-      "polygon" = {
-        mesh.polygon <- make_polygon(coordinates$D2, mesh.circle)
-        mesh.out <- list(D2 = data.frame(x = mesh.polygon[,1], y = mesh.polygon[,2]))
-      },
-      stop("Invalid type argument")
+           "circle" = {
+             mesh.out <- list(D2 = mesh.circle)
+           },
+           "polygon" = {
+             inside <- sp::point.in.polygon(mesh.circle$x, mesh.circle$y, coords.ch$x, coords.ch$y)
+             mesh.polygon <- mesh.circle[inside > 0,]
+             mesh.out <- list(D2 = data.frame(x = mesh.polygon[,1], y = mesh.polygon[,2]))
+           },
+           stop("Invalid type argument")
     )
   } else if (identical(dim, 3)) {
     switch(type,
@@ -100,7 +113,8 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own.coordina
              mesh.out <- list(D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh.circle))
            },
            "polygon" = {
-             mesh.polygon <- make_polygon(coordinates$D2, mesh.circle)
+             inside <- sp::point.in.polygon(mesh.circle$x, mesh.circle$y, coords.ch$x, coords.ch$y)
+             mesh.polygon <- mesh.circle[inside > 0,]
              mesh.out <- list(D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh.polygon))
            },
            stop("Invalid type argument")
@@ -112,7 +126,8 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own.coordina
                               D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh.circle))
            },
            "polygon" = {
-             mesh.polygon <- make_polygon(coordinates$D2, mesh.circle)
+             inside <- sp::point.in.polygon(mesh.circle$x, mesh.circle$y, coords.ch$x, coords.ch$y)
+             mesh.polygon <- mesh.circle[inside > 0,]
              mesh.out <- list(D2 = data.frame(x = mesh.polygon[,1], y = mesh.polygon[,2]),
                               D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh.polygon))
            },
@@ -130,12 +145,6 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own.coordina
 
 }
 
-
-edist0 <- function(x1, x2){
-  ## compute euclidean distance of a point (x1,x2) from (0,0)
-  distvec <- sqrt(x1^2 + x2^2)
-  return(distvec)
-}
 
 spline_matrix <- function(X, Xcp = X) {
   ## compute S matrix to using in spline methods for d = 2 or d = 3
@@ -222,37 +231,4 @@ recompute_3d <- function(X2D, X3D, mesh) {
   Y <- data.frame(x = Y.Pcp[1:k.cp, 1], y = Y.Pcp[1:k.cp, 2], z = Y.Pcp[1:k.cp, 3])
   return(Y)
 }
-
-make_polygon <- function(locations, mesh) {
-  # create polygon mesh as convex hull of locations
-  if (is.list(mesh) && "D2" %in% names(mesh)) {
-    mesh <- mesh$D2
-  }
-
-  if (dim(mesh)[2] > 2) {
-    mesh <- mesh[,1:2]
-    warning("The number of input mesh columns > 2. The first two columns were used for furher computing. You should be careful with the result.")
-  }
-
-  if (!is.data.frame(mesh)) {
-    mesh <- data.frame(x = mesh[,1], y = mesh[,2])
-    warning("The input mesh was not data.frame. The data.frame from first two columns of the input mesh was used for further calculation.")
-  }
-
-  if (any(is.na(mesh))) {
-    mesh <- na.omit(mesh)
-  }
-
-  roi <- st_as_sf(locations, coords = c("x", "y"))
-  roi.mp <- st_combine(roi)
-  roi.poly <- st_convex_hull(roi.mp) # Define convex hull
-
-  mesh.sf <- st_as_sf(mesh, coords = c("x", "y"))
-  mesh.inside <- st_intersection(mesh.sf, roi.poly)
-  mesh.inside <- st_coordinates(mesh.inside)
-
-  return(mesh.inside)
-
-}
-
 
