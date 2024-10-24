@@ -23,7 +23,7 @@ head_plot(signal, mesh, tri, coords = NULL, col.range = NULL, col.scale = NULL)
 A rgl plot of scalp EEG signal.
 }
 \description{
-Plot a scalp polygon map of the EEG signal amplitude using topographic color scale. The thin-plate interpolation spline model (IM) is used for signal interpolation between the sensor locations. The \code{\link[rgl]{shape3d}} function is used for plotting.
+Plot a scalp polygon map of the EEG signal amplitude using topographic color scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^3 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations. The \code{\link[rgl]{shape3d}} function is used for plotting.
 }
 \details{
 The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.

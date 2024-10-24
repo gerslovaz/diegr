@@ -1,7 +1,7 @@
 #' Plot scalp map of EEG signal
 #'
 #' @description
-#' Plot a scalp polygon map of the EEG signal amplitude using topographic color scale. The thin-plate interpolation spline model (IM) is used for signal interpolation between the sensor locations. The \code{\link[rgl]{shape3d}} function is used for plotting.
+#' Plot a scalp polygon map of the EEG signal amplitude using topographic color scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^3 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations. The \code{\link[rgl]{shape3d}} function is used for plotting.
 #'
 #' @param signal A vector with signal to plot.
 #' @param mesh An object of class \code{"mesh"} used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh()}} function is used. Can also be a data frame or a matrix with x, y and z coordinates of a point mesh. See details for more information about the structure.

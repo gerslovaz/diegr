@@ -1,7 +1,7 @@
 #' Plot topographic map of EEG signal
 #'
 #' @description
-#' Plot a topographic circle or polygon map of the EEG signal amplitude using topographic color scale. The thin-plate interpolation spline model (IM) is used for signal interpolation between the sensor locations.
+#' Plot a topographic circle or polygon map of the EEG signal amplitude using topographic color scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^2 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations.
 #' The output in the form of a ggplot object allows to easily edit the result image properties.
 #'
 #'
@@ -88,7 +88,12 @@ topo_plot <- function(signal, mesh, coords = NULL,
     mesh.mat <- mesh[,1:2]
   }
 
-  M <- max(mesh.mat[,2], na.rm = TRUE)
+  M <- max(max(mesh.mat[,2], na.rm = TRUE), max(coords$y))
+  x0 <- mean(mesh.mat[,1], na.rm = TRUE)
+
+  if (ncol(coords) > 2){
+    coords <- data.frame(x = coords$x, y = coords$y)
+  }
 
   beta.hat <- IM(coords, signal)
   X.Pcp <- XP_IM(coords, mesh.mat)
@@ -135,8 +140,8 @@ topo_plot <- function(signal, mesh, coords = NULL,
     geom_point(data = coords, aes(x = x, y = y), color = "black", cex = 0.7)
 
   g +
-    annotate("segment", x = 0, y = 1.07 * M, xend = -0.08 * M, yend = 1.01 * M, col = "gray40") +
-    annotate("segment", x = 0, y = 1.07 * M, xend = 0.08 * M, yend = 1.01 * M, col = "gray40")
+    annotate("segment", x = x0, y = M + 0.07 * abs(M), xend = x0 - 0.08 * M, yend = M + 0.01 * abs(M), col = "gray40") +
+    annotate("segment", x = x0, y = M + 0.07 * abs(M), xend = x0 + 0.08 * M, yend = M + 0.01 * abs(M), col = "gray40")
 
 }
 

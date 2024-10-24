@@ -29,8 +29,9 @@ pick_region <- function(coords = NULL, hemisphere = c("left", "right", "midline"
   }
 
   if (is.null(coords)) {
-    coords <- HCGSN256$D2
-  }
+    coords <- cbind(HCGSN256$D2, HCGSN256$sensor)
+    colnames(coords) <- c("x", "y", "sensor")
+   }
 
   if (is.null(ROI)) {
     ROI <- HCGSN256$ROI
@@ -61,6 +62,7 @@ pick_region <- function(coords = NULL, hemisphere = c("left", "right", "midline"
     idx.m <- which(x == 0)
   }
   idx <- c(idx.l, idx.m, idx.r)
+  idx <- sort(idx)
 
   new.coords <- new.coords[idx,]
 
