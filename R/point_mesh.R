@@ -78,7 +78,11 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own.coordina
 
   if (missing(r)) {
     Edist <- sqrt((ch_x - x0)^2 + (ch_y - y0)^2)
-    r <- ceiling(max(Edist))
+    r <- max(Edist)
+    if (r > 100) {
+      r <- ceiling(r)
+    }
+
   }
 
   N <- round(sqrt(2*n))
@@ -194,11 +198,11 @@ XP_IM <- function(X, Xcp) {
   k <- dim(X)[1]
   kcp <- dim(Xcp)[1]
   d <- dim(X)[2]
-  S <- spline_matrix(X, Xcp)
-  kcp.block <- cbind(1, Xcp)
-  k.block <- rbind(1, t(X))
-  zero.block <- matrix(0, d + 1, d + 1)
-  X.P <- cbind(rbind(S, k.block), rbind(kcp.block, zero.block))
+
+  X.P <- matrix(0, nrow = kcp + d + 1, ncol = k + d + 1)
+  X.P[1:kcp, 1:k] <- spline_matrix(X, Xcp)
+  X.P[1:kcp, (k + 1):(k + d + 1)] <- cbind(1, Xcp)
+  X.P[(kcp + 1):(kcp + d + 1), 1:k] <- rbind(1, t(X))
 
   return(X.P)
 }
@@ -223,11 +227,7 @@ recompute_3d <- function(X2D, X3D, mesh) {
   }
 
   k.cp <- dim(mesh)[1]
-  X.P <- XP_IM(X2D, X2D)
-  Y.P <- rbind(X3D, matrix(0, 3, 3))
-  beta.hat <- solve(X.P) %*% Y.P
-  X.Pcp <- XP_IM(X2D, mesh)
-  Y.Pcp <- X.Pcp %*% beta.hat
+  Y.Pcp <- IM(X2D, X3D, mesh)$Y.hat
   Y <- data.frame(x = Y.Pcp[1:k.cp, 1], y = Y.Pcp[1:k.cp, 2], z = Y.Pcp[1:k.cp, 3])
   return(Y)
 }

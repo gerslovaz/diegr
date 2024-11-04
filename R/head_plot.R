@@ -91,13 +91,10 @@ head_plot <- function(signal, mesh, tri,
     coords <- HCGSN256$D3
   }
 
+  y.hat <- IM(coords, signal, mesh3)$Y.hat
+  ycp.IM <- y.hat[1:length(mesh3[,1])]
 
-  beta.hat <- IM(coords, signal)
-  X.Pcp <- XP_IM(coords, mesh3)
-  y.Pcp <- X.Pcp %*% beta.hat
-  ycp.IM2 <- y.Pcp[1:length(mesh3[,1])]
-
-  y.cut <- cut(ycp.IM2, breaks = col.scale$breaks, include.lowest = TRUE)
+  y.cut <- cut(ycp.IM, breaks = col.scale$breaks, include.lowest = TRUE)
   y.col <- col.scale$colors[y.cut]
 
   shade3d(mesh3d(x = mesh3$x, y = mesh3$y, z = mesh3$z, triangles = t(tri)),

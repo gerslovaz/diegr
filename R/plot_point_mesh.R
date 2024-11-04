@@ -65,7 +65,7 @@ plot_point_mesh <- function(mesh, sensors = TRUE, names = FALSE, names.vec = NUL
   }
 
   if (names == TRUE && is.null(own.coordinates)) {
-    names.vec <- HCGSN256$number
+    names.vec <- HCGSN256$sensor
   }
 
 

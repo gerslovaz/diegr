@@ -11,7 +11,9 @@ topo_plot(
   col.range = NULL,
   col.scale = NULL,
   contour = FALSE,
-  legend = TRUE
+  legend = TRUE,
+  names = FALSE,
+  names.vec = NULL
 )
 }
 \arguments{
@@ -28,6 +30,10 @@ topo_plot(
 \item{contour}{Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.}
 
 \item{legend}{Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.}
+
+\item{names}{A logical value indicating whether the sensor names should also be plotted (default value is \code{FALSE}).}
+
+\item{names.vec}{A vector with sensor names. The argument is required only when using own \code{coords} and setting \code{names = TRUE}.}
 }
 \value{
 A plot.
@@ -56,6 +62,9 @@ dplyr::mutate(average = mean(signal, na.rm = TRUE))
 s1 <- s1$average[1:204]
 
 # b) plotting the topographic circle map with contours and legend
-topo_plot(signal = s1, col.range = c(-40, 40))
+topo_plot(signal = s1, col.range = c(-40, 40), contour = TRUE)
+
+# c) plotting the same map without contours but with sensor labels
+topo_plot(signal = s1, col.range = c(-40, 40), contour = FALSE, names = TRUE)
 
 }

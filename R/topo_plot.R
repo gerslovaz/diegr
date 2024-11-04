@@ -12,6 +12,9 @@
 #' @param col.scale A color scale which should be used for plotting. If not defined, it is computed from col.range.
 #' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.
 #' @param legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.
+#' @param names A logical value indicating whether the sensor names should also be plotted (default value is \code{FALSE}).
+#' @param names.vec A vector with sensor names. The argument is required only when using own \code{coords} and setting \code{names = TRUE}.
+
 #'
 #' @details
 #' Be careful when choosing the argument \code{col.range}. If the input \code{signal} contains values outside the chosen range, this will cause "holes" in the resulting plot.
@@ -41,10 +44,14 @@
 #' s1 <- s1$average[1:204]
 #'
 #' # b) plotting the topographic circle map with contours and legend
-#' topo_plot(signal = s1, col.range = c(-40, 40))
+#' topo_plot(signal = s1, col.range = c(-40, 40), contour = TRUE)
+#'
+#' # c) plotting the same map without contours but with sensor labels
+#' topo_plot(signal = s1, col.range = c(-40, 40), contour = FALSE, names = TRUE)
 #'
 topo_plot <- function(signal, mesh, coords = NULL,
-                      col.range = NULL, col.scale = NULL, contour = FALSE, legend = TRUE) {
+                      col.range = NULL, col.scale = NULL, contour = FALSE, legend = TRUE,
+                      names = FALSE, names.vec = NULL) {
   ## zamyslet se nad zjednodusenim ohledne n a r, slo by to automaticky vytahnout z mesh > uprava vystupu
   ## takto by bylo nutne pocitat mesh na kazde vykresleni, coz nechceme
 
@@ -62,9 +69,19 @@ topo_plot <- function(signal, mesh, coords = NULL,
   if (is.null(col.scale)) {
     col.scale <- create_scale(col.range)
   }
+  if (names == TRUE && !is.null(coords) && is.null(names.vec)) {
+    stop("With using own coordinates please define the 'names.vec' or set 'names' to FALSE.")
+  }
+  if (names == TRUE && is.null(coords)) {
+    names.vec <- HCGSN256$sensor
+  }
   if (is.null(coords)) {
     coords <- HCGSN256$D2
   }
+
+
+
+
 
   required_cols <- c("x", "y")
   missing_cols <- setdiff(required_cols, colnames(coords))
@@ -91,35 +108,35 @@ topo_plot <- function(signal, mesh, coords = NULL,
   M <- max(max(mesh.mat[,2], na.rm = TRUE), max(coords$y))
   x0 <- mean(mesh.mat[,1], na.rm = TRUE)
 
-  if (ncol(coords) > 2){
+  if (ncol(coords) > 2) {
     coords <- data.frame(x = coords$x, y = coords$y)
   }
 
-  beta.hat <- IM(coords, signal)
-  X.Pcp <- XP_IM(coords, mesh.mat)
-  y.Pcp <- X.Pcp %*% beta.hat
-  ycp.IM2 <- y.Pcp[1:dim(mesh.mat)[1]]
-  interp_data <- data.frame(x = mesh.mat[,1], y = mesh.mat[,2], ycp.IM2 = ycp.IM2)
+  y.hat <- IM(coords, signal, mesh.mat)$Y.hat
+  ycp.IM <- y.hat[1:dim(mesh.mat)[1]]
+  interp_data <- data.frame(x = mesh.mat[,1], y = mesh.mat[,2], ycp.IM = ycp.IM)
 
 
   g <- ggplot(interp_data, aes(x = x, y = y)) +
-    geom_raster(aes(fill = ycp.IM2), interpolate = TRUE) +
+    geom_raster(aes(fill = ycp.IM)) +  #, interpolate = TRUE
     scale_fill_gradientn(
       colors = col.scale$colors,
       breaks = col.scale$breaks,
       limits = range(col.scale$breaks),
-      labels = col.scale$breaks,
+      labels = round(col.scale$breaks, 2),
       values = scales::rescale(col.scale$breaks)
     ) +
     coord_fixed(ratio = 1) +
     theme_minimal() +
     theme(
+      #plot.margin = unit(c(5, 5, 5, 5), "cm"),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       axis.text = element_blank(),
       axis.title = element_blank(),
       legend.position = "none"
     )
+
 
   if (legend == TRUE) {
     g <- g  +
@@ -133,11 +150,15 @@ topo_plot <- function(signal, mesh, coords = NULL,
   }
 
   if (contour == TRUE) {
-   g <- g + geom_contour(aes(z = ycp.IM2), color = "gray", breaks = col.scale$breaks)
+   g <- g + geom_contour(aes(z = ycp.IM), color = "gray", breaks = col.scale$breaks)
   }
 
   g <- g +
     geom_point(data = coords, aes(x = x, y = y), color = "black", cex = 0.7)
+
+  if (names == TRUE) {
+    g <- g + geom_text(data = coords, aes(label = names.vec), size = 2, vjust = -0.9)
+  }
 
   g +
     annotate("segment", x = x0, y = M + 0.07 * abs(M), xend = x0 - 0.08 * M, yend = M + 0.01 * abs(M), col = "gray40") +
@@ -146,21 +167,93 @@ topo_plot <- function(signal, mesh, coords = NULL,
 }
 
 
-IM <- function(X, y) {
+IM <- function(X, Y, Xcp = X) {
   ## interpolating using spline
   if (!is.matrix(X)) {
     X <- as.matrix(X)
   }
-  if (!is.numeric(y)) {
-    y <- as.numeric(y)
+  if (!is.matrix(Xcp)) {
+    Xcp <- as.matrix(Xcp)
+  }
+  if (!is.matrix(Y)) {
+    Y <- as.matrix(Y)
   }
 
-  d <- ncol(X)
+  d1 <- ncol(X)
+  d2 <- ncol(Y)
+
   X.P <- XP_IM(X)
-  beta.hat <- solve(X.P) %*% c(y, rep(0, d + 1))
-  return(beta.hat)
+  Y.P <- rbind(Y, matrix(0, d1 + 1, d2))
+  beta.hat <- solve(X.P) %*% Y.P
+
+  if (identical(X, Xcp)) {
+    y.Pcp <- X.P %*% beta.hat
+  } else {
+    X.Pcp <- XP_IM(X, Xcp)
+    y.Pcp <- X.Pcp %*% beta.hat
+  }
+
+  return(list(Y.hat = y.Pcp, beta.hat = beta.hat))
 }
 
 
+XP_PRM <- function(X, lambda) {
+  if (!is.matrix(X)) {
+    X <- as.matrix(X)
+  }
+
+  k <-  dim(X)[1]
+  d.v <- dim(X)[2]
+  kk <- k + d.v + 1
+
+  S <- spline_matrix(X)
+  S.P <- matrix(0, kk, kk)
+  S.P[(d.v + 2):kk, (d.v + 2):kk] <- S
+
+  decomp <- eigen(S, symmetric = T)
+  U <- decomp$vectors
+  eigval <- decomp$values
+  eigval[eigval < 0] <- 0
+
+  R <- matrix(0, kk, kk)
+  R[(d.v + 2):kk, (d.v + 2):kk] <- U %*% diag(sqrt(eigval)) %*% t(U)
+
+  X.P <- matrix(0, nrow = k + kk, ncol = kk)
+  X.P[1:k, ] <- cbind(rep(1, k), X, S)
+  X.P[(k + 1):(k + kk),] <- sqrt(lambda) * R
+  return(X.P)
+}
+
+PRM <- function(X, Y, lambda) {
+  k <-  dim(X)[1]
+  d.v <- dim(X)[2]
+  d.o <- dim(as.matrix(Y))[2]
+
+  XP <- XP_PRM(X, lambda)
+  YP <- matrix(0, nrow = 2 * k + d.v + 1, ncol = d.o)
+  YP[1:k,] <- Y
+
+  model <- lm(YP ~ XP - 1)
+  hatY <- matrix(model$fitted.values, nrow = 2*k + d.v + 1, ncol = d.o)
+  hatY <- hatY[1:k,]
+  Beta <- model$coefficients
+  DiagHat <- influence(model)$hat[1:k]
+  return(list(Y.hat = hatY, beta.hat = Beta, diag.hat = DiagHat))
+}
+
+
+GCV_score <- function(X, Y, lambda){
+  model <- PRM(X, Y, lambda)
+  k <- dim(as.matrix(X))[1]
+  GCV <- k * sum((model$Y.hat - Y)^2) / (sum(rep(1,k) - model$diag.hat))^2
+  return(GCV)
+}
+
+DCV_score <- function(X, Y, lambda){
+  k <- dim(as.matrix(X))[1]
+  model <- PRM(X, Y, lambda)
+  DCV <- k * sum((model$Y.hat - Y)^2) / (k - 1.5 * sum(model$diag.hat))^2
+  return(DCV)
+}
 
 
