@@ -4,7 +4,7 @@
 \alias{boxplot_epoch}
 \title{Plot interactive boxplots of epochs}
 \usage{
-boxplot_epoch(data, subject, channel, time_lim = NULL, ...)
+boxplot_epoch(data, subject, channel, time_lim = NULL)
 }
 \arguments{
 \item{data}{A data frame or a database table with EEG dataset. Required columns: subject, sensor, epoch, time, signal.}
@@ -14,14 +14,12 @@ boxplot_epoch(data, subject, channel, time_lim = NULL, ...)
 \item{channel}{An integer or character ID of channel to plot.}
 
 \item{time_lim}{A character vector with time range to plot. If not defined, the first ten time points are plotted.}
-
-\item{...}{Additional arguments affecting the plot.}
 }
 \value{
 A plotly object.
 }
 \description{
-Function for plotting interactive boxplots of EEG amplitude in individual epochs for selected subject and channel within the chosen time interval. The interactive plotly output enables to easily determine the epoch number from which outliers come.
+Function for plotting interactive boxplots of EEG amplitude in individual epochs for selected subject and channel within the chosen time interval. The interactive plotly output enables to easily determine the epoch number from which outliers come and also allows to easily edit the image layout.
 }
 \examples{
 # Interactive boxplots of signal from channel E3 for subject 1 (health control)
