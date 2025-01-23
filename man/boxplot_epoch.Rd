@@ -21,6 +21,14 @@ A plotly object.
 \description{
 Function for plotting interactive boxplots of EEG amplitude in individual epochs for selected subject and channel within the chosen time interval. The interactive plotly output enables to easily determine the epoch number from which outliers come and also allows to easily edit the image layout.
 }
+\details{
+The input data frame or database table must contain at least following columns:
+subject - a column with subject IDs,
+sensor - a column with sensor labels,
+epoch - a column with epoch numbers,
+time - a column with time point numbers,
+signal - a column with measured EEG signal values.
+}
 \examples{
 # Interactive boxplots of signal from channel E3 for subject 1 (health control)
 # in chosen time points

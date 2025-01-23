@@ -8,6 +8,15 @@
 #' @param channel An integer or character ID of channel to plot.
 #' @param time_lim A character vector with time range to plot. If not defined, the first ten time points are plotted.
 #'
+#' @details
+#' The input data frame or database table must contain at least following columns:
+#' subject - a column with subject IDs,
+#' sensor - a column with sensor labels,
+#' epoch - a column with epoch numbers,
+#' time - a column with time point numbers,
+#' signal - a column with measured EEG signal values.
+#'
+#'
 #' @return A plotly object.
 #'
 #' @import dplyr
@@ -61,11 +70,13 @@ boxplot_epoch <- function(data,
   db_df <- collect(db_sub) #as.data.frame(db_sub)
   #db_df$epoch <- factor(db_df$epoch)
 
+  label <- rlang::englue("Subject { subject }, channel { channel }")
+
   fig <- plot_ly(db_df, x = ~time, y = ~signal) |>
     add_boxplot(hovertext = paste("Epoch :", db_df$epoch))
   fig2 <- fig |> layout(xaxis = list(title = "Time point"),
                          yaxis = list(title = TeX("\\mu V")),
-                        title = paste("Subject ", {{ subject }}, ", channel ", {{ channel }}, sep = "")) |>
+                        title = label) |>
     config(mathjax = 'cdn')
   fig2
 }
