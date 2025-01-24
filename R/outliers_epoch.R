@@ -1,11 +1,19 @@
 #' Select outlier epochs
 #'
-#' @param data A data frame, tibble or a database table with input data, must contain at least following columns: subject, sensor, time, signal, epoch.
+#' @param data A data frame, tibble or a database table with input data, required columns: subject, sensor, time, signal, epoch.
 #' @param subject An integer or character ID of selected subject.
 #' @param sensor An integer or character ID of selected sensor.
 #' @param time A vector with time range for outliers detection. If not defined, the outliers are searching across all time points in the dataset.
 #' @param method A character denoting the method used for outlier detection. The options are: "iqr" for interquartile range criterion, "percentile" for percentile method and "hampel" for Hampel filter method.
 #' @param p A probability value from [0,1] interval determining percentile to the percentile method (according to \code{probs} argument in \code{quantile()} function). The default value is set to 0.975 for the interval formed by the 2.5 and 97.5 percentiles.
+#'
+#' @details
+#' The input data frame or database table must contain at least following columns:
+#' subject - a column with subject IDs,
+#' sensor - a column with sensor labels,
+#' time - a column with time point numbers,
+#' signal - a column with measured EEG signal values,
+#' epoch - a column with epoch numbers.
 #'
 #'
 #' @return A list with following components:
@@ -20,11 +28,18 @@
 #' outliers_epoch(epochdata, subject = 2, sensor = "E45", method = "iqr")
 #'
 #' # Outlier epoch detection for subject 2, electrode E45 for the whole time range with percentile method with 1 and 99 percentiles
-#' outliers_epoch(epochdata, subject = 2, sensor = "E45", method = "percentile", q = 0.99)
+#' outliers_epoch(epochdata, subject = 2, sensor = "E45", method = "percentile", p = 0.99)
 
 outliers_epoch <- function(data, subject = NULL, sensor = NULL, time = NULL, method, p = 0.975){
 
-  newdata <- pick_data(data, subject = {{ subject }}, sensor = {{ sensor }}, time = {{ time }})
+  if (is.null(time)) {
+    newdata <- pick_data(data, subject.rg = {{ subject }}, sensor.rg = {{ sensor }})
+  } else {
+    newdata <- pick_data(data, subject.rg = {{ subject }}, sensor.rg = {{ sensor }}, time.rg = {{ time }})
+  }
+   newdata <- dplyr::collect(newdata)
+   newdata$epoch <- factor(newdata$epoch)
+
   if (method == "iqr") {
     outdata <- newdata |>
       dplyr::group_by(time) |>
@@ -33,7 +48,7 @@ outliers_epoch <- function(data, subject = NULL, sensor = NULL, time = NULL, met
       dplyr::select(time, signal, epoch, sensor)
   }
 
-  if (method == "percentile") { # zvazit osetreni q mezi 0 a 1, prip. nechat default warning - trochu neprehledny
+  if (method == "percentile") {
     if (p > 1 | p < 0) {
       p <- 0.975
       warning("The input 'p' is outside the interval [0,1]. The default value 0.975 is used instead.")
@@ -43,7 +58,7 @@ outliers_epoch <- function(data, subject = NULL, sensor = NULL, time = NULL, met
     }
     outdata <- newdata |>
       dplyr::group_by(time) |>
-      dplyr::mutate(outliers = signal < quantile(signal, 1 - q) | signal > quantile(signal, q)) |>
+      dplyr::mutate(outliers = signal < quantile(signal, 1 - p) | signal > quantile(signal, p)) |>
       dplyr::filter(outliers == TRUE) |>
       dplyr::select(time, signal, epoch, sensor)
   }
@@ -56,7 +71,8 @@ outliers_epoch <- function(data, subject = NULL, sensor = NULL, time = NULL, met
       dplyr::select(time, signal, epoch, sensor)
   }
 
-  epoch.tbl <- table(droplevels(outdata$epoch))
+  epoch.vec <- outdata$epoch
+  epoch.tbl <- table(droplevels(epoch.vec))
   epoch.tbl <- as.data.frame(epoch.tbl)
   colnames(epoch.tbl) <- c("Epoch", "Count")
   print(epoch.tbl)

@@ -14,7 +14,7 @@ outliers_epoch(
 )
 }
 \arguments{
-\item{data}{A data frame, tibble or a database table with input data, must contain at least following columns: subject, sensor, time, signal, epoch.}
+\item{data}{A data frame, tibble or a database table with input data, required columns: subject, sensor, time, signal, epoch.}
 
 \item{subject}{An integer or character ID of selected subject.}
 
@@ -34,11 +34,19 @@ A list with following components:
 \description{
 Select outlier epochs
 }
+\details{
+The input data frame or database table must contain at least following columns:
+subject - a column with subject IDs,
+sensor - a column with sensor labels,
+time - a column with time point numbers,
+signal - a column with measured EEG signal values,
+epoch - a column with epoch numbers.
+}
 \examples{
 data("epochdata")
 # Outlier epoch detection for subject 2, electrode E45 for the whole time range with IQR method
 outliers_epoch(epochdata, subject = 2, sensor = "E45", method = "iqr")
 
 # Outlier epoch detection for subject 2, electrode E45 for the whole time range with percentile method with 1 and 99 percentiles
-outliers_epoch(epochdata, subject = 2, sensor = "E45", method = "percentile", q = 0.99)
+outliers_epoch(epochdata, subject = 2, sensor = "E45", method = "percentile", p = 0.99)
 }
