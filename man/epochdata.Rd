@@ -18,7 +18,7 @@ The data frame contains five columns:
 Central European Institute of Technology, Masaryk University, Brno, Czech Republic.
 }
 \usage{
-data(epochdata)
+data("epochdata")
 }
 \description{
 This dataset is a short slice of a HD-EEG dataset from a study investigating the impact of deep brain stimulation on patients with advanced Parkinson's disease.

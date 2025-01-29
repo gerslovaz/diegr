@@ -56,19 +56,10 @@ boxplot_epoch <- function(data,
     warning("The argument 'time_lim' was not defined, the first ten time points from data are plotted.")
   }
 
-  # check time range
-  #  min_lim <- min(time_lim)
-  #  max_lim <- max(time_lim)
-  #
-  # if (!any(dplyr::pull(data, time) >= min_lim & dplyr::pull(data, time) <= max_lim)) {
-  #   stop("There are no time values in the input data within the range defined by 'time_lim'.")
-  # }
-
   db_sub <- data |>
     dplyr::filter(subject == {{ subject }} & (sensor == {{ channel }}) & time %in% time_lim)  |>
     dplyr::select(time, signal, epoch)
-  db_df <- collect(db_sub) #as.data.frame(db_sub)
-  #db_df$epoch <- factor(db_df$epoch)
+  db_df <- collect(db_sub)
 
   label <- rlang::englue("Subject { subject }, channel { channel }")
 

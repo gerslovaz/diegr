@@ -8,7 +8,7 @@
 #'
 #' @docType data
 #'
-#' @usage data(epochdata)
+#' @usage data("epochdata")
 #'
 #' @format The data frame contains five columns:
 #' \describe{
