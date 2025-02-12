@@ -7,8 +7,8 @@
 #' @param subject An integer or character ID of selected subject.
 #' @param sensor An integer or character ID of selected sensor.
 #' @param time A vector with time range for outliers detection. If not defined, the outliers are searching across all time points in the dataset.
-#' @param method A character denoting the method used for outlier detection. The options are: "iqr" for interquartile range criterion, "percentile" for percentile method and "hampel" for Hampel filter method.
-#' @param p A probability value from [0,1] interval determining percentile to the percentile method (according to \code{probs} argument in \code{quantile()} function). The default value is set to 0.975 for the interval formed by the 2.5 and 97.5 percentiles.
+#' @param method A character denoting the method used for outlier detection. The options are: \code{"iqr"} for interquartile range criterion, \code{"percentile"} for percentile method and \code{"hampel"} for Hampel filter method. See details for further information about methods.
+#' @param p A probability value from \code{[0,1]} interval determining percentile to the percentile method (according to \code{probs} argument in \code{quantile()} function). The default value is set to 0.975 for the interval formed by the 2.5 and 97.5 percentiles.
 #'
 #' @details
 #' The input data frame or database table must contain at least following columns:
@@ -18,6 +18,10 @@
 #' signal - a column with measured EEG signal values,
 #' epoch - a column with epoch numbers.
 #'
+#' The outlier detection method is chosen through \code{method} argument. The possibilities are
+#' - \code{iqr} for the interquartile range criterion, values outside the interval \code{[lower quartile - 1.5 * IQR, upper quartile + 1.5 * IQR]}, where IQR denotes interquartile range, are considered as outliers
+#' - \code{percentile} for the percentile method, values outside the interval defined by the chosen percentiles are considered as outliers
+#' - \code{hampel} for the Hampel filter method, values outside the interval \code{[median - 3 * MAD, median + 3 * MAD]}, where MAD denotes median absolute deviation, are considered as outliers
 #'
 #' @return A list with following components:
 #' \item{epoch.table}{A data frame with epoch ID and the number of time points in which the epoch was evaluated as outlier. (Only epochs with occurrence of outliers in at least one time point are presented.)}
@@ -40,6 +44,8 @@ outliers_epoch <- function(data, subject = NULL, sensor = NULL, time = NULL, met
   } else {
     newdata <- pick_data(data, subject.rg = {{ subject }}, sensor.rg = {{ sensor }}, time.rg = {{ time }})
   }
+   newdata <- newdata |>
+     dplyr::select(subject, time, signal, epoch, sensor)
    newdata <- dplyr::collect(newdata)
    newdata$epoch <- factor(newdata$epoch)
 
