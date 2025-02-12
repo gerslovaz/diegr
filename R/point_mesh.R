@@ -1,15 +1,16 @@
 #' Create regular mesh of points
 #'
 #' @description
-#' Function creates an object of class \code{"mesh"}, which is a list of data frames with coordinates of a regular (in the sense of the equidistant distance between mesh nodes) mesh of points on the space defined by sensor coordinates.
+#' Function creates an object of class \code{"mesh"}, which is a list of data frames with coordinates of a regular (in the sense of the equidistant distance between mesh nodes) mesh of points on the space defined by sensor coordinates. Circular or polygonal shape of the result mesh is available.
+#' For the equivalence between 2D and 3D mesh and the possibility to compare models in different dimensions, the thin-plate spline interpolation model \eqn{\mathbb{R}^2 \rightarrow \mathbb{R}^3} is used for creating 3D mesh.
 #'
 #'
-#' @param dim A number (or a vector) indicating a dimension of the mesh: 2 for two dimensional, 3 for three dimensional mesh and \code{c(2,3)} for both of them in one output (default setting).
+#' @param dim A number (or a vector) indicating a dimension of the mesh: \code{2} for two dimensional, \code{3} for three dimensional mesh and \code{c(2,3)} for both of them in one output (default setting).
 #' @param n Optionally, the required number of mesh points. Default setting is \code{n = 10 000}.
 #' @param r Optionally, desired radius of a circular mesh. If not defined, it is selected according to the sensor locations.
 #' @param template The kind of sensor template montage used. Default setting \code{"HCGSN256"} denotes the 256-channel HydroCel Geodesic Sensor Net v.1.0 (currently the only available option).
 #' @param own.coordinates Optionally, a list with own sensor coordinates for mesh building, if no pre-defined template is to be used. See Details for more information.
-#' @param type A character indicating the shape of the mesh with 2 possible values: \code{"circle"} for circular mesh (default), \code{"polygon"} for irregular polygon shape with boundaries defined by sensor locations.
+#' @param type A character indicating the shape of the mesh with 2 possible values: \code{"circle"} for circular mesh, \code{"polygon"} for irregular polygon shape with boundaries defined by sensor locations (default).
 #'
 #' @details
 #' In the case of using Geodesic Sensor Net (\code{template = 'HCGSN256'}), the (0,0) point of the resulting 2D mesh corresponds to a reference electrode located at the vertex.
@@ -21,7 +22,7 @@
 #' \item \code{D2} a tibble or data frame with sensor coordinates in named x and y columns,
 #' \item \code{D3} a tibble or data frame with sensor coordinates in named x, y and z columns.
 #' }
-#'
+#' To build the appropriate meshes in both dimensions, it is necessary to have the input of 3D sensor locations and their corresponding projection onto a plane obtained in another way; the function itself does not perform this projection.
 #'
 #' @return Returns an object of class \code{"mesh"}. It is a list containing some (or all) of the following components:
 #'
@@ -47,7 +48,7 @@
 #'
 #' # Computing coordinates of a polygon mesh in 2D and 3D in one step:
 #' M <- point_mesh(dim = c(2,3), n = 2000, template = "HCGSN256", type = 'polygon')
-point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own.coordinates = NULL, type = 'circle') {
+point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own.coordinates = NULL, type = 'polygon') {
 
   if (is.null(template) && !is.null(own.coordinates)) {
     if (!"D2" %in% names(own.coordinates)) {
@@ -151,7 +152,7 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own.coordina
 
 
 spline_matrix <- function(X, Xcp = X) {
-  ## compute S matrix to using in spline methods for d = 2 or d = 3
+  ## compute S matrix to using in spline methods for d in c(1,2,3)
   if (!is.matrix(X)) {
     X <- as.matrix(X)
   }
@@ -173,9 +174,17 @@ spline_matrix <- function(X, Xcp = X) {
   argument <- rowSums(diff.sq)
   if (d == 2) {
     S <- 1 / (8 * pi) * (argument) * log(sqrt(argument))
-  } else if (d == 3) S <- -1 / (8 * pi) * sqrt(argument)
-  S[argument == 0] <- 0
-  S <- matrix(S, kcp, k, byrow = F)
+    S[argument == 0] <- 0
+  } else if (d == 3) {
+    S <- -1 / (8 * pi) * sqrt(argument)
+    S[argument == 0] <- 0
+  } else if (d == 1) {
+    S <- 1/12 * abs(X1 - X2)^3
+  } else {
+    stop("X input in spline_matrix must be dim 1, 2 or 3")
+  }
+
+  S <- matrix(S, kcp, k, byrow = FALSE)
   return(S)
 }
 
