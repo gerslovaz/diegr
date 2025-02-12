@@ -1,5 +1,8 @@
 #' Select outlier epochs
 #'
+#' @description
+#' Function for selecting outlier epochs for one subject and one sensor in chosen time points. Epochs are marked as outliers based on one of the following criteria: interquartile range criterion, percentile approach or Hampel filter method.
+#'
 #' @param data A data frame, tibble or a database table with input data, required columns: subject, sensor, time, signal, epoch.
 #' @param subject An integer or character ID of selected subject.
 #' @param sensor An integer or character ID of selected sensor.
