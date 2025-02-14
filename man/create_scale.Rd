@@ -4,7 +4,7 @@
 \alias{create_scale}
 \title{Create color scale used in topographic figures}
 \usage{
-create_scale(col.range, k = 0.02)
+create_scale(col.range, k = NULL)
 }
 \arguments{
 \item{col.range}{A numeric vector with required range of the variable to be plotted in the color scale.}
@@ -22,6 +22,8 @@ Create color scale used in topographic figures
 \details{
 The palette is created according to topographical colors: negative values correspond to shades of blue and purple and positive values to shades of green, yellow and red. The zero value of the variable is always at the border of blue and green shades.
 To compare results for different subjects or conditions, set the same \code{col.range} for all cases.
+
+The parameter \code{k} is set by default with respect to the range of \code{col.range} as follows: \code{k = 0.1} for range \eqn{\leq 30}, \code{k = 0.03} for range \eqn{\geq 70} and \code{k = 0.04} otherwise.
 }
 \examples{
 # Creating scale on interval (-10,10) with default step number

@@ -7,6 +7,8 @@
 #' The palette is created according to topographical colors: negative values correspond to shades of blue and purple and positive values to shades of green, yellow and red. The zero value of the variable is always at the border of blue and green shades.
 #' To compare results for different subjects or conditions, set the same \code{col.range} for all cases.
 #'
+#' The parameter \code{k} is set by default with respect to the range of \code{col.range} as follows: \code{k = 0.1} for range \eqn{\leq 30}, \code{k = 0.03} for range \eqn{\geq 70} and \code{k = 0.04} otherwise.
+#'
 #' @return A list with two components:
 #' \item{colors}{A vector with hexadecimal codes of palette colors.}
 #' \item{breaks}{A vector with breaks for cutting the data range.}
@@ -15,15 +17,26 @@
 #' @examples
 #' # Creating scale on interval (-10,10) with default step number
 #' create_scale(col.range = c(-10,10))
-create_scale <- function(col.range, k = 0.02) {
+create_scale <- function(col.range, k = NULL) {
 
   if (length(col.range) != 2 | !is.numeric(col.range)) {
     stop("The argument 'col.range' is supposed to be a numeric vector with two terms.")
   }
 
-  if (k > 1 | k <= 0) {
-    k <- 0.02
-    warning("The argument 'k' is supposed to be from the (0,1) interval. The default value 0.02 was used instead.")
+  if (is.null(k)) {
+    maxmin <- max(col.range) - min(col.range)
+    if (maxmin <= 30) {
+      k <- 0.1
+    } else if (maxmin >= 70) {
+      k <- 0.03
+    } else {
+      k <- 0.04
+    }
+  }
+
+ if (k > 1 | k <= 0) {
+   k <- 0.04
+   warning("The argument 'k' is supposed to be from the (0,1) interval. The value 0.04 was used instead.")
   }
 
   probs <- seq(0, 1, by = { k })
