@@ -50,10 +50,10 @@ The outlier detection method is chosen through \code{method} argument. The possi
 }
 }
 \examples{
-data("epochdata")
 # Outlier epoch detection for subject 2, electrode E45 for the whole time range with IQR method
 outliers_epoch(epochdata, subject = 2, sensor = "E45", method = "iqr")
 
-# Outlier epoch detection for subject 2, electrode E45 for the whole time range with percentile method with 1 and 99 percentiles
+# Outlier epoch detection for subject 2, electrode E45 for the whole time range
+# with percentile method with 1 and 99 percentiles
 outliers_epoch(epochdata, subject = 2, sensor = "E45", method = "percentile", p = 0.99)
 }

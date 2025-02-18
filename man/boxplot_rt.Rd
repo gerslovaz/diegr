@@ -18,6 +18,6 @@ A plotly object.
 Function for plotting interactive boxplots of response time in individual epochs for selected subjects. The interactive plotly output enables to easily determine the epoch number from which outliers come and also allows to easily edit the image layout.
 }
 \examples{
-data("rtdata")
+# Display interactive boxplots for both example subjects
 boxplot_rt(rtdata)
 }

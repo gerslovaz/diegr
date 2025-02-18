@@ -29,7 +29,7 @@
 #' @import dplyr
 #'
 #' @examples
-#' data("epochdata")
+#' # Data preview
 #' head(epochdata)
 #'
 

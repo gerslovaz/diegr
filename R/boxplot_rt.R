@@ -14,7 +14,7 @@
 #' @export
 #'
 #' @examples
-#' data("rtdata")
+#' # Display interactive boxplots for both example subjects
 #' boxplot_rt(rtdata)
 
 boxplot_rt <- function(data, subject = NULL){
@@ -28,10 +28,11 @@ boxplot_rt <- function(data, subject = NULL){
   }
 
   if (!is.null(subject)){
-    data <- data |>
-      dplyr::filter(subject %in% {{ subject }})
+    data <- pick_data(data, subject.rg = {{ subject }})
   }
 
+  data <- data |>
+    dplyr::select(subject, epoch, RT)
   data <- collect(data)
 
   fig <- plot_ly(data, x = ~subject, y = ~RT) |>

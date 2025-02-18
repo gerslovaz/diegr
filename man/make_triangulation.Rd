@@ -7,13 +7,13 @@
 make_triangulation(mesh)
 }
 \arguments{
-\item{mesh}{A data frame or tibble with named columns: x, y (required) and index (optionally).}
+\item{mesh}{A data frame or tibble with named columns: \code{x}, \code{y} (required) and \code{index} (optionally).}
 }
 \value{
 A three column matrix with indices of the vertices of the triangles.
 }
 \description{
-Function for creating Delaunay type-I triangulation (see Schumaker 2007) with consistent oriented edges adapted for a regular point mesh created by \code{\link{point_mesh()}} function.
+Function for creating Delaunay type-I triangulation (see Schumaker 2007) with consistent oriented edges adapted for a regular point mesh created by \code{\link{point_mesh}} function.
 See Details for more information.
 }
 \details{
@@ -23,17 +23,16 @@ The order of the vertices is chosen to maintain a consistent orientation of the 
 }
 \examples{
 
-# Create small mesh for triangulation example
-data("HCGSN25")
-M <- point_mesh(dim = c(2,3), n = 500, template = "HCGSN256", type = "polygon")
-# Make triangulation on this mesh
+# a) Create small mesh for triangulation example
+M <- point_mesh(n = 500, template = "HCGSN256")
+
+# b) Make triangulation on this mesh
 TRI <- make_triangulation(M$D2)
 head(TRI)
 
-# Plot the result triangulation as 3D wire model using rgl
-open3d()
+# c) Plot the result triangulation as 3D wire model using rgl
+library(rgl)
 wire3d(mesh3d(M$D3$x, M$D3$y, M$D3$z, triangles = t(TRI)))
-close3d()
 }
 \references{
 Lai M-J, Schumaker LL. \emph{Spline functions on triangulations.} Cambridge University Press; 2007.

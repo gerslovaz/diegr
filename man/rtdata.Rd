@@ -26,7 +26,7 @@ The study was carried out by Central European Institute of Technology in Brno an
 Example dataset contains response time values in individual experiment epochs for 2 representative subjects (one from patient, one from health control group). The epochs and subjects correspond to the sample dataset \link[diegr]{epochdata}.
 }
 \examples{
-data("rtdata")
+# Data preview
 head(rtdata)
 
 }

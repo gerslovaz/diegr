@@ -17,5 +17,7 @@ Imports:
     ggplot2,
     plotly,
     rgl,
-    sf
+    sp,
+    scales,
+    stats
 LazyData: true

@@ -1,22 +1,25 @@
-#' Create color scale used in topographic figures
+#' Create colour scale used in topographic figures
 #'
-#' @param col.range A numeric vector with required range of the variable to be plotted in the color scale.
-#' @param k A number from interval (0,1) indicating a sequence step for the color palette. The smaller number, the finer division of the data range interval.
+#' @param col.range A numeric vector with required range of the variable to be plotted in the colour scale.
+#' @param k A number from interval (0,1) indicating a sequence step for the colour palette. The smaller number, the finer division of the data range interval.
 #'
 #' @details
-#' The palette is created according to topographical colors: negative values correspond to shades of blue and purple and positive values to shades of green, yellow and red. The zero value of the variable is always at the border of blue and green shades.
+#' The palette is created according to topographical colours: negative values correspond to shades of blue and purple and positive values to shades of green, yellow and red. The zero value of the variable is always at the border of blue and green shades.
 #' To compare results for different subjects or conditions, set the same \code{col.range} for all cases.
 #'
 #' The parameter \code{k} is set by default with respect to the range of \code{col.range} as follows: \code{k = 0.1} for range \eqn{\leq 30}, \code{k = 0.03} for range \eqn{\geq 70} and \code{k = 0.04} otherwise.
 #'
 #' @return A list with two components:
-#' \item{colors}{A vector with hexadecimal codes of palette colors.}
+#' \item{colors}{A vector with hexadecimal codes of palette colours.}
 #' \item{breaks}{A vector with breaks for cutting the data range.}
 #' @export
 #'
 #' @examples
-#' # Creating scale on interval (-10,10) with default step number
+#' # Create scale on interval (-10,10) with default step number
 #' create_scale(col.range = c(-10,10))
+#'
+#' # Create scale on interval c(-5,10) with small k (finer division)
+#' create_scale(col.range = c(-5, 10), k = 0.02)
 create_scale <- function(col.range, k = NULL) {
 
   if (length(col.range) != 2 | !is.numeric(col.range)) {
@@ -36,7 +39,7 @@ create_scale <- function(col.range, k = NULL) {
 
  if (k > 1 | k <= 0) {
    k <- 0.04
-   warning("The argument 'k' is supposed to be from the (0,1) interval. The value 0.04 was used instead.")
+   warning("The argument 'k' is supposed to be from the (0,1) interval. The user input value was replaced by 0.04.")
   }
 
   probs <- seq(0, 1, by = { k })
@@ -52,7 +55,7 @@ create_scale <- function(col.range, k = NULL) {
 }
 
 ColorsNeg <- function(n, alpha = 1) {
-  ## create negative part of color palette
+  ## create negative part of colour palette
   if (n > 0) {
     hsv(h = seq.int(from = 43 / 60, to = 31 / 60, length.out = n), alpha = alpha)
   } else {
@@ -61,7 +64,7 @@ ColorsNeg <- function(n, alpha = 1) {
 }
 
 ColorsPos <- function(n, alpha = 1) {
-  ## create positive part of color palette
+  ## create positive part of colour palette
   if (n > 0) {
     j <- n %/% 3
     i <- n - 2 * j

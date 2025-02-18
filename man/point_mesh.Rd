@@ -20,7 +20,7 @@ point_mesh(
 
 \item{r}{Optionally, desired radius of a circular mesh. If not defined, it is selected according to the sensor locations.}
 
-\item{template}{The kind of sensor template montage used. Default setting \code{"HCGSN256"} denotes the 256-channel HydroCel Geodesic Sensor Net v.1.0 (currently the only available option).}
+\item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0.}
 
 \item{own.coordinates}{Optionally, a list with own sensor coordinates for mesh building, if no pre-defined template is to be used. See Details for more information.}
 
@@ -29,8 +29,8 @@ point_mesh(
 \value{
 Returns an object of class \code{"mesh"}. It is a list containing some (or all) of the following components:
 
-\item{D2}{A data frame with x and y coordinates of the created two dimensional point mesh.}
-\item{D3}{A data frame with x, y and z coordinates of the created three dimensional point mesh.}
+\item{D2}{A data frame with \code{x} and \code{y} coordinates of the created two dimensional point mesh.}
+\item{D3}{A data frame with \code{x}, \code{y} and \code{z} coordinates of the created three dimensional point mesh.}
 \item{template}{A character indicating the template of the sensor coordinates used for mesh computing.}
 \item{r}{A radius of the circle used for mesh creating.}
 }
@@ -45,21 +45,20 @@ The number \code{n} for controlling the mesh density is only an approximate valu
 
 The \code{own.coordinates} enables computing a mesh from user's own sensor locations. The input must be a list containing following elements:
 \itemize{
-\item \code{D2} a tibble or data frame with sensor coordinates in named x and y columns,
-\item \code{D3} a tibble or data frame with sensor coordinates in named x, y and z columns.
+\item \code{D2} a tibble or data frame with sensor coordinates in named \code{x} and \code{y} columns,
+\item \code{D3} a tibble or data frame with sensor coordinates in named \code{x}, \code{y} and \code{z} columns.
 }
 To build the appropriate meshes in both dimensions, it is necessary to have the input of 3D sensor locations and their corresponding projection onto a plane obtained in another way; the function itself does not perform this projection.
 }
 \examples{
-data("HCGSN256")
 # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template
-M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256", type = 'circle')
+M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256", type = "circle")
 
 # Computing polygon 3D mesh with starting number 2000 points for HCGSN256 template
-M <- point_mesh(dim = 3, n = 2000, template = "HCGSN256", type = 'polygon')
+M <- point_mesh(dim = 3, n = 2000, template = "HCGSN256")
 
-# Computing coordinates of a polygon mesh in 2D and 3D in one step:
-M <- point_mesh(dim = c(2,3), n = 2000, template = "HCGSN256", type = 'polygon')
+# Computing coordinates of a polygon mesh in 2D and 3D in one step (starting number 3000 points):
+M <- point_mesh(n = 3000, template = "HCGSN256")
 }
 \references{
 EGI Geodesic Sensor Net Technical Manual (2024)

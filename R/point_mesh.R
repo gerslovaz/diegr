@@ -8,7 +8,7 @@
 #' @param dim A number (or a vector) indicating a dimension of the mesh: \code{2} for two dimensional, \code{3} for three dimensional mesh and \code{c(2,3)} for both of them in one output (default setting).
 #' @param n Optionally, the required number of mesh points. Default setting is \code{n = 10 000}.
 #' @param r Optionally, desired radius of a circular mesh. If not defined, it is selected according to the sensor locations.
-#' @param template The kind of sensor template montage used. Default setting \code{"HCGSN256"} denotes the 256-channel HydroCel Geodesic Sensor Net v.1.0 (currently the only available option).
+#' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0.
 #' @param own.coordinates Optionally, a list with own sensor coordinates for mesh building, if no pre-defined template is to be used. See Details for more information.
 #' @param type A character indicating the shape of the mesh with 2 possible values: \code{"circle"} for circular mesh, \code{"polygon"} for irregular polygon shape with boundaries defined by sensor locations (default).
 #'
@@ -19,35 +19,35 @@
 #'
 #' The \code{own.coordinates} enables computing a mesh from user's own sensor locations. The input must be a list containing following elements:
 #' \itemize{
-#' \item \code{D2} a tibble or data frame with sensor coordinates in named x and y columns,
-#' \item \code{D3} a tibble or data frame with sensor coordinates in named x, y and z columns.
+#' \item \code{D2} a tibble or data frame with sensor coordinates in named \code{x} and \code{y} columns,
+#' \item \code{D3} a tibble or data frame with sensor coordinates in named \code{x}, \code{y} and \code{z} columns.
 #' }
 #' To build the appropriate meshes in both dimensions, it is necessary to have the input of 3D sensor locations and their corresponding projection onto a plane obtained in another way; the function itself does not perform this projection.
 #'
 #' @return Returns an object of class \code{"mesh"}. It is a list containing some (or all) of the following components:
 #'
-#' \item{D2}{A data frame with x and y coordinates of the created two dimensional point mesh.}
-#' \item{D3}{A data frame with x, y and z coordinates of the created three dimensional point mesh.}
+#' \item{D2}{A data frame with \code{x} and \code{y} coordinates of the created two dimensional point mesh.}
+#' \item{D3}{A data frame with \code{x}, \code{y} and \code{z} coordinates of the created three dimensional point mesh.}
 #' \item{template}{A character indicating the template of the sensor coordinates used for mesh computing.}
 #' \item{r}{A radius of the circle used for mesh creating.}
 #'
 #' @references EGI Geodesic Sensor Net Technical Manual (2024)
 #'
-#' @import sf
+#' @import sp
 #' @importFrom stats na.omit
+#' @importFrom grDevices chull
 #'
 #' @export
 #'
 #' @examples
-#' data("HCGSN256")
 #' # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template
-#' M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256", type = 'circle')
+#' M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256", type = "circle")
 #'
 #' # Computing polygon 3D mesh with starting number 2000 points for HCGSN256 template
-#' M <- point_mesh(dim = 3, n = 2000, template = "HCGSN256", type = 'polygon')
+#' M <- point_mesh(dim = 3, n = 2000, template = "HCGSN256")
 #'
-#' # Computing coordinates of a polygon mesh in 2D and 3D in one step:
-#' M <- point_mesh(dim = c(2,3), n = 2000, template = "HCGSN256", type = 'polygon')
+#' # Computing coordinates of a polygon mesh in 2D and 3D in one step (starting number 3000 points):
+#' M <- point_mesh(n = 3000, template = "HCGSN256")
 point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own.coordinates = NULL, type = 'polygon') {
 
   if (is.null(template) && !is.null(own.coordinates)) {
@@ -58,7 +58,9 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own.coordina
       stop("There must be an element named D3 in the own.coordinates list for computing 3D mesh.")
     }
     coordinates <- {{ own.coordinates }}
-  }
+  } else if (is.null(template) && is.null(own.coordinates)) {
+    coordinates <- HCGSN256 #stop("Please choose a template.")
+   }
 
 
   if (!is.null(template)) {

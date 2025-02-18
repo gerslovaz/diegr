@@ -28,7 +28,7 @@ The study was carried out by Central European Institute of Technology in Brno an
 Example dataset contains amplitude values measured on chosen 204 channels in 50 time points (starting at the time of the stimulus) for 2 representative subjects (one from patient, one from health control group). From the total number of 50 epochs for each subject, 15 (or 14) epochs were selected for the sample dataset.
 }
 \examples{
-data("epochdata")
+# Data preview
 head(epochdata)
 
 }

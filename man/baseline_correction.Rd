@@ -11,7 +11,7 @@ baseline_correction(data, base.int, type = "absolute")
 
 \item{base.int}{Numeric character vector including time points to use as a baseline. It must include all required values, so for baseline between time points 125 and 250 write \code{base.int = 125:250}.}
 
-\item{type}{A character indicating the type of baseline correction. Only the value \code{'absolute'} is available at this moment.}
+\item{type}{A character indicating the type of baseline correction. Only the value \code{"absolute"} is available at this moment.}
 }
 \value{
 A data frame/tibble with added two columns:
@@ -23,10 +23,11 @@ Function for computing amplitude corrected to the selected baseline.
 }
 \examples{
 # Computing baseline correction on first 10 points, sensor "E1"
-data("epochdata")
+# a) Prepare data and compute
 data01 <- epochdata |> dplyr::filter(subject == 1 & sensor == "E1")
-basedata <- baseline_correction(data01, base.int = 1:10, type = 'absolute')
-# Plotting raw (black line) and corrected (red line) signal for epoch 1
+basedata <- baseline_correction(data01, base.int = 1:10, type = "absolute")
+
+# b) Plot raw (black line) and corrected (red line) signal for epoch 1
 plot(basedata$signal[1:50], type = "l", ylim = c(-40, 20), xlab = "time point", ylab = "amplitude")
 lines(basedata$signal_base[1:50], col = "red")
 }

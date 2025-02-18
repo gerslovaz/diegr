@@ -25,7 +25,7 @@
 #' @import dplyr
 #'
 #' @examples
-#' data("rtdata")
+#' # Data preview
 #' head(rtdata)
 #'
 

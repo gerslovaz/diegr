@@ -19,13 +19,13 @@ topo_plot(
 \arguments{
 \item{signal}{A vector with signal to plot.}
 
-\item{mesh}{A \code{"mesh"} object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh()}} function is used.}
+\item{mesh}{A \code{"mesh"} object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.}
 
-\item{coords}{Sensor coordinates as a tibble or data frame with named x and y columns. If not defined, the HCGSN256 template is used.}
+\item{coords}{Sensor coordinates as a tibble or data frame with named \code{x} and \code{y} columns. If not defined, the HCGSN256 template is used.}
 
-\item{col.range}{A vector with minimum and maximum value of the amplitude used in the color palette for plotting. If not defined, the range of input signal is used.}
+\item{col.range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.}
 
-\item{col.scale}{A color scale which should be used for plotting. If not defined, it is computed from col.range.}
+\item{col.scale}{Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col.range}.}
 
 \item{contour}{Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.}
 
@@ -33,24 +33,23 @@ topo_plot(
 
 \item{names}{A logical value indicating whether the sensor names should also be plotted (default value is \code{FALSE}).}
 
-\item{names.vec}{A vector with sensor names. The argument is required only when using own \code{coords} and setting \code{names = TRUE}.}
+\item{names.vec}{Optionally, a vector with sensor names. The argument is required when using own \code{coords} and setting \code{names = TRUE}.}
 }
 \value{
 A plot.
 }
 \description{
-Plot a topographic circle or polygon map of the EEG signal amplitude using topographic color scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^2 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations.
+Plot a topographic circle or polygon map of the EEG signal amplitude using topographic colour scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^2 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations.
 The output in the form of a ggplot object allows to easily edit the result image properties.
 }
 \details{
 Be careful when choosing the argument \code{col.range}. If the input \code{signal} contains values outside the chosen range, this will cause "holes" in the resulting plot.
 To compare results for different subjects or conditions, set the same values of \code{col.range} and \code{col.scale} arguments in all cases.
-The default used scale is based on topographical colors with zero value always at the border of blue and green shades.
+The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
 }
 \examples{
-data("HCGSN256")
-data("epochdata")
-# Plot average topographic map of signal for subject 1 from the time point 1 (the time of the stimulus)
+# Plot average topographic map of signal for subject 1 from the time point 1
+# (the time of the stimulus)
 # the outliers (epoch 14 and 15) are extracted before computing average
 
 # a) preparing data
@@ -65,6 +64,6 @@ s1 <- s1$average[1:204]
 topo_plot(signal = s1, col.range = c(-40, 40), contour = TRUE)
 
 # c) plotting the same map without contours but with sensor labels
-topo_plot(signal = s1, col.range = c(-40, 40), contour = FALSE, names = TRUE)
+topo_plot(signal = s1, col.range = c(-40, 40), names = TRUE)
 
 }
