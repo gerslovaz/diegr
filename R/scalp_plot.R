@@ -26,19 +26,19 @@
 #' @import rgl
 #'
 #' @examples
-#' # Plot average scalp map of signal for subject 1 from the time point 1 (the time of the stimulus)
+#' # Plot average scalp map of signal for subject 2 from the time point 10 (the time of the stimulus)
 #' # the outliers (epoch 14 and 15) are extracted before computing average
 #'
 #' # a) preparing data
 #' s1 <- epochdata |>
-#' dplyr::filter(time == 1 & subject == 1 & !epoch %in% c(14,15)) |>
+#' dplyr::filter(time == 10 & subject == 2 & !epoch %in% c(14,15)) |>
 #' dplyr::select(signal, sensor, epoch) |>
 #' dplyr::group_by(sensor) |>
 #' dplyr::mutate(average = mean(signal, na.rm = TRUE))
 #' s1 <- s1$average[1:204]
 #'
 #' # b) plotting the scalp polygon map
-#' scalp_plot(signal = s1, col.range = c(-40, 40))
+#' scalp_plot(signal = s1, col.range = c(-30, 15))
 
 scalp_plot <- function(signal, mesh, tri,
                       coords = NULL, col.range = NULL, col.scale = NULL) {
@@ -79,7 +79,7 @@ scalp_plot <- function(signal, mesh, tri,
     tri <- make_triangulation(mesh2)
   }
   if (is.null(col.range)) {
-    col.range <- range(data)
+    col.range <- range(signal)
   }
   if (is.null(col.scale)) {
     col.scale <- create_scale(col.range)

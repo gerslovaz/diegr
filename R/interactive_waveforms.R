@@ -27,10 +27,11 @@
 #'
 #' @examples
 #' # Plot waveforms for subject 1 and electrode "E65" with 250 sampling frequency rate
-#' # and 1 as zero time point
-#' interactive_waveforms(epochdata, subject = 1, channel = "E65", t0 = 1)
+#' # and 10 as zero time point
+#' interactive_waveforms(epochdata, subject = 1, channel = "E65", t0 = 10)
 #'
-interactive_waveforms <- function(data, subject, channel, FS = 250, t0 = NULL, col.palette) {
+interactive_waveforms <- function(data, subject, channel, FS = 250, t0 = NULL, col.palette,
+                                  base.int = NULL) {
 
   if (missing(subject)) {
     stop("Argument 'subject' is missing, with no default.")
@@ -51,31 +52,41 @@ interactive_waveforms <- function(data, subject, channel, FS = 250, t0 = NULL, c
 
   data <- data %>%
     dplyr::filter(subject == {{ subject }} & (sensor == {{ channel }}))  %>%
-    dplyr::select(time, signal, epoch)
-  data <- data %>%
+    dplyr::select(time, signal, epoch, subject, sensor)
+  if (!is.null(base.int)) {
+    newdata <- baseline_correction(data, base.int = { base.int }, type = "absolute")
+  } else {
+    newdata <- collect(data)
+    newdata <- newdata |>
+      dplyr::mutate(signal_base = signal)
+  }
+
+
+  newdata <- newdata %>%
+    dplyr::select(time, signal_base, epoch) %>%
     group_by(time) %>%
-    mutate(average = mean(signal, na.rm = TRUE))
-  data <- dplyr::collect(data)
-  data$epoch <- factor(data$epoch)
+    mutate(average = mean(signal_base, na.rm = TRUE))
+  #data <- dplyr::collect(data)
+  newdata$epoch <- factor(newdata$epoch)
 
   label <- rlang::englue("Subject { subject }, channel { channel }")
 
   if (missing(col.palette)) {
-    n <- length(levels(data$epoch))
+    n <- length(levels(newdata$epoch))
     col.palette <- rainbow(n)
   }
 
   if (is.null(t0)) {
-    t0 <- min(data$time)
+    t0 <- min(newdata$time)
     warning("The argument t0 was not specified. The minimal value of time was chosen as 0 ms time point.")
   }
 
   k <- 1000 / FS
   k0 <- t0 * k
 
-  curv_epoch <- data %>%
+  curv_epoch <- newdata %>%
     group_by(epoch) %>%
-    plot_ly(x = ~time * k - k0, y = ~signal, color = ~epoch, colors = col.palette,
+    plot_ly(x = ~time * k - k0, y = ~signal_base, color = ~epoch, colors = col.palette,
             type = "scatter",  mode = "lines")
   curv_epoch %>%
     add_trace(x = ~time * k - k0, y = ~average, type = 'scatter', mode = 'lines',

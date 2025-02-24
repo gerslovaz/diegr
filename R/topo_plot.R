@@ -1,25 +1,25 @@
 #' Plot topographic map of EEG signal
 #'
 #' @description
-#' Plot a topographic circle or polygon map of the EEG signal amplitude using topographic color scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^2 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations.
+#' Plot a topographic circle or polygon map of the EEG signal amplitude using topographic colour scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^2 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations.
 #' The output in the form of a ggplot object allows to easily edit the result image properties.
 #'
 #'
 #' @param signal A vector with signal to plot.
-#' @param mesh A \code{"mesh"} object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh()}} function is used.
-#' @param coords Sensor coordinates as a tibble or data frame with named x and y columns. If not defined, the HCGSN256 template is used.
-#' @param col.range A vector with minimum and maximum value of the amplitude used in the color palette for plotting. If not defined, the range of input signal is used.
-#' @param col.scale A color scale which should be used for plotting. If not defined, it is computed from col.range.
+#' @param mesh A \code{"mesh"} object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
+#' @param coords Sensor coordinates as a tibble or data frame with named \code{x} and \code{y} columns. If not defined, the HCGSN256 template is used.
+#' @param col.range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.
+#' @param col.scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col.range}.
 #' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.
 #' @param legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.
 #' @param names A logical value indicating whether the sensor names should also be plotted (default value is \code{FALSE}).
-#' @param names.vec A vector with sensor names. The argument is required only when using own \code{coords} and setting \code{names = TRUE}.
+#' @param names.vec Optionally, a vector with sensor names. The argument is required when using own \code{coords} and setting \code{names = TRUE}.
 
 #'
 #' @details
 #' Be careful when choosing the argument \code{col.range}. If the input \code{signal} contains values outside the chosen range, this will cause "holes" in the resulting plot.
 #' To compare results for different subjects or conditions, set the same values of \code{col.range} and \code{col.scale} arguments in all cases.
-#' The default used scale is based on topographical colors with zero value always at the border of blue and green shades.
+#' The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
 #'
 #' @return A plot.
 #' @export
@@ -28,32 +28,31 @@
 #' @import dplyr
 #' @importFrom grDevices hsv
 #' @importFrom scales rescale
+#' @importFrom stats influence
 #'
 #' @examples
-#' data("HCGSN256")
-#' data("epochdata")
-#' # Plot average topographic map of signal for subject 1 from the time point 1 (the time of the stimulus)
+#' # Plot average topographic map of signal for subject 2 from the time point 10
+#' # (the time of the stimulus)
 #' # the outliers (epoch 14 and 15) are extracted before computing average
 #'
 #' # a) preparing data
 #' s1 <- epochdata |>
-#' dplyr::filter(time == 1 & subject == 1 & !epoch %in% c(14,15)) |>
+#' dplyr::filter(time == 10 & subject == 2 & !epoch %in% c(14,15)) |>
 #' dplyr::select(signal, sensor, epoch) |>
 #' dplyr::group_by(sensor) |>
 #' dplyr::mutate(average = mean(signal, na.rm = TRUE))
 #' s1 <- s1$average[1:204]
 #'
 #' # b) plotting the topographic circle map with contours and legend
-#' topo_plot(signal = s1, col.range = c(-40, 40), contour = TRUE)
+#' # interval (-30,15) is selected in consideration of the signal progress
+#' topo_plot(signal = s1, col.range = c(-30, 15), contour = TRUE)
 #'
 #' # c) plotting the same map without contours but with sensor labels
-#' topo_plot(signal = s1, col.range = c(-40, 40), contour = FALSE, names = TRUE)
+#' topo_plot(signal = s1, col.range = c(-30, 15), names = TRUE)
 #'
 topo_plot <- function(signal, mesh, coords = NULL,
                       col.range = NULL, col.scale = NULL, contour = FALSE, legend = TRUE,
                       names = FALSE, names.vec = NULL) {
-  ## zamyslet se nad zjednodusenim ohledne n a r, slo by to automaticky vytahnout z mesh > uprava vystupu
-  ## takto by bylo nutne pocitat mesh na kazde vykresleni, coz nechceme
 
   if (!(is.logical(contour))) {
     stop("Argument 'contour' has to be logical.")
@@ -63,24 +62,24 @@ topo_plot <- function(signal, mesh, coords = NULL,
     stop("Argument 'legend' has to be logical.")
   }
 
+  if (!(is.logical(names))) {
+    stop("Argument 'names' has to be logical.")
+  }
+
   if (is.null(col.range)) {
     col.range <- 1.1 * range(signal)
   }
   if (is.null(col.scale)) {
     col.scale <- create_scale(col.range)
   }
-  if (names == TRUE && !is.null(coords) && is.null(names.vec)) {
-    stop("With using own coordinates please define the 'names.vec' or set 'names' to FALSE.")
-  }
-  if (names == TRUE && is.null(coords)) {
-    names.vec <- HCGSN256$sensor
-  }
+  if (names == TRUE && is.null(names.vec)) {
+    if (!is.null(coords)) {
+      stop("With using own coordinates please define the 'names.vec' or set 'names' to FALSE.")
+    } else {names.vec <- HCGSN256$sensor}
+      }
   if (is.null(coords)) {
     coords <- HCGSN256$D2
   }
-
-
-
 
 
   required_cols <- c("x", "y")
@@ -129,7 +128,6 @@ topo_plot <- function(signal, mesh, coords = NULL,
     coord_fixed(ratio = 1) +
     theme_minimal() +
     theme(
-      #plot.margin = unit(c(5, 5, 5, 5), "cm"),
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       axis.text = element_blank(),
@@ -225,6 +223,14 @@ XP_PRM <- function(X, lambda) {
 }
 
 PRM <- function(X, Y, lambda) {
+
+  if (!is.matrix(X)) {
+    X <- as.matrix(X)
+  }
+  if (!is.matrix(Y)) {
+    Y <- as.matrix(Y)
+  }
+
   k <-  dim(X)[1]
   d.v <- dim(X)[2]
   d.o <- dim(as.matrix(Y))[2]

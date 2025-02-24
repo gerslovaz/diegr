@@ -13,7 +13,7 @@
 #' @format The data frame contains three columns:
 #' \describe{
 #'   \item{subject}{Factor variable with subject ID, 1 - representative health control subject, 2 - representative patient subject}
-#'   \item{epoch}{Factor variable with epoch number (there are 15 epochs for subject one, 14 epochs for subject two)}
+#'   \item{epoch}{Factor variable with epoch number (there are 14 epochs for subject one, 15 epochs for subject two)}
 #'   \item{RT}{Response time in ms.}
 #' }
 #'
