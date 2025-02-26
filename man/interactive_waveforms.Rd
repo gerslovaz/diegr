@@ -4,7 +4,15 @@
 \alias{interactive_waveforms}
 \title{Plot interactive waveform graph}
 \usage{
-interactive_waveforms(data, subject, channel, FS = 250, t0 = NULL, col.palette)
+interactive_waveforms(
+  data,
+  subject,
+  channel,
+  FS = 250,
+  t0 = NULL,
+  col.palette,
+  base.int = NULL
+)
 }
 \arguments{
 \item{data}{A data frame, tibble or a database table with input data, must contain at least following columns: subject, sensor, time, signal, epoch.}
@@ -35,7 +43,7 @@ epoch - a column with epoch numbers.
 }
 \examples{
 # Plot waveforms for subject 1 and electrode "E65" with 250 sampling frequency rate
-# and 1 as zero time point
-interactive_waveforms(epochdata, subject = 1, channel = "E65", t0 = 1)
+# and 10 as zero time point
+interactive_waveforms(epochdata, subject = 1, channel = "E65", t0 = 10)
 
 }

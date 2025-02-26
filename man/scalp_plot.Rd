@@ -42,17 +42,17 @@ To compare results for different subjects or conditions, set the same values of 
 The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
 }
 \examples{
-# Plot average scalp map of signal for subject 1 from the time point 1 (the time of the stimulus)
+# Plot average scalp map of signal for subject 2 from the time point 10 (the time of the stimulus)
 # the outliers (epoch 14 and 15) are extracted before computing average
 
 # a) preparing data
 s1 <- epochdata |>
-dplyr::filter(time == 1 & subject == 1 & !epoch \%in\% c(14,15)) |>
+dplyr::filter(time == 10 & subject == 2 & !epoch \%in\% c(14,15)) |>
 dplyr::select(signal, sensor, epoch) |>
 dplyr::group_by(sensor) |>
 dplyr::mutate(average = mean(signal, na.rm = TRUE))
 s1 <- s1$average[1:204]
 
 # b) plotting the scalp polygon map
-scalp_plot(signal = s1, col.range = c(-40, 40))
+scalp_plot(signal = s1, col.range = c(-30, 15))
 }

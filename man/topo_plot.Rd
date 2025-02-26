@@ -48,22 +48,23 @@ To compare results for different subjects or conditions, set the same values of 
 The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
 }
 \examples{
-# Plot average topographic map of signal for subject 1 from the time point 1
+# Plot average topographic map of signal for subject 2 from the time point 10
 # (the time of the stimulus)
 # the outliers (epoch 14 and 15) are extracted before computing average
 
 # a) preparing data
 s1 <- epochdata |>
-dplyr::filter(time == 1 & subject == 1 & !epoch \%in\% c(14,15)) |>
+dplyr::filter(time == 10 & subject == 2 & !epoch \%in\% c(14,15)) |>
 dplyr::select(signal, sensor, epoch) |>
 dplyr::group_by(sensor) |>
 dplyr::mutate(average = mean(signal, na.rm = TRUE))
 s1 <- s1$average[1:204]
 
 # b) plotting the topographic circle map with contours and legend
-topo_plot(signal = s1, col.range = c(-40, 40), contour = TRUE)
+# interval (-30,15) is selected in consideration of the signal progress
+topo_plot(signal = s1, col.range = c(-30, 15), contour = TRUE)
 
 # c) plotting the same map without contours but with sensor labels
-topo_plot(signal = s1, col.range = c(-40, 40), names = TRUE)
+topo_plot(signal = s1, col.range = c(-30, 15), names = TRUE)
 
 }

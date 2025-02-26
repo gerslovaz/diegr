@@ -3,6 +3,7 @@
 export(baseline_correction)
 export(boxplot_epoch)
 export(boxplot_rt)
+export(compute_mean)
 export(create_scale)
 export(interactive_waveforms)
 export(make_triangulation)

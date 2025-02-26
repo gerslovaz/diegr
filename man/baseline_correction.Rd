@@ -28,6 +28,6 @@ data01 <- epochdata |> dplyr::filter(subject == 1 & sensor == "E1")
 basedata <- baseline_correction(data01, base.int = 1:10, type = "absolute")
 
 # b) Plot raw (black line) and corrected (red line) signal for epoch 1
-plot(basedata$signal[1:50], type = "l", ylim = c(-40, 20), xlab = "time point", ylab = "amplitude")
+plot(basedata$signal[1:50], type = "l", ylim = c(-20, 30), xlab = "time point", ylab = "amplitude")
 lines(basedata$signal_base[1:50], col = "red")
 }
