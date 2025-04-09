@@ -69,23 +69,51 @@ compute_mean <- function(data, subject = NULL, channel = NULL, group = "time", e
     }
   }
 
-  if (type == "jack") {
-    stop("jacknife is not available yet")
-  }
-
-
-
   if (group == "time") {
-    newdata <- newdata |>
-      dplyr::group_by(subject, time) |>
-      dplyr::summarise(average = mean(signal_base, na.rm = TRUE), sd = sd(signal_base, na.rm = TRUE))
 
+    if (type == "jack") {
+      ## takto je jack jen pro jeden subjekt, kdyz jich budu mit vice s ruznym poctem epoch, nebude to fungovat
+      level_e <- levels(newdata$epoch)
+      n_e <- length(level_e) # number of epochs (curves)
+      n_t <- length(unique(newdata$time)) # number of time points
+      leave_one_out_means <- matrix(NA, ncol = n_t, nrow = n_e)
+
+      for (i in 1:n_e) {
+        mean_i <- newdata |>
+          exclude_epoch(ex.epoch = level_e[i]) |>
+          dplyr::group_by(subject, time) |>
+          dplyr::summarise(average = mean(signal_base, na.rm = TRUE))
+        leave_one_out_means[i, ] <- mean_i$average
+      }
+
+      loomean <- colMeans(leave_one_out_means)
+      diff_m <- sweep(leave_one_out_means, 2, colMeans(leave_one_out_means), "-")
+      loo_var <- (n_e - 1) / n_e * colSums(diff_m^2)
+
+      avg_vec <- loomean
+      sd_vec <- sqrt(loo_var)
+    } else {
+      newdata <- newdata |>
+        dplyr::group_by(subject, time) |>
+        dplyr::summarise(average = mean(signal_base, na.rm = TRUE), sd = sd(signal_base, na.rm = TRUE))
+
+      avg_vec <- newdata$average
+      sd_vec <- newdata$sd
+    }
 
   } else if (group == "space") {
-    newdata <- newdata |>
-      dplyr::mutate(sensor = factor(sensor, levels = unique(sensor))) |>
-      dplyr::group_by(sensor) |>
-      dplyr::summarise(average = mean(signal, na.rm = TRUE))
+    if (type == "jack") {
+      stop("jack for space is not available yet")
+    } else{
+      newdata <- newdata |>
+        dplyr::mutate(sensor = factor(sensor, levels = unique(sensor))) |>
+        dplyr::group_by(sensor) |>
+        dplyr::summarise(average = mean(signal, na.rm = TRUE))
+
+      avg_vec <- newdata$average
+      sd_vec <- NA
+    }
+
   } else {
     stop("Allowed 'group' argument values are only 'time' or 'space'.")
   }
@@ -93,7 +121,7 @@ compute_mean <- function(data, subject = NULL, channel = NULL, group = "time", e
   ## pokud vyberu napr. vice elektrod a chci porovnani mezi sebou, musim najit zpusob, jak to automaticky vytahovat z dat, coz nebude uplne jednoduche...
   ## teoreticky spise proste spocitat prumer pro vybrane elektrody nez to ukladat oboje? ovsem musi se to udelat komplexne i pro pripady prumeru subjektu, kdy ma kazdy jiny pocet epoch... melo by to jit nejak postupne...
 
-  return(list(average = newdata$average, sd = newdata$sd))
+  return(list(average = avg_vec, sd = sd_vec))
 
 }
 

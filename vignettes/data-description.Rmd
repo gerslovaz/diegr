@@ -1,0 +1,30 @@
+---
+title: "Description of built-in datasets"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Description of built-in datasets}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(diegr)
+```
+
+## HCGSN256
+
+The Cartesian coordinates of 256-channel HydroCel Geodesic Sensor Net average template montage. 
+
+The data are structured as a list with following components:
+- sensor ... sensor labels (according to EGI GSN Technical Manual)
+- D2 ... projection of sensor positions in 2D space
+- D3 ... coordinates of sensor positions in 3D 
+- ROI ... division of sensors into several areas according to brain anatomy (frontal, central, occipital, parietal, temporal)
+
