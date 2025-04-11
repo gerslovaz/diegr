@@ -11,7 +11,7 @@ R**. The package is developed to display high-density
 electroencephalography (HD-EEG) data in different ways using interactive
 elements or animations for a comprehensive overview of data.
 
-The package diegr includes:
+The package `diegr` includes:
 
 - interactive boxplots
 - interactive epoch waveforms
@@ -20,13 +20,24 @@ The package diegr includes:
 
 ## Installation
 
-You can install the development version of diegr from
+You can install the development version of `diegr` from
 [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("gerslovaz/diegr")
 ```
+
+## Data
+
+Because of large volumes of data obtained from HD-EEG measurements, the
+package allows users to work directly with database tables (in addition
+to common formats such as data frames or tibbles). Such a procedure is
+more efficient in terms of memory usage. The database you want to use as
+input to `diegr` functions must contain columns with the following
+names: – subject - ID of subjects, – epoch - epoch numbers – time -
+numbers of time points (as sampling points, not in ms), – sensor -
+sensor labels, – signal - the EEG signal amplitude in microvolts.
 
 ## Example
 
@@ -53,13 +64,13 @@ interactive elements, only the static preview of the result is shown.
 ``` r
 data("HCGSN256")
 # creating a mesh
-M1 <- point_mesh(2, type = "polygon")
+M1 <- point_mesh(dim = 2, n = 30000, type = "polygon")
 # filtering a subset of data to display 
 signal <- epochdata |>
-  dplyr::filter(subject == 1 & epoch == 10 & time == 255) 
+  dplyr::filter(subject == 1 & epoch == 10 & time == 15) 
 signal <- signal$signal
 # function for displaying a topographic map of the chosen signal on the created mesh M1
-topo_plot(signal, M1)
+topo_plot(signal, M1$D2)
 ```
 
 <img src="man/figures/README-topoplot-1.png" width="100%" />
