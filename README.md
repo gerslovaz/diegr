@@ -33,15 +33,37 @@ devtools::install_github("gerslovaz/diegr")
 Because of large volumes of data obtained from HD-EEG measurements, the
 package allows users to work directly with database tables (in addition
 to common formats such as data frames or tibbles). Such a procedure is
-more efficient in terms of memory usage. The database you want to use as
-input to `diegr` functions must contain columns with the following
-names: – subject - ID of subjects, – epoch - epoch numbers – time -
-numbers of time points (as sampling points, not in ms), – sensor -
-sensor labels, – signal - the EEG signal amplitude in microvolts.
+more efficient in terms of memory usage.
 
-## Example
+The database you want to use as input to `diegr` functions must contain
+columns with the following names:
 
-This is a basic example which shows you how to plot interactive epoch
+- `subject` - ID of subjects,
+- `epoch` - epoch numbers
+- `time` - numbers of time points (as sampling points, not in ms),
+- `sensor` - sensor labels,
+- `signal` - the EEG signal amplitude in microvolts.
+
+The package contains some included training datasets:
+
+- `epochdata`: epoched HD-EEG data (short slice from big HD-EEG study)
+  arranged as mentioned above,
+- `HCGSN256`: a list with Cartesian coordinates of HD-EEG sensor
+  positions in 3D space on the scalp surface and their projection into
+  2D space
+- `rtdata`: response times (time between stimulus presentation and
+  pressing the button) from the experiment involving a simple visual
+  motor task.
+
+For more information about the structure of built-in data and conversion
+from Matlab hdf5 files to database tables using R see … here will be the
+link on vignette …
+
+## Examples
+
+#### Interactive boxplot
+
+This is a basic example which shows how to plot interactive epoch
 boxplots from chosen electrode in different time points for one subject:
 
 ``` r
