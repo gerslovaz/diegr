@@ -13,6 +13,7 @@ A list with following elements:
 \item{ROI}{Factor containing the name of the region to which the corresponding sensor belongs.
 The levels are: "central", "frontal", "occipital", "parietal", "temporal".
 The regions were determined by an expert from Central European Institute of Technology, Masaryk University, Brno, Czech Republic.}
+\item{pairedname}{Alternative sensor labels corresponding to left/right paired electrodes (with C for midline).}
 }
 }
 \source{

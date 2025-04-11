@@ -44,7 +44,7 @@ signal - a column with measured EEG signal values,
 epoch - a column with epoch numbers.
 }
 \examples{
-# Plot waveforms for subject 1 and electrode "E65" with 250 sampling frequency rate
+# Plot waveforms for subject 1 and electrode "E65" with 250 sampling frequency rate (default)
 # and 10 as zero time point
 interactive_waveforms(epochdata, subject = 1, channel = "E65", t0 = 10)
 

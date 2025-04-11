@@ -28,7 +28,7 @@
 #' @export
 #'
 #' @examples
-#' # Plot waveforms for subject 1 and electrode "E65" with 250 sampling frequency rate
+#' # Plot waveforms for subject 1 and electrode "E65" with 250 sampling frequency rate (default)
 #' # and 10 as zero time point
 #' interactive_waveforms(epochdata, subject = 1, channel = "E65", t0 = 10)
 #'
@@ -52,8 +52,8 @@ interactive_waveforms <- function(data, subject, channel, FS = 250, t0 = NULL, c
   }
 
 
-  data <- data %>%
-    dplyr::filter(.data$subject == {{ subject }} & (.data$sensor == {{ channel }}))  %>%
+  data <- data |>
+    dplyr::filter(.data$subject == {{ subject }} & (.data$sensor == {{ channel }}))  |>
     dplyr::select("time", "signal", "epoch", "subject", "sensor")
   if (!is.null(base.int)) {
     newdata <- baseline_correction(data, base.int = { base.int }, type = "absolute")
@@ -64,9 +64,9 @@ interactive_waveforms <- function(data, subject, channel, FS = 250, t0 = NULL, c
   }
 
 
-  newdata <- newdata %>%
-    dplyr::select("time", "signal_base", "epoch") %>%
-    group_by(.data$time) %>%
+  newdata <- newdata |>
+    dplyr::select("time", "signal_base", "epoch") |>
+    group_by(.data$time) |>
     mutate(average = mean(.data$signal_base, na.rm = TRUE))
   #data <- dplyr::collect(data)
   newdata$epoch <- factor(newdata$epoch)
@@ -86,18 +86,18 @@ interactive_waveforms <- function(data, subject, channel, FS = 250, t0 = NULL, c
   k <- 1000 / FS
   k0 <- t0 * k
 
-  curv_epoch <- newdata %>%
-    group_by(.data$epoch) %>%
+  curv_epoch <- newdata |>
+    group_by(.data$epoch) |>
     plot_ly(x = ~time * k - k0, y = ~signal_base, color = ~epoch, colors = col.palette,
             type = "scatter",  mode = "lines")
-  curv_epoch %>%
+  curv_epoch |>
     add_trace(x = ~time * k - k0, y = ~average, type = 'scatter', mode = 'lines',
               line = list(color = 'black'),
-              name = 'Average') %>%
+              name = 'Average') |>
     layout(xaxis = list(title = "Time (ms)"),
            yaxis = list(title = TeX("\\mu V")),
            showlegend = F,
-           title = label) %>%
+           title = label) |>
     config(mathjax = 'cdn')
 
 }

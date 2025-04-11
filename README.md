@@ -6,6 +6,8 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
+## Overview
+
 The name diegr comes from **Dynamic and Interactive EEG Graphics using
 R**. The package is developed to display high-density
 electroencephalography (HD-EEG) data in different ways using interactive
