@@ -8,6 +8,7 @@
 #' @param FS The sampling frequency. Default value is 250 Hz.
 #' @param t0 Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).
 #' @param col.palette Optionally, a colour palette for plotting lines. If missing, the rainbow palette is used.
+#' @param base.int Optionally, an interval for baseline correction.
 #'
 #' @details
 #' The input data frame or database table must contain at least following columns:
@@ -22,6 +23,7 @@
 #' @import ggplot2
 #' @rawNamespace import(plotly, except = last_plot)
 #' @importFrom grDevices rainbow
+#' @importFrom rlang .data
 #'
 #' @export
 #'
@@ -51,21 +53,21 @@ interactive_waveforms <- function(data, subject, channel, FS = 250, t0 = NULL, c
 
 
   data <- data %>%
-    dplyr::filter(subject == {{ subject }} & (sensor == {{ channel }}))  %>%
-    dplyr::select(time, signal, epoch, subject, sensor)
+    dplyr::filter(.data$subject == {{ subject }} & (.data$sensor == {{ channel }}))  %>%
+    dplyr::select("time", "signal", "epoch", "subject", "sensor")
   if (!is.null(base.int)) {
     newdata <- baseline_correction(data, base.int = { base.int }, type = "absolute")
   } else {
     newdata <- collect(data)
     newdata <- newdata |>
-      dplyr::mutate(signal_base = signal)
+      dplyr::mutate(signal_base = .data$signal)
   }
 
 
   newdata <- newdata %>%
-    dplyr::select(time, signal_base, epoch) %>%
-    group_by(time) %>%
-    mutate(average = mean(signal_base, na.rm = TRUE))
+    dplyr::select("time", "signal_base", "epoch") %>%
+    group_by(.data$time) %>%
+    mutate(average = mean(.data$signal_base, na.rm = TRUE))
   #data <- dplyr::collect(data)
   newdata$epoch <- factor(newdata$epoch)
 
@@ -85,7 +87,7 @@ interactive_waveforms <- function(data, subject, channel, FS = 250, t0 = NULL, c
   k0 <- t0 * k
 
   curv_epoch <- newdata %>%
-    group_by(epoch) %>%
+    group_by(.data$epoch) %>%
     plot_ly(x = ~time * k - k0, y = ~signal_base, color = ~epoch, colors = col.palette,
             type = "scatter",  mode = "lines")
   curv_epoch %>%

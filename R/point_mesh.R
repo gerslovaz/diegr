@@ -59,13 +59,13 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own.coordina
     }
     coordinates <- {{ own.coordinates }}
   } else if (is.null(template) && is.null(own.coordinates)) {
-    coordinates <- HCGSN256 #stop("Please choose a template.")
+    coordinates <- diegr::HCGSN256 #stop("Please choose a template.")
    }
 
 
   if (!is.null(template)) {
     coordinates <- switch(template,
-                          "HCGSN256" = HCGSN256)
+                          "HCGSN256" = diegr::HCGSN256)
     if (is.null(coordinates)) {
       stop("Unknown template.")
     }

@@ -17,6 +17,8 @@
 #' @return A list with result average and standard deviation.
 #' @export
 #'
+#' @importFrom rlang .data
+#'
 #' @examples
 #' # Average signal for subject 1 and electrode E1 with baseline correction on interval 1:10
 #' avg <- compute_mean(epochdata, subject = 1, channel = "E1", base.int = 1:10)
@@ -52,7 +54,7 @@ compute_mean <- function(data, subject = NULL, channel = NULL, group = "time", e
   if (raw == FALSE) {
     if ("signal_base" %in% colnames(newdata)) {
       newdata <- newdata |>
-        dplyr::select(subject, sensor, epoch, time, signal_base)
+        dplyr::select("subject", "sensor", "epoch", "time", "signal_base")
       newdata <- collect(newdata)
     } else {
       stop("There is no column 'signal_base' in corrected input data.")
@@ -62,10 +64,10 @@ compute_mean <- function(data, subject = NULL, channel = NULL, group = "time", e
       newdata <- baseline_correction(newdata, base.int = { base.int }, type = "absolute")
     } else {
       newdata <- newdata |>
-        dplyr::select(subject, sensor, epoch, time, signal)
+        dplyr::select("subject", "sensor", "epoch", "time", "signal")
       newdata <- collect(newdata)
       newdata <- newdata |>
-        dplyr::mutate(signal_base = signal)
+        dplyr::mutate(signal_base = .data$signal)
     }
   }
 
@@ -81,8 +83,8 @@ compute_mean <- function(data, subject = NULL, channel = NULL, group = "time", e
       for (i in 1:n_e) {
         mean_i <- newdata |>
           exclude_epoch(ex.epoch = level_e[i]) |>
-          dplyr::group_by(subject, time) |>
-          dplyr::summarise(average = mean(signal_base, na.rm = TRUE))
+          dplyr::group_by(.data$subject, .data$time) |>
+          dplyr::summarise(average = mean(.data$signal_base, na.rm = TRUE))
         leave_one_out_means[i, ] <- mean_i$average
       }
 
@@ -94,8 +96,8 @@ compute_mean <- function(data, subject = NULL, channel = NULL, group = "time", e
       sd_vec <- sqrt(loo_var)
     } else {
       newdata <- newdata |>
-        dplyr::group_by(subject, time) |>
-        dplyr::summarise(average = mean(signal_base, na.rm = TRUE), sd = sd(signal_base, na.rm = TRUE))
+        dplyr::group_by(.data$subject, .data$time) |>
+        dplyr::summarise(average = mean(.data$signal_base, na.rm = TRUE), sd = sd(.data$signal_base, na.rm = TRUE))
 
       avg_vec <- newdata$average
       sd_vec <- newdata$sd
@@ -106,9 +108,9 @@ compute_mean <- function(data, subject = NULL, channel = NULL, group = "time", e
       stop("jack for space is not available yet")
     } else{
       newdata <- newdata |>
-        dplyr::mutate(sensor = factor(sensor, levels = unique(sensor))) |>
-        dplyr::group_by(sensor) |>
-        dplyr::summarise(average = mean(signal, na.rm = TRUE))
+        dplyr::mutate(sensor = factor(.data$sensor, levels = unique(.data$sensor))) |>
+        dplyr::group_by(.data$sensor) |>
+        dplyr::summarise(average = mean(.data$signal, na.rm = TRUE))
 
       avg_vec <- newdata$average
       sd_vec <- NA
@@ -131,7 +133,7 @@ compute_mean <- function(data, subject = NULL, channel = NULL, group = "time", e
 
 exclude_epoch <- function(data, ex.epoch){
   newdata <- data |>
-    dplyr::filter(!epoch %in% {{ ex.epoch }})
+    dplyr::filter(!.data$epoch %in% {{ ex.epoch }})
 
   return(newdata)
 }

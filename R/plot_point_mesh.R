@@ -25,6 +25,7 @@
 #' @return A plot.
 #'
 #' @import rgl
+#' @importFrom rlang .data
 #'
 #' @export
 #'
@@ -64,7 +65,7 @@ plot_point_mesh <- function(mesh, sensors = TRUE, names = FALSE, names.vec = NUL
   }
 
   if (names == TRUE && is.null(names.vec)) {
-    names.vec <- HCGSN256$sensor
+    names.vec <- diegr::HCGSN256$sensor
   }
 
 
@@ -72,7 +73,7 @@ plot_point_mesh <- function(mesh, sensors = TRUE, names = FALSE, names.vec = NUL
     rgl::points3d(mesh$x, mesh$y, mesh$z, col = {{ col }}, cex = {{ cex }})
 
     if (is.null(own.coordinates)) {
-      own.coordinates <- HCGSN256$D3
+      own.coordinates <- diegr::HCGSN256$D3
     }
 
     if (sensors == TRUE) {
@@ -92,13 +93,13 @@ plot_point_mesh <- function(mesh, sensors = TRUE, names = FALSE, names.vec = NUL
   else if (all(c("x", "y") %in% colnames(mesh))) {
 
     if (is.null(own.coordinates)) {
-      own.coordinates <- HCGSN256$D2
+      own.coordinates <- diegr::HCGSN256$D2
     }
 
-    M <- max(max(mesh$y, na.rm = TRUE), max(own.coordinates$y))
-    x0 <- mean(mesh$x, na.rm = TRUE)
+    M <- max(max(mesh[["y"]], na.rm = TRUE), max(own.coordinates[["y"]]))
+    x0 <- mean(mesh[["x"]], na.rm = TRUE)
 
-    g <- ggplot(mesh, aes(x = x, y = y)) +
+    g <- ggplot(mesh, aes(x = .data$x, y = .data$y)) +
       geom_point(col = { col }, cex = { cex }) +
       coord_fixed(ratio = 1) +
       theme_minimal() +

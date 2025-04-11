@@ -15,6 +15,7 @@
 #' Remark: The option \code{hemisphere = "left"} (respectively \code{hemisphere = "right"}) means only the left hemisphere without the midline. If you want to include midline as well, use \code{hemisphere = c("left", "midline")} (respectively \code{hemisphere = c("right", "midline")}).
 #'
 #' @return A subset of \code{coords} appropriate to the chosen region/hemisphere.
+#' @importFrom rlang .data
 #' @export
 #'
 #' @examples
@@ -37,12 +38,12 @@ pick_region <- function(coords = NULL, hemisphere = c("left", "right", "midline"
   }
 
   if (is.null(coords)) {
-    coords <- cbind(HCGSN256$D2, HCGSN256$sensor)
+    coords <- cbind(diegr::HCGSN256$D2, diegr::HCGSN256$sensor)
     colnames(coords) <- c("x", "y", "sensor")
    }
 
   if (is.null(ROI)) {
-    ROI <- HCGSN256$ROI
+    ROI <- diegr::HCGSN256$ROI
   }
 
   idx.reg <- grep(paste(region, collapse = "|"), ROI)
@@ -82,18 +83,18 @@ pick_data <- function(data, subject.rg = NULL, sensor.rg = NULL,
   conditions <- list()
 
   if (!is.null(subject.rg)) {
-    conditions <- append(conditions, expr(subject %in% {{ subject.rg }}))
+    conditions <- append(conditions, expr(.data$subject %in% {{ subject.rg }}))
   }
   if (!is.null(sensor.rg)) {
-    conditions <- append(conditions, expr(sensor %in% {{ sensor.rg }}))
+    conditions <- append(conditions, expr(.data$sensor %in% {{ sensor.rg }}))
   }
 
   if (!is.null(time.rg)) {
-    conditions <- append(conditions, expr(time %in% {{ time.rg }}))
+    conditions <- append(conditions, expr(.data$time %in% {{ time.rg }}))
   }
 
   if (!is.null(epoch.rg)) {
-    conditions <- append(conditions, expr(epoch %in% {{ epoch.rg }}))
+    conditions <- append(conditions, expr(.data$epoch %in% {{ epoch.rg }}))
   }
 
   data |>

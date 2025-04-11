@@ -29,6 +29,7 @@
 #'
 #' @importFrom grDevices boxplot.stats
 #' @importFrom stats lm mad median quantile sd
+#' @importFrom rlang .data
 #' @export
 #'
 #' @examples
@@ -47,16 +48,16 @@ outliers_epoch <- function(data, subject = NULL, sensor = NULL, time = NULL, met
     newdata <- pick_data(data, subject.rg = {{ subject }}, sensor.rg = {{ sensor }}, time.rg = {{ time }})
   }
    newdata <- newdata |>
-     dplyr::select(subject, time, signal, epoch, sensor)
+     dplyr::select("subject", "time", "signal", "epoch", "sensor")
    newdata <- dplyr::collect(newdata)
    newdata$epoch <- factor(newdata$epoch)
 
   if (method == "iqr") {
     outdata <- newdata |>
-      dplyr::group_by(time) |>
-      dplyr::mutate(outliers = signal %in% boxplot.stats(signal)$out) |>
-      dplyr::filter(outliers == TRUE) |>
-      dplyr::select(time, signal, epoch, sensor)
+      dplyr::group_by(.data$time) |>
+      dplyr::mutate(outliers = .data$signal %in% boxplot.stats(.data$signal)$out) |>
+      dplyr::filter(.data$outliers == TRUE) |>
+      dplyr::select("time", "signal", "epoch", "sensor")
   }
 
   if (method == "percentile") {
@@ -68,18 +69,18 @@ outliers_epoch <- function(data, subject = NULL, sensor = NULL, time = NULL, met
       p <- 1 - p
     }
     outdata <- newdata |>
-      dplyr::group_by(time) |>
-      dplyr::mutate(outliers = signal < quantile(signal, 1 - p) | signal > quantile(signal, p)) |>
-      dplyr::filter(outliers == TRUE) |>
-      dplyr::select(time, signal, epoch, sensor)
+      dplyr::group_by(.data$time) |>
+      dplyr::mutate(outliers = .data$signal < quantile(.data$signal, 1 - p) | .data$signal > quantile(.data$signal, p)) |>
+      dplyr::filter(.data$outliers == TRUE) |>
+      dplyr::select("time", "signal", "epoch", "sensor")
   }
 
   if (method == "hampel") {
     outdata <- newdata |>
-      dplyr::group_by(time) |>
-      dplyr::mutate(outliers = signal < median(signal) - 3 * mad(signal, constant = 1) | signal > median(signal) + 3 * mad(signal, constant = 1)) |>
-      dplyr::filter(outliers == TRUE) |>
-      dplyr::select(time, signal, epoch, sensor)
+      dplyr::group_by(.data$time) |>
+      dplyr::mutate(outliers = .data$signal < median(.data$signal) - 3 * mad(.data$signal, constant = 1) | .data$signal > median(.data$signal) + 3 * mad(.data$signal, constant = 1)) |>
+      dplyr::filter(.data$outliers == TRUE) |>
+      dplyr::select("time", "signal", "epoch", "sensor")
   }
 
   epoch.vec <- outdata$epoch

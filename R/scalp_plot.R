@@ -85,7 +85,7 @@ scalp_plot <- function(signal, mesh, tri,
     col.scale <- create_scale(col.range)
   }
   if (is.null(coords)) {
-    coords <- HCGSN256$D3
+    coords <- diegr::HCGSN256$D3
   }
 
   y.hat <- IM(coords, signal, mesh3)$Y.hat

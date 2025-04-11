@@ -9,6 +9,7 @@
 #' @return A plotly object.
 #'
 #' @import dplyr
+#' @importFrom rlang .data
 #' @rawNamespace import(plotly, except = last_plot)
 #'
 #' @export
@@ -32,7 +33,7 @@ boxplot_rt <- function(data, subject = NULL){
   }
 
   data <- data |>
-    dplyr::select(subject, epoch, RT)
+    dplyr::select("subject", "epoch", "RT")
   data <- collect(data)
 
   fig <- plot_ly(data, x = ~subject, y = ~RT) |>

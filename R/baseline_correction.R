@@ -1,3 +1,4 @@
+#'
 #' Baseline correction
 #'
 #' @description
@@ -13,6 +14,8 @@
 #' \item{baseline}{a value of baseline for the given epoch}
 #' @export
 #'
+#' @importFrom rlang .data
+#'
 #' @examples
 #' # Computing baseline correction on first 10 points, sensor "E1"
 #' # a) Prepare data and compute
@@ -22,7 +25,9 @@
 #' # b) Plot raw (black line) and corrected (red line) signal for epoch 1
 #' plot(basedata$signal[1:50], type = "l", ylim = c(-20, 30), xlab = "time point", ylab = "amplitude")
 #' lines(basedata$signal_base[1:50], col = "red")
+
 baseline_correction <- function(data, base.int, type = 'absolute') {
+
   required_cols <- c("time", "signal", "epoch", "subject", "sensor")
   missing_cols <- setdiff(required_cols, colnames(data))
 
@@ -32,13 +37,13 @@ baseline_correction <- function(data, base.int, type = 'absolute') {
   }
 
   newdata <- data |>
-    dplyr::select(subject, sensor, epoch, time, signal)
+    dplyr::select("subject", "sensor", "epoch", "time", "signal")
   newdata <- collect(newdata)
 
   newdata <- newdata |>
-    dplyr::group_by(subject, sensor, epoch) |>
-    dplyr::mutate(baseline = mean(signal[{ base.int }])) |>
-    dplyr::mutate(signal_base = signal - baseline) |>
+    dplyr::group_by(.data$subject, .data$sensor, .data$epoch) |>
+    dplyr::mutate(baseline = mean(.data$signal[{ base.int }])) |>
+    dplyr::mutate(signal_base = .data$signal - .data$baseline) |>
     dplyr::ungroup()
 
   return(newdata)

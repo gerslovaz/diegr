@@ -26,6 +26,8 @@ interactive_waveforms(
 \item{t0}{Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).}
 
 \item{col.palette}{Optionally, a colour palette for plotting lines. If missing, the rainbow palette is used.}
+
+\item{base.int}{Optionally, an interval for baseline correction.}
 }
 \value{
 A plotly graph.

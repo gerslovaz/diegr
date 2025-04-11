@@ -20,6 +20,7 @@
 #' @return A plotly object.
 #'
 #' @import dplyr
+#' @importFrom rlang .data
 #' @rawNamespace import(plotly, except = last_plot)
 #'
 #' @examples
@@ -50,14 +51,14 @@ boxplot_epoch <- function(data,
   }
 
   if (is.null(time_lim)) {
-    min.t <- min(dplyr::pull(data, time))
+    min.t <- min(dplyr::pull(data, .data$time))
     time_lim <- c(min.t:(min.t + 9))
     warning("The argument 'time_lim' was not defined, the first ten time points from data are plotted.")
   }
 
   db_sub <- data |>
-    dplyr::filter(subject == {{ subject }} & (sensor == {{ channel }}) & time %in% time_lim)  |>
-    dplyr::select(time, signal, epoch)
+    dplyr::filter(.data$subject == {{ subject }} & (.data$sensor == {{ channel }}) & .data$time %in% time_lim)  |>
+    dplyr::select("time", "signal", "epoch")
   db_df <- collect(db_sub)
 
   label <- rlang::englue("Subject { subject }, channel { channel }")

@@ -29,6 +29,7 @@
 #' @importFrom grDevices hsv
 #' @importFrom scales rescale
 #' @importFrom stats influence
+#' @importFrom rlang .data
 #'
 #' @examples
 #' # Plot average topographic map of signal for subject 2 from the time point 10
@@ -75,10 +76,10 @@ topo_plot <- function(signal, mesh, coords = NULL,
   if (names == TRUE && is.null(names.vec)) {
     if (!is.null(coords)) {
       stop("With using own coordinates please define the 'names.vec' or set 'names' to FALSE.")
-    } else {names.vec <- HCGSN256$sensor}
+    } else {names.vec <- diegr::HCGSN256$sensor}
       }
   if (is.null(coords)) {
-    coords <- HCGSN256$D2
+    coords <- diegr::HCGSN256$D2
   }
 
 
@@ -90,7 +91,7 @@ topo_plot <- function(signal, mesh, coords = NULL,
                paste(missing_cols, collapse = ", ")))
   }
 
-  if (length(coords$x) != length(signal)) {
+  if (length(coords[["x"]]) != length(signal)) {
     stop("Arguments 'signal' and 'coords' must be the same length.")
   }
 
@@ -104,11 +105,11 @@ topo_plot <- function(signal, mesh, coords = NULL,
     mesh.mat <- mesh[,1:2]
   }
 
-  M <- max(max(mesh.mat[,2], na.rm = TRUE), max(coords$y))
+  M <- max(max(mesh.mat[,2], na.rm = TRUE), max(coords[["y"]]))
   x0 <- mean(mesh.mat[,1], na.rm = TRUE)
 
   if (ncol(coords) > 2) {
-    coords <- data.frame(x = coords$x, y = coords$y)
+    coords <- data.frame(x = coords[["x"]], y = coords[["y"]])
   }
 
   y.hat <- IM(coords, signal, mesh.mat)$Y.hat
@@ -116,7 +117,7 @@ topo_plot <- function(signal, mesh, coords = NULL,
   interp_data <- data.frame(x = mesh.mat[,1], y = mesh.mat[,2], ycp.IM = ycp.IM)
 
 
-  g <- ggplot(interp_data, aes(x = x, y = y)) +
+  g <- ggplot(interp_data, aes(x = .data$x, y = .data$y)) +
     geom_raster(aes(fill = ycp.IM)) +  #, interpolate = TRUE
     scale_fill_gradientn(
       colors = col.scale$colors,
@@ -152,7 +153,7 @@ topo_plot <- function(signal, mesh, coords = NULL,
   }
 
   g <- g +
-    geom_point(data = coords, aes(x = x, y = y), color = "black", cex = 0.7)
+    geom_point(data = coords, aes(x = .data$x, y = .data$y), color = "black", cex = 0.7)
 
   if (names == TRUE) {
     g <- g + geom_text(data = coords, aes(label = names.vec), size = 2, vjust = -0.9)
