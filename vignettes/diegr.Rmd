@@ -98,6 +98,7 @@ boxplot_epoch(epochdata, subject = 1, channel = "E34", time_lim = c(10:20))
 By using the hoover text in the plotly output, we can easily see that the epoch 14 is significantly outlier for this channel.
 
 ```{r}
+#| eval: false
 # customizing the output title and axis labels using |> operator
 p1 <- boxplot_epoch(epochdata, subject = 1, channel = "E34", 
                     time_lim = c(10:20))
@@ -106,6 +107,7 @@ p1 |> plotly::layout(xaxis = list(title = ""),
                      title = list(text = "Outlier detection for subject 1 and channel E34",
                                   font = list(size = 11, color = "darkblue"))
                      )
+# note: the output is not plotted to keep the vignette size reasonable
 ```
 
 The results can be supported computationally by the `outliers_epoch` function, which allows the evaluation of outliers using one of three criteria (interquartile range - IQR, percentile approach or Hampel filter).  
@@ -153,7 +155,7 @@ If the `mesh` input is not specified, the graphic functions automatically use th
 #### Topographical maps in 2D projection
 
 The `topo_plot` function is used to plot a topographic map of the brain signal on the scalp, the amplitude values are colored using a topographic scale (with zero value always at the border of blue and green shades). 
-The function allows setting some optionally arguments for editing the output appearance (with or without contours, sensor names, etc.) and further customization is for users available through output in the form of \code{\link[ggplot2]{ggplot}} function. 
+The function allows setting some optionally arguments for editing the output appearance (with or without contours, sensor names, etc.) and further customization is for users available through output in the form of `ggplot` function. 
 
 Notes: 
 
@@ -188,7 +190,9 @@ g1 + ggplot2::ggtitle("Subject 1, time of the stimulus")
 
 #### Topographical maps on the scalp
 
-The `scalp_plot` function is created for plotting a scalp polygon map of the EEG signal amplitude using topographic colour scale (with zero value always at the border of blue and green shades). The result plot is rendered using \code{\link[rgl]{shape3d}} function and the signal interpolation between sensor locations is based on thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^3 \rightarrow \mathbb{R}}.  
+The `scalp_plot` function is created for plotting a scalp polygon map of the EEG signal amplitude using topographic colour scale (with zero value always at the border of blue and green shades). The result plot is rendered using `shape3d` function from package `rgl` and the signal interpolation between sensor locations is based on thin-plate spline interpolation model.  
+Correct mesh triangulation is required for appropriate colours rendering. This triangulation is done through `make_triangulation` function which creates a Delaunay type-I triangulation (according Schumaker 2007) with consistent oriented edges.
+
 The function allows setting the `col.range` argument, which is neccessary to obtain comparable results between different subjects or conditions. 
 
 Note: The input values of `signal` outside the chosen `col.range` will cause "holes" in the resulting plot.
@@ -208,8 +212,13 @@ s1 <- s1$average[1:204]
 scalp_plot(signal = s1, col.range = c(-30, 15))
 ```
 
-The `rgl` output enables to rotate the image with default view of the back of the head.
+The `rgl` output enables to zoom and rotate the image with default view of the back of the head.
 
+#### References
+
+Lai M-J, Schumaker LL. *Spline functions on triangulations.* Cambridge University Press; 2007.
+
+Schneider PJ, Eberly DH. *Geometric Tools for Computer Graphics.* The Morgan Kaufmann Series in Computer Graphics. San Francisco: Morgan Kaufmann, 2003.
 
 
 
