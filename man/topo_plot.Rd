@@ -54,10 +54,10 @@ The default used scale is based on topographical colours with zero value always 
 
 # a) preparing data
 s1 <- epochdata |>
-dplyr::filter(time == 10 & subject == 2 & !epoch \%in\% c(14,15)) |>
-dplyr::select(signal, sensor, epoch) |>
-dplyr::group_by(sensor) |>
-dplyr::mutate(average = mean(signal, na.rm = TRUE))
+dplyr::filter(.data$time == 10 & .data$subject == 2 & !.data$epoch \%in\% c(14,15)) |>
+dplyr::select("signal", "sensor", "epoch") |>
+dplyr::group_by(.data$sensor) |>
+dplyr::mutate(average = mean(.data$signal, na.rm = TRUE))
 s1 <- s1$average[1:204]
 
 # b) plotting the topographic circle map with contours and legend

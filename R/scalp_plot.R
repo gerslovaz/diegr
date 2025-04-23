@@ -24,6 +24,7 @@
 #' @export
 #'
 #' @import rgl
+#' @importFrom rlang .data
 #'
 #' @examples
 #' # Plot average scalp map of signal for subject 2 from the time point 10 (the time of the stimulus)
@@ -31,10 +32,10 @@
 #'
 #' # a) preparing data
 #' s1 <- epochdata |>
-#' dplyr::filter(time == 10 & subject == 2 & !epoch %in% c(14,15)) |>
-#' dplyr::select(signal, sensor, epoch) |>
-#' dplyr::group_by(sensor) |>
-#' dplyr::mutate(average = mean(signal, na.rm = TRUE))
+#' dplyr::filter(.data$time == 10 & .data$subject == 2 & !.data$epoch %in% c(14,15)) |>
+#' dplyr::select("signal", "sensor", "epoch") |>
+#' dplyr::group_by(.data$sensor) |>
+#' dplyr::mutate(average = mean(.data$signal, na.rm = TRUE))
 #' s1 <- s1$average[1:204]
 #'
 #' # b) plotting the scalp polygon map

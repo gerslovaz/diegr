@@ -24,7 +24,7 @@ Function for computing amplitude corrected to the selected baseline.
 \examples{
 # Computing baseline correction on first 10 points, sensor "E1"
 # a) Prepare data and compute
-data01 <- epochdata |> dplyr::filter(subject == 1 & sensor == "E1")
+data01 <- epochdata |> dplyr::filter(.data$subject == 1 & .data$sensor == "E1")
 basedata <- baseline_correction(data01, base.int = 1:10, type = "absolute")
 
 # b) Plot raw (black line) and corrected (red line) signal for epoch 1
