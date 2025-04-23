@@ -10,14 +10,16 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
+  eval = FALSE,
   comment = "#>"
 )
-library(rgl)
-knitr::knit_hooks$set(webgl = hook_webgl)
+#> library(rgl)
+#> knitr::knit_hooks$set(webgl = hook_webgl)
 ```
 
 ```{r setup}
 #| echo: false
+#| eval: true
 library(diegr)
 library(rlang)
 ```
@@ -93,12 +95,7 @@ There is also an interactive graph of amplitudes in individual epochs with the a
 # in which the boxplots should be plotted
 # example for subject 1 and channel E34 in time points from 10 to 20
 boxplot_epoch(epochdata, subject = 1, channel = "E34", time_lim = c(10:20))
-```
 
-By using the hoover text in the plotly output, we can easily see that the epoch 14 is significantly outlier for this channel.
-
-```{r}
-#| eval: false
 # customizing the output title and axis labels using |> operator
 p1 <- boxplot_epoch(epochdata, subject = 1, channel = "E34", 
                     time_lim = c(10:20))
@@ -107,8 +104,10 @@ p1 |> plotly::layout(xaxis = list(title = ""),
                      title = list(text = "Outlier detection for subject 1 and channel E34",
                                   font = list(size = 11, color = "darkblue"))
                      )
-# note: the output is not plotted to keep the vignette size reasonable
+# note: the output is not plotted to reduce the vignette file size
 ```
+
+Outlier epochs can be easily detected by using the hoover text in the `plotly` output. In the case above, the outlier is epoch 14.
 
 The results can be supported computationally by the `outliers_epoch` function, which allows the evaluation of outliers using one of three criteria (interquartile range - IQR, percentile approach or Hampel filter).  
 The output of this function is a table containing epoch IDs and the number of time points in which the epochs were evaluated as outliers (according to chosen criteria).
@@ -135,19 +134,19 @@ Notes:
 - If the number of mesh points is large, they are no longer visible in the plot and the mesh looks like a solid surface.
 
 
-```{r}
+```{r, fig.show='hold'}
+#| eval: true
 # creating a mesh with default settings
 M1 <- point_mesh(template = "HCGSN256")
 # plot output in 2D
 plot_point_mesh(M1$D2)
-```
 
-```{r}
-# creating a denser circular mesh, only 2D coordinates
-M2 <- point_mesh(n = 30000, template = "HCGSN256", type = "circle")
+# creating a circular mesh, only 2D coordinates
+M2 <- point_mesh(dim = 2, n = 3000, template = "HCGSN256", type = "circle")
 # plotting a mesh - function allows different options of the result plot
 plot_point_mesh(M2$D2, col.sensors = "purple", names = TRUE, cex = 0.1)
 ```
+
 
 The graphic functions in `diegr` allow also the user to input the custom mesh created in other way, it is only necessary to maintain the structure following a `"mesh"` object.  
 If the `mesh` input is not specified, the graphic functions automatically use the mesh created by `point_mesh` with default settings.
@@ -163,7 +162,8 @@ Notes:
 
 - To compare results for different subjects or conditions, setting the same values of \code{col.range} and \code{col.scale} arguments in all cases is necessary.
 
-```{r}
+```{r, fig.show='hold'}
+#| eval: true
 # Plot average topographic map of signal for subject 1 from the time point 10
 # (the time of the stimulus)
 # the outlier epoch 14 is extracted before computing average
@@ -197,7 +197,7 @@ The function allows setting the `col.range` argument, which is neccessary to obt
 
 Note: The input values of `signal` outside the chosen `col.range` will cause "holes" in the resulting plot.
 
-```{r, webgl=TRUE}
+```{r}
 # preparing data - filtering signal from time point 10 (time of the stimulus) for subject 2,
 # computing average from all epochs without outliers 14 and 15
 s1 <- epochdata |>
@@ -210,6 +210,8 @@ s1 <- s1$average[1:204]
 # plotting the scalp polygon map
 #open3d()
 scalp_plot(signal = s1, col.range = c(-30, 15))
+
+# note: the output is not plotted to reduce the vignette file size
 ```
 
 The `rgl` output enables to zoom and rotate the image with default view of the back of the head.
