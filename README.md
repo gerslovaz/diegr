@@ -61,7 +61,7 @@ For more information about the structure of built-in data and conversion
 from Matlab hdf5 files to database tables using R see … here will be the
 link on vignette …
 
-## Examples
+## Examples of graphic functions
 
 #### Interactive boxplot
 
@@ -98,6 +98,9 @@ topo_plot(signal, M1$D2)
 ```
 
 <img src="man/figures/README-topoplot-1.png" width="100%" />
+
+For more examples and basic informations about using the package see the
+diegr vignette.
 
 <!-- You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. -->
 <!-- You can also embed plots, for example: -->

@@ -85,9 +85,9 @@ The data is organized into a data frame with the following columns:
 
 The package assumes that the input data has already been preprocessed (artifacts removed, ICA and segmentation performed, etc.), but it may still contain outliers that need to be discarded for some statistical and analytic issues. 
 
-The useful tool in outliers detection is interactive plot with boxplots of amplitudes (`boxplot_epoch`) or response times (`boxplot_rt`) in individual epochs. The `plotly` output enables to easily determine the epoch number from which outliers come and additionally allows editing of the output image layout.
+The useful tool in outliers detection is interactive plot with boxplots of amplitudes (`boxplot_epoch()`) or response times (`boxplot_rt()`) in individual epochs. The `plotly` output enables to easily determine the epoch number from which outliers come and additionally allows editing of the output image layout.
 
-There is also an interactive graph of amplitudes in individual epochs with the average plotted (`interactive_waveforms`).
+There is also an interactive graph of amplitudes in individual epochs with the average plotted (`interactive_waveforms()`).
 
 ```{r}
 # in interactive boxplot of signal we choose subject, 
@@ -109,7 +109,7 @@ p1 |> plotly::layout(xaxis = list(title = ""),
 
 Outlier epochs can be easily detected by using the hoover text in the `plotly` output. In the case above, the outlier is epoch 14.
 
-The results can be supported computationally by the `outliers_epoch` function, which allows the evaluation of outliers using one of three criteria (interquartile range - IQR, percentile approach or Hampel filter).  
+The results can be supported computationally by the `outliers_epoch()` function, which allows the evaluation of outliers using one of three criteria (interquartile range - IQR, percentile approach or Hampel filter).  
 The output of this function is a table containing epoch IDs and the number of time points in which the epochs were evaluated as outliers (according to chosen criteria).
 
 ```{r}
@@ -117,21 +117,21 @@ The output of this function is a table containing epoch IDs and the number of ti
 outliers_epoch(epochdata, subject = 1, sensor = "E34", method = "iqr")
 ```
 
-The results correspond with findings from `boxplot_epoch` - the epoch 14 was evaluated as an outlier in all 50 time points.
+The results correspond with findings from `boxplot_epoch()` - the epoch 14 was evaluated as an outlier in all 50 time points.
 
 ### Spatial Visualization 
 
 #### Mesh Generation
 The original electrode grid is too coarse for graphical rendering. To achieve smoother and more visually appealing results in plots, it's necessary to generate a denser mesh of points. This refined mesh provides better spatial resolution and enhances the quality of visualizations.
-Creating a new mesh is available through `point_mesh` function. This function computes the coordinates of mesh in 2D and/or 3D and enables to control a density (argument `n`) or the shape (argument `type`) of the result mesh.  
+Creating a new mesh is available through `point_mesh()` function. This function computes the coordinates of mesh in 2D and/or 3D and enables to control a density (argument `n`) or the shape (argument `type`) of the result mesh.  
 The default setting creates a polygonal mesh with starting number 10000 points and computes the coordinates in both dimensions, which are available in `$D2` and `$D3` parts of a result list (class `"mesh"`).
 
-For simple created mesh plotting use the function `plot_point_mesh`, which results in two dimensional \code{ggplot} of point mesh or three dimensional \code{rgl} plot depending on the input dimension. 
+For simple created mesh plotting use the function `plot_point_mesh()`, which results in two dimensional `ggplot` of point mesh or three dimensional `rgl` plot depending on the input dimension. 
 
 Notes: 
 
-- The input of `plot_point_mesh` must be only the relevant part with coordinates - `$D2` for two dimensional and `$D3` for three dimensional plot.
-- If the number of mesh points is large, they are no longer visible in the plot and the mesh looks like a solid surface.
+- The input of `plot_point_mesh()` must be only the relevant part with coordinates - `$D2` for two dimensional and `$D3` for three dimensional plot.
+- If the number of mesh points is large, they are no longer visible in the plot and the mesh looks like a solid surface (as can be seen below in first plot).
 
 
 ```{r, fig.show='hold'}
@@ -149,18 +149,18 @@ plot_point_mesh(M2$D2, col.sensors = "purple", names = TRUE, cex = 0.1)
 
 
 The graphic functions in `diegr` allow also the user to input the custom mesh created in other way, it is only necessary to maintain the structure following a `"mesh"` object.  
-If the `mesh` input is not specified, the graphic functions automatically use the mesh created by `point_mesh` with default settings.
+If the `mesh` input is not specified, the graphic functions automatically use the mesh created by `point_mesh()` with default settings.
 
 #### Topographical maps in 2D projection
 
-The `topo_plot` function is used to plot a topographic map of the brain signal on the scalp, the amplitude values are colored using a topographic scale (with zero value always at the border of blue and green shades). 
+The `topo_plot()` function is used to plot a topographic map of the brain signal on the scalp, the amplitude values are colored using a topographic scale (with zero value always at the border of blue and green shades). 
 The function allows setting some optionally arguments for editing the output appearance (with or without contours, sensor names, etc.) and further customization is for users available through output in the form of `ggplot` function. 
 
 Notes: 
 
 - The input values of `signal` outside the chosen `col.range` will cause "holes" in the resulting plot.
 
-- To compare results for different subjects or conditions, setting the same values of \code{col.range} and \code{col.scale} arguments in all cases is necessary.
+- To compare results for different subjects or conditions, setting the same values of `col.range` and `col.scale` arguments in all cases is necessary.
 
 ```{r, fig.show='hold'}
 #| eval: true
@@ -190,10 +190,10 @@ g1 + ggplot2::ggtitle("Subject 1, time of the stimulus")
 
 #### Topographical maps on the scalp
 
-The `scalp_plot` function is created for plotting a scalp polygon map of the EEG signal amplitude using topographic colour scale (with zero value always at the border of blue and green shades). The result plot is rendered using `shape3d` function from package `rgl` and the signal interpolation between sensor locations is based on thin-plate spline interpolation model.  
-Correct mesh triangulation is required for appropriate colours rendering. This triangulation is done through `make_triangulation` function which creates a Delaunay type-I triangulation (according Schumaker 2007) with consistent oriented edges.
+The `scalp_plot()` function is created for plotting a scalp polygon map of the EEG signal amplitude using topographic colour scale (with zero value always at the border of blue and green shades). The result plot is rendered using `shape3d` function from package `rgl` and the signal interpolation between sensor locations is based on thin-plate spline interpolation model.  
+Correct mesh triangulation is required for appropriate colours rendering. This triangulation is done through `make_triangulation()` function which creates a Delaunay type-I triangulation (according Schumaker 2007) with consistent oriented edges.
 
-The function allows setting the `col.range` argument, which is neccessary to obtain comparable results between different subjects or conditions. 
+The function allows setting the `col.range` argument, which is necessary to obtain comparable results between different subjects or conditions. 
 
 Note: The input values of `signal` outside the chosen `col.range` will cause "holes" in the resulting plot.
 
