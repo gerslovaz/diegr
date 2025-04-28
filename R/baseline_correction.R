@@ -40,26 +40,17 @@ baseline_correction <- function(data, base.int, type = 'absolute') {
     dplyr::select("subject", "sensor", "epoch", "time", "signal")
   newdata <- collect(newdata)
 
-  newdata <- newdata |>
+  basel_data <- newdata |>
+    dplyr::filter(.data$time %in% base.int) |>
     dplyr::group_by(.data$subject, .data$sensor, .data$epoch) |>
-    dplyr::mutate(baseline = mean(.data$signal[{ base.int }])) |>
+    dplyr::summarise(baseline = mean(.data$signal, na.rm = TRUE), .groups = "drop")
+
+
+  newdata <- newdata |>
+    dplyr::left_join(basel_data, by = c("subject", "sensor", "epoch")) |>
     dplyr::mutate(signal_base = .data$signal - .data$baseline) |>
     dplyr::ungroup()
 
   return(newdata)
 
 }
-
-# E1 <- epochdata |>
-#   dplyr::filter(sensor == "E1", subject == 1)
-#
-#
-# d03 <- E12bothbase |>
-#   filter(subject == 2 & sensor == "E1")
-#
-# epocha1 <- epochdata |>
-#   filter(subject == 2 & sensor == "E1" & epoch == 1)
-#
-# E1bothbase |>
-#   filter(subject == 2 & epoch == 1) |>
-#   select(signal_base)
