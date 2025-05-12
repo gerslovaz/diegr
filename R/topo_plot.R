@@ -8,17 +8,17 @@
 #' @param signal A vector with signal to plot.
 #' @param mesh A \code{"mesh"} object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
 #' @param coords Sensor coordinates as a tibble or data frame with named \code{x} and \code{y} columns. If not defined, the HCGSN256 template is used.
-#' @param col.range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.
-#' @param col.scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col.range}.
+#' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.
+#' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
 #' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.
 #' @param legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.
 #' @param names A logical value indicating whether the sensor names should also be plotted (default value is \code{FALSE}).
-#' @param names.vec Optionally, a vector with sensor names. The argument is required when using own \code{coords} and setting \code{names = TRUE}.
+#' @param names_vec Optionally, a vector with sensor names. The argument is required when using own \code{coords} and setting \code{names = TRUE}.
 
 #'
 #' @details
-#' Be careful when choosing the argument \code{col.range}. If the input \code{signal} contains values outside the chosen range, this will cause "holes" in the resulting plot.
-#' To compare results for different subjects or conditions, set the same values of \code{col.range} and \code{col.scale} arguments in all cases.
+#' Be careful when choosing the argument \code{col_range}. If the input \code{signal} contains values outside the chosen range, this will cause "holes" in the resulting plot.
+#' To compare results for different subjects or conditions, set the same values of \code{col_range} and \code{col_scale} arguments in all cases.
 #' The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
 #'
 #' @return A plot.
@@ -46,14 +46,14 @@
 #'
 #' # b) plotting the topographic circle map with contours and legend
 #' # interval (-30,15) is selected in consideration of the signal progress
-#' topo_plot(signal = s1, col.range = c(-30, 15), contour = TRUE)
+#' topo_plot(signal = s1, col_range = c(-30, 15), contour = TRUE)
 #'
 #' # c) plotting the same map without contours but with sensor labels
-#' topo_plot(signal = s1, col.range = c(-30, 15), names = TRUE)
+#' topo_plot(signal = s1, col_range = c(-30, 15), names = TRUE)
 #'
 topo_plot <- function(signal, mesh, coords = NULL,
-                      col.range = NULL, col.scale = NULL, contour = FALSE, legend = TRUE,
-                      names = FALSE, names.vec = NULL) {
+                      col_range = NULL, col_scale = NULL, contour = FALSE, legend = TRUE,
+                      names = FALSE, names_vec = NULL) {
 
   if (!(is.logical(contour))) {
     stop("Argument 'contour' has to be logical.")
@@ -67,16 +67,16 @@ topo_plot <- function(signal, mesh, coords = NULL,
     stop("Argument 'names' has to be logical.")
   }
 
-  if (is.null(col.range)) {
-    col.range <- 1.1 * range(signal)
+  if (is.null(col_range)) {
+    col_range <- 1.1 * range(signal)
   }
-  if (is.null(col.scale)) {
-    col.scale <- create_scale(col.range)
+  if (is.null(col_scale)) {
+    col_scale <- create_scale(col_range)
   }
-  if (names == TRUE && is.null(names.vec)) {
+  if (names == TRUE && is.null(names_vec)) {
     if (!is.null(coords)) {
-      stop("With using own coordinates please define the 'names.vec' or set 'names' to FALSE.")
-    } else {names.vec <- diegr::HCGSN256$sensor}
+      stop("With using own coordinates please define the 'names_vec' or set 'names' to FALSE.")
+    } else {names_vec <- diegr::HCGSN256$sensor}
       }
   if (is.null(coords)) {
     coords <- diegr::HCGSN256$D2
@@ -100,31 +100,31 @@ topo_plot <- function(signal, mesh, coords = NULL,
   }
 
   if (inherits(mesh, "mesh")) {
-    mesh.mat <- mesh$D2
+    mesh_mat <- mesh$D2
   } else {
-    mesh.mat <- mesh[,1:2]
+    mesh_mat <- mesh[,1:2]
   }
 
-  M <- max(max(mesh.mat[,2], na.rm = TRUE), max(coords[["y"]]))
-  x0 <- mean(mesh.mat[,1], na.rm = TRUE)
+  M <- max(max(mesh_mat[,2], na.rm = TRUE), max(coords[["y"]]))
+  x0 <- mean(mesh_mat[,1], na.rm = TRUE)
 
   if (ncol(coords) > 2) {
     coords <- data.frame(x = coords[["x"]], y = coords[["y"]])
   }
 
-  y.hat <- IM(coords, signal, mesh.mat)$Y.hat
-  ycp.IM <- y.hat[1:dim(mesh.mat)[1]]
-  interp_data <- data.frame(x = mesh.mat[,1], y = mesh.mat[,2], ycp.IM = ycp.IM)
+  y_hat <- IM(coords, signal, mesh_mat)$Y_hat
+  ycp_IM <- y_hat[1:dim(mesh_mat)[1]]
+  interp_data <- data.frame(x = mesh_mat[,1], y = mesh_mat[,2], ycp_IM = ycp_IM)
 
 
   g <- ggplot(interp_data, aes(x = .data$x, y = .data$y)) +
-    geom_raster(aes(fill = ycp.IM)) +  #, interpolate = TRUE
+    geom_raster(aes(fill = ycp_IM)) +  #, interpolate = TRUE
     scale_fill_gradientn(
-      colors = col.scale$colors,
-      breaks = col.scale$breaks,
-      limits = range(col.scale$breaks),
-      labels = round(col.scale$breaks, 2),
-      values = scales::rescale(col.scale$breaks)
+      colors = col_scale$colors,
+      breaks = col_scale$breaks,
+      limits = range(col_scale$breaks),
+      labels = round(col_scale$breaks, 2),
+      values = scales::rescale(col_scale$breaks)
     ) +
     coord_fixed(ratio = 1) +
     theme_minimal() +
@@ -149,14 +149,14 @@ topo_plot <- function(signal, mesh, coords = NULL,
   }
 
   if (contour == TRUE) {
-   g <- g + geom_contour(aes(z = ycp.IM), color = "gray", breaks = col.scale$breaks)
+   g <- g + geom_contour(aes(z = ycp_IM), color = "gray", breaks = col_scale$breaks)
   }
 
   g <- g +
     geom_point(data = coords, aes(x = .data$x, y = .data$y), color = "black", cex = 0.7)
 
   if (names == TRUE) {
-    g <- g + geom_text(data = coords, aes(label = names.vec), size = 2, vjust = -0.9)
+    g <- g + geom_text(data = coords, aes(label = names_vec), size = 2, vjust = -0.9)
   }
 
   g +
@@ -181,18 +181,18 @@ IM <- function(X, Y, Xcp = X) {
   d1 <- ncol(X)
   d2 <- ncol(Y)
 
-  X.P <- XP_IM(X)
-  Y.P <- rbind(Y, matrix(0, d1 + 1, d2))
-  beta.hat <- solve(X.P) %*% Y.P
+  X_P <- XP_IM(X)
+  Y_P <- rbind(Y, matrix(0, d1 + 1, d2))
+  beta_hat <- solve(X_P) %*% Y_P
 
   if (identical(X, Xcp)) {
-    y.Pcp <- X.P %*% beta.hat
+    y_Pcp <- X_P %*% beta_hat
   } else {
-    X.Pcp <- XP_IM(X, Xcp)
-    y.Pcp <- X.Pcp %*% beta.hat
+    X_Pcp <- XP_IM(X, Xcp)
+    y_Pcp <- X_Pcp %*% beta_hat
   }
 
-  return(list(Y.hat = y.Pcp, beta.hat = beta.hat))
+  return(list(Y_hat = y_Pcp, beta_hat = beta_hat))
 }
 
 
@@ -202,12 +202,12 @@ XP_PRM <- function(X, lambda) {
   }
 
   k <-  dim(X)[1]
-  d.v <- dim(X)[2]
-  kk <- k + d.v + 1
+  dv <- dim(X)[2]
+  kk <- k + dv + 1
 
   S <- spline_matrix(X)
-  S.P <- matrix(0, kk, kk)
-  S.P[(d.v + 2):kk, (d.v + 2):kk] <- S
+  S_P <- matrix(0, kk, kk)
+  S_P[(dv + 2):kk, (dv + 2):kk] <- S
 
   decomp <- eigen(S, symmetric = T)
   U <- decomp$vectors
@@ -215,12 +215,12 @@ XP_PRM <- function(X, lambda) {
   eigval[eigval < 0] <- 0
 
   R <- matrix(0, kk, kk)
-  R[(d.v + 2):kk, (d.v + 2):kk] <- U %*% diag(sqrt(eigval)) %*% t(U)
+  R[(dv + 2):kk, (dv + 2):kk] <- U %*% diag(sqrt(eigval)) %*% t(U)
 
-  X.P <- matrix(0, nrow = k + kk, ncol = kk)
-  X.P[1:k, ] <- cbind(rep(1, k), X, S)
-  X.P[(k + 1):(k + kk),] <- sqrt(lambda) * R
-  return(X.P)
+  X_P <- matrix(0, nrow = k + kk, ncol = kk)
+  X_P[1:k, ] <- cbind(rep(1, k), X, S)
+  X_P[(k + 1):(k + kk),] <- sqrt(lambda) * R
+  return(X_P)
 }
 
 PRM <- function(X, Y, lambda) {
@@ -233,34 +233,32 @@ PRM <- function(X, Y, lambda) {
   }
 
   k <-  dim(X)[1]
-  d.v <- dim(X)[2]
-  d.o <- dim(as.matrix(Y))[2]
+  dv <- dim(X)[2]
+  do <- dim(as.matrix(Y))[2]
 
   XP <- XP_PRM(X, lambda)
-  YP <- matrix(0, nrow = 2 * k + d.v + 1, ncol = d.o)
+  YP <- matrix(0, nrow = 2 * k + dv + 1, ncol = do)
   YP[1:k,] <- Y
 
   model <- lm(YP ~ XP - 1)
-  hatY <- matrix(model$fitted.values, nrow = 2*k + d.v + 1, ncol = d.o)
+  hatY <- matrix(model$fitted.values, nrow = 2*k + dv + 1, ncol = do)
   hatY <- hatY[1:k,]
   Beta <- model$coefficients
   DiagHat <- influence(model)$hat[1:k]
-  return(list(Y.hat = hatY, beta.hat = Beta, diag.hat = DiagHat))
+  return(list(Y_hat = hatY, beta_hat = Beta, diag_hat = DiagHat))
 }
 
 
 GCV_score <- function(X, Y, lambda){
   model <- PRM(X, Y, lambda)
   k <- dim(as.matrix(X))[1]
-  GCV <- k * sum((model$Y.hat - Y)^2) / (sum(rep(1,k) - model$diag.hat))^2
+  GCV <- k * sum((model$Y_hat - Y)^2) / (sum(rep(1,k) - model$diag_hat))^2
   return(GCV)
 }
 
 DCV_score <- function(X, Y, lambda){
   k <- dim(as.matrix(X))[1]
   model <- PRM(X, Y, lambda)
-  DCV <- k * sum((model$Y.hat - Y)^2) / (k - 1.5 * sum(model$diag.hat))^2
+  DCV <- k * sum((model$Y_hat - Y)^2) / (k - 1.5 * sum(model$diag_hat))^2
   return(DCV)
 }
-
-

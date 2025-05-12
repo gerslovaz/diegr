@@ -17,11 +17,14 @@ Imports:
     dplyr,
     rlang,
     ggplot2,
+    gganimate,
     plotly,
     rgl,
     sp,
     scales,
-    stats
+    stats,
+    gifski,
+    purrr
 LazyData: true
 Suggests: 
     knitr,

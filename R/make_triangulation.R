@@ -33,8 +33,8 @@
 #' head(TRI)
 #'
 #' # c) Plot the result triangulation as 3D wire model using rgl
-#' library(rgl)
-#' wire3d(mesh3d(M$D3$x, M$D3$y, M$D3$z, triangles = t(TRI)))
+#'  library(rgl)
+#'  wire3d(mesh3d(M$D3$x, M$D3$y, M$D3$z, triangles = t(TRI)))
 make_triangulation <- function(mesh) {
 
   required_cols <- c("x", "y")
@@ -50,10 +50,10 @@ make_triangulation <- function(mesh) {
   }
 
   seqy <- unique(mesh$y)
-  k.y <- length(seqy)
+  ky <- length(seqy)
 
   TRIMAT <- c()
-  for (i in (1:(k.y - 1))) {
+  for (i in (1:(ky - 1))) {
 
     line1 <- mesh[mesh$y == seqy[i],]
     line2 <- mesh[mesh$y == seqy[i + 1],]

@@ -1,13 +1,13 @@
 #' Create colour scale used in topographic figures
 #'
-#' @param col.range A numeric vector with required range of the variable to be plotted in the colour scale.
+#' @param col_range A numeric vector with required range of the variable to be plotted in the colour scale.
 #' @param k A number from interval (0,1) indicating a sequence step for the colour palette. The smaller number, the finer division of the data range interval.
 #'
 #' @details
 #' The palette is created according to topographical colours: negative values correspond to shades of blue and purple and positive values to shades of green, yellow and red. The zero value of the variable is always at the border of blue and green shades.
-#' To compare results for different subjects or conditions, set the same \code{col.range} for all cases.
+#' To compare results for different subjects or conditions, set the same \code{col_range} for all cases.
 #'
-#' The parameter \code{k} is set by default with respect to the range of \code{col.range} as follows: \code{k = 0.1} for range \eqn{\leq 30}, \code{k = 0.03} for range \eqn{\geq 70} and \code{k = 0.04} otherwise.
+#' The parameter \code{k} is set by default with respect to the range of \code{col_range} as follows: \code{k = 0.1} for range \eqn{\leq 30}, \code{k = 0.03} for range \eqn{\geq 70} and \code{k = 0.04} otherwise.
 #'
 #' @return A list with two components:
 #' \item{colors}{A vector with hexadecimal codes of palette colours.}
@@ -16,18 +16,18 @@
 #'
 #' @examples
 #' # Create scale on interval (-10,10) with default step number
-#' create_scale(col.range = c(-10,10))
+#' create_scale(col_range = c(-10,10))
 #'
 #' # Create scale on interval c(-5,10) with small k (finer division)
-#' create_scale(col.range = c(-5, 10), k = 0.02)
-create_scale <- function(col.range, k = NULL) {
+#' create_scale(col_range = c(-5, 10), k = 0.02)
+create_scale <- function(col_range, k = NULL) {
 
-  if (length(col.range) != 2 | !is.numeric(col.range)) {
-    stop("The argument 'col.range' is supposed to be a numeric vector with two terms.")
+  if (length(col_range) != 2 | !is.numeric(col_range)) {
+    stop("The argument 'col_range' is supposed to be a numeric vector with two terms.")
   }
 
   if (is.null(k)) {
-    maxmin <- max(col.range) - min(col.range)
+    maxmin <- max(col_range) - min(col_range)
     if (maxmin <= 30) {
       k <- 0.1
     } else if (maxmin >= 70) {
@@ -44,7 +44,7 @@ create_scale <- function(col.range, k = NULL) {
 
   probs <- seq(0, 1, by = { k })
   k_probs <- length(probs)
-  breaks <- pretty(col.range, k_probs)
+  breaks <- pretty(col_range, k_probs)
   breaks_negative <- which(breaks <= 0)
   breaks_positive <- which(breaks >= 0)
   k_negbreaks <- length(breaks_negative)
@@ -79,15 +79,15 @@ ColorsPos <- function(n, alpha = 1) {
 
 
 
-cut_scale <- function(signal, col.scale) {
+cut_scale <- function(signal, col_scale) {
 
-  clr <- cut(signal, col.scale$breaks, include.lowest = TRUE)
-  colour <- col.scale$colors[clr]
+  clr <- cut(signal, col_scale$breaks, include.lowest = TRUE)
+  colour <- col_scale$colors[clr]
   return(colour)
 }
 
 
-cut_signal <- function(signal, mesh, coords, col.scale) {
+cut_signal <- function(signal, mesh, coords, col_scale) {
   #if (missing(coords)) {
   #  coords <- HCGSN256$D2
   #}
@@ -96,10 +96,10 @@ cut_signal <- function(signal, mesh, coords, col.scale) {
   #  mesh <- mesh[,1:2]
   #}
 
-  y.Pcp <- IM(coords, signal, mesh)$Y.hat
-  ycp.IM <- y.Pcp[1:length(mesh[,1])]
+  y_Pcp <- IM(coords, signal, mesh)$Y_hat
+  ycp_IM <- y_Pcp[1:length(mesh[,1])]
 
-  y.cut <- cut(ycp.IM, breaks = col.scale$breaks, include.lowest = TRUE)
-  y.color <- col.scale$colors[y.cut]
-  return(y.color)
+  y_cut <- cut(ycp_IM, breaks = col_scale$breaks, include.lowest = TRUE)
+  y_color <- col_scale$colors[y_cut]
+  return(y_color)
 }

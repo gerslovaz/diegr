@@ -29,7 +29,7 @@ boxplot_rt <- function(data, subject = NULL){
   }
 
   if (!is.null(subject)){
-    data <- pick_data(data, subject.rg = {{ subject }})
+    data <- pick_data(data, subject_rg = {{ subject }})
   }
 
   data <- data |>

@@ -144,7 +144,7 @@ plot_point_mesh(M1$D2)
 # creating a circular mesh, only 2D coordinates
 M2 <- point_mesh(dim = 2, n = 3000, template = "HCGSN256", type = "circle")
 # plotting a mesh - function allows different options of the result plot
-plot_point_mesh(M2$D2, col.sensors = "purple", names = TRUE, cex = 0.1)
+plot_point_mesh(M2$D2, col_sensors = "purple", names = TRUE, cex = 0.1)
 ```
 
 
@@ -178,11 +178,11 @@ s1 <- s1$average[1:204]
 
 # plotting the topographic polygon map with contours and legend
 # interval (-30,15) is selected in consideration of the signal progress
-topo_plot(signal = s1, col.range = c(-30, 15), contour = TRUE)
+topo_plot(signal = s1, col_range = c(-30, 15), contour = TRUE)
 
 # plotting the same map without contours and legend 
 # but with sensor labels and adding the title
-g1 <- topo_plot(signal = s1, col.range = c(-30, 15),
+g1 <- topo_plot(signal = s1, col_range = c(-30, 15),
                 names = TRUE, legend = FALSE)
 g1 + ggplot2::ggtitle("Subject 1, time of the stimulus")
 ```
@@ -209,7 +209,7 @@ s1 <- s1$average[1:204]
 
 # plotting the scalp polygon map
 #open3d()
-scalp_plot(signal = s1, col.range = c(-30, 15))
+scalp_plot(signal = s1, col_range = c(-30, 15))
 
 # note: the output is not plotted to reduce the vignette file size
 ```

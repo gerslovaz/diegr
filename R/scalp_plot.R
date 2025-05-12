@@ -7,16 +7,16 @@
 #' @param mesh An object of class \code{"mesh"} used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. Can also be a data frame or a matrix with x, y and z coordinates of a point mesh. See details for more information about the structure.
 #' @param tri A matrix with indices of the triangles. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the input mesh object (or a list).
 #' @param coords Sensor coordinates as a tibble or data frame with named \code{x} and \code{y} columns. If not defined, the HCGSN256 template is used.
-#' @param col.range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of the input signal is used.
-#' @param col.scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col.range}.
+#' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of the input signal is used.
+#' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
 #'
 #' @details
 #' The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
 #' If the input \code{mesh} is a data frame or a matrix with only 3D coordinates of a point mesh, the use of previously created triangulation (through \code{tri} argument) is necessary.
 #' To compare results between 2D topographical plot and 3D scalp plot use the same mesh in both cases.
 #'
-#' Be careful when choosing the argument \code{col.range}. If the input \code{signal} contains values outside the chosen range, this will cause "holes" in the resulting plot.
-#' To compare results for different subjects or conditions, set the same values of \code{col.range} and \code{col.scale} arguments in all cases.
+#' Be careful when choosing the argument \code{col_range}. If the input \code{signal} contains values outside the chosen range, this will cause "holes" in the resulting plot.
+#' To compare results for different subjects or conditions, set the same values of \code{col_range} and \code{col_scale} arguments in all cases.
 #' The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
 
 #'
@@ -39,10 +39,10 @@
 #' s1 <- s1$average[1:204]
 #'
 #' # b) plotting the scalp polygon map
-#' scalp_plot(signal = s1, col.range = c(-30, 15))
+#' scalp_plot(signal = s1, col_range = c(-30, 15))
 
 scalp_plot <- function(signal, mesh, tri,
-                      coords = NULL, col.range = NULL, col.scale = NULL) {
+                      coords = NULL, col_range = NULL, col_scale = NULL) {
 
   if (missing(mesh)) {
     mesh <- point_mesh(dim = c(2,3), template = "HCGSN256", type = "polygon")
@@ -79,24 +79,24 @@ scalp_plot <- function(signal, mesh, tri,
   if (missing(tri)) {
     tri <- make_triangulation(mesh2)
   }
-  if (is.null(col.range)) {
-    col.range <- range(signal)
+  if (is.null(col_range)) {
+    col_range <- range(signal)
   }
-  if (is.null(col.scale)) {
-    col.scale <- create_scale(col.range)
+  if (is.null(col_scale)) {
+    col_scale <- create_scale(col_range)
   }
   if (is.null(coords)) {
     coords <- diegr::HCGSN256$D3
   }
 
-  y.hat <- IM(coords, signal, mesh3)$Y.hat
-  ycp.IM <- y.hat[1:length(mesh3[,1])]
+  y_hat <- IM(coords, signal, mesh3)$Y_hat
+  ycp_IM <- y_hat[1:length(mesh3[,1])]
 
-  y.cut <- cut(ycp.IM, breaks = col.scale$breaks, include.lowest = TRUE)
-  y.col <- col.scale$colors[y.cut]
+  y_cut <- cut(ycp_IM, breaks = col_scale$breaks, include.lowest = TRUE)
+  y_col <- col_scale$colors[y_cut]
 
-  shade3d(mesh3d(x = mesh3$x, y = mesh3$y, z = mesh3$z, triangles = t(tri)),
-          col = y.col, lit = FALSE)
+  rgl::shade3d(rgl::mesh3d(x = mesh3$x, y = mesh3$y, z = mesh3$z, triangles = t(tri)),
+          col = y_col, lit = FALSE)
  }
 
 

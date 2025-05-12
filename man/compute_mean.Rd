@@ -9,9 +9,9 @@ compute_mean(
   subject = NULL,
   channel = NULL,
   group = "time",
-  ex.epoch = NULL,
+  ex_epoch = NULL,
   time = NULL,
-  base.int = NULL,
+  base_int = NULL,
   raw = TRUE,
   type = "point"
 )
@@ -25,24 +25,35 @@ compute_mean(
 
 \item{group}{A character specifying the grouping factor. Default is \code{"time"} for calculation of the average at individual time points, other possibility is \code{"space"} for calculation of the average at individual space points (sensors).}
 
-\item{ex.epoch}{Optional. A vector of epoch indices to be excluded from the average calculation.}
+\item{ex_epoch}{Optional. A vector of epoch indices to be excluded from the average calculation.}
 
 \item{time}{A numeric vector specifying the time points used for computing the average signal. If NULL, the whole time interval is included.}
 
-\item{base.int}{Numeric character vector including time points to use as a baseline. See \code{\link{baseline_correction}} for details.}
+\item{base_int}{Numeric character vector including time points to use as a baseline. See \code{\link{baseline_correction}} for details.}
 
 \item{raw}{A logical value indicating whether the input data are in raw form (\code{raw = TRUE}) or baseline corrected (\code{raw = FALSE}). Default is \code{TRUE}.}
 
 \item{type}{A character specifying the method of calculating the average, \code{"point"} for pointwise arithmetic average (default) and \code{"jack"} for jacknife average.}
 }
 \value{
-A list with result average and standard deviation.
+A list with result average and standard deviation for each time point (\code{group = "time"}) or sensor (\code{group = "space"}).
 }
 \description{
 Function calculates the average signal for chosen subject (or average of more subjects) in temporal or spatial domain. The function computes a single overall average, considering all provided subjects and channels (or time points). If multiple subjects are provided, the result is the average across all specified subjects. Similarly, if multiple channels/time points are provided, the result is the average of all specified channels/time points.
 }
 \examples{
 # Average signal for subject 1 and electrode E1 with baseline correction on interval 1:10
-avg <- compute_mean(epochdata, subject = 1, channel = "E1", base.int = 1:10)
+# without outlier epoch 14
+avg <- compute_mean(epochdata, subject = 1, channel = "E1", base_int = 1:10, ex_epoch = 14)
 avg$average
+# plot the result
+plot(avg$average, type = "l")
+
+# Average signal for subject 1 in all electrodes in time point 11 with baseline correction
+# on interval 1:10 (again without outlier epoch 14)
+avg <- compute_mean(epochdata, subject = 1, time = 11, group = "space",
+base_int = 1:10, ex_epoch = 14)
+str(avg)
+# plot the result with topo_plot()
+topo_plot(avg$average)
 }

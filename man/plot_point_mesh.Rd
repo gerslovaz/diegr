@@ -8,11 +8,11 @@ plot_point_mesh(
   mesh,
   sensors = TRUE,
   names = FALSE,
-  names.vec = NULL,
+  names_vec = NULL,
   col = "gray",
   cex = 0.4,
-  col.sensors = "green",
-  own.coordinates = NULL
+  col_sensors = "green",
+  own_coordinates = NULL
 )
 }
 \arguments{
@@ -22,15 +22,15 @@ plot_point_mesh(
 
 \item{names}{A logical value indicating whether the sensor names should also be plotted (default value is \code{FALSE}).}
 
-\item{names.vec}{A vector with sensor names. The argument is required when using \code{own.coordinates} together with setting \code{names = TRUE}, otherwise is optional.}
+\item{names_vec}{A vector with sensor names. The argument is required when using \code{own_coordinates} together with setting \code{names = TRUE}, otherwise is optional.}
 
 \item{col}{The colour of mesh points (default colour is gray).}
 
 \item{cex}{The \code{cex} argument for points of the mesh.}
 
-\item{col.sensors}{The colour of sensor locations points (default colour is green).}
+\item{col_sensors}{The colour of sensor locations points (default colour is green).}
 
-\item{own.coordinates}{A data frame or tibble with coordinates of the sensor locations. If the value is \code{NULL} and \code{sensors} is set to \code{TRUE}, the HCGSN256 template is used.}
+\item{own_coordinates}{A data frame or tibble with coordinates of the sensor locations. If the value is \code{NULL} and \code{sensors} is set to \code{TRUE}, the HCGSN256 template is used.}
 }
 \value{
 A plot.
@@ -39,15 +39,15 @@ A plot.
 Function for plotting a mesh of points (not only) created by \code{\link{point_mesh}} function. The output is two dimensional \code{ggplot} of point mesh or three dimensional \code{rgl} plot depending on the input dimension.
 }
 \details{
-Please follow the instructions below when entering \code{own.coordinates}:
+Please follow the instructions below when entering \code{own_coordinates}:
 
-The output plot is designed with frontal part of the brain above and occipital part of the brain bottom. The orientation of \code{own.coordinates} should be consistent with this. In other case the results could be distorted.
+The output plot is designed with frontal part of the brain above and occipital part of the brain bottom. The orientation of \code{own_coordinates} should be consistent with this. In other case the results could be distorted.
 
-For displaying 3D rgl plot, the \code{own.coordinates} must contain the x, y and z coordinates of the sensors, otherwise the function does not work correctly.
+For displaying 3D rgl plot, the \code{own_coordinates} must contain the x, y and z coordinates of the sensors, otherwise the function does not work correctly.
 
-The order of elements in \code{names.vec} must be consistent with elements of \code{own.coordinates}.
+The order of elements in \code{names_vec} must be consistent with elements of \code{own_coordinates}.
 
-When both \code{names.vec} and \code{own.coordinates} are provided, it is essential that the length of \code{names.vec} matches the number of rows in \code{own.coordinates}, otherwise the names are not plotted (despite the setting \code{names = TRUE}).
+When both \code{names_vec} and \code{own_coordinates} are provided, it is essential that the length of \code{names_vec} matches the number of rows in \code{own_coordinates}, otherwise the names are not plotted (despite the setting \code{names = TRUE}).
 }
 \examples{
 # 2D polygon point mesh with plotted sensors and default settings
@@ -61,12 +61,12 @@ plot_point_mesh(M$D3)
 # Plotting 2D circle point mesh with sensors as orange points
 par(mar = c(0,0,0,0))
 M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256", type = "circle")
-plot_point_mesh(M$D2, col.sensors = "orange")
+plot_point_mesh(M$D2, col_sensors = "orange")
 
 # Plotting the same mesh with marking only midline electrodes
 midline <- HCGSN256$D2[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204),]
-names.vec <- HCGSN256$sensor[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204)]
+names_vec <- HCGSN256$sensor[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204)]
 par(mar = c(0,0,0,0))
-plot_point_mesh(M$D2, names = TRUE, names.vec = names.vec, own.coordinates = midline)
+plot_point_mesh(M$D2, names = TRUE, names_vec = names_vec, own_coordinates = midline)
 
 }

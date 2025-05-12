@@ -6,21 +6,21 @@
 #' @param mesh A data frame or tibble with cartesian coordinates of point mesh to plot. It could be \code{D2} or \code{D3} element of output from \code{\link{point_mesh}} function or any data frame (or tibble) with named x and y (x, y and z, respectively) columns. See Details for more information.
 #' @param sensors A logical value indicating whether the sensor locations should also be plotted (default value is \code{TRUE}).
 #' @param names A logical value indicating whether the sensor names should also be plotted (default value is \code{FALSE}).
-#' @param names.vec A vector with sensor names. The argument is required when using \code{own.coordinates} together with setting \code{names = TRUE}, otherwise is optional.
+#' @param names_vec A vector with sensor names. The argument is required when using \code{own_coordinates} together with setting \code{names = TRUE}, otherwise is optional.
 #' @param col The colour of mesh points (default colour is gray).
 #' @param cex The \code{cex} argument for points of the mesh.
-#' @param col.sensors The colour of sensor locations points (default colour is green).
-#' @param own.coordinates A data frame or tibble with coordinates of the sensor locations. If the value is \code{NULL} and \code{sensors} is set to \code{TRUE}, the HCGSN256 template is used.
+#' @param col_sensors The colour of sensor locations points (default colour is green).
+#' @param own_coordinates A data frame or tibble with coordinates of the sensor locations. If the value is \code{NULL} and \code{sensors} is set to \code{TRUE}, the HCGSN256 template is used.
 #'
-#' @details Please follow the instructions below when entering \code{own.coordinates}:
+#' @details Please follow the instructions below when entering \code{own_coordinates}:
 #'
-#' The output plot is designed with frontal part of the brain above and occipital part of the brain bottom. The orientation of \code{own.coordinates} should be consistent with this. In other case the results could be distorted.
+#' The output plot is designed with frontal part of the brain above and occipital part of the brain bottom. The orientation of \code{own_coordinates} should be consistent with this. In other case the results could be distorted.
 #'
-#' For displaying 3D rgl plot, the \code{own.coordinates} must contain the x, y and z coordinates of the sensors, otherwise the function does not work correctly.
+#' For displaying 3D rgl plot, the \code{own_coordinates} must contain the x, y and z coordinates of the sensors, otherwise the function does not work correctly.
 #'
-#' The order of elements in \code{names.vec} must be consistent with elements of \code{own.coordinates}.
+#' The order of elements in \code{names_vec} must be consistent with elements of \code{own_coordinates}.
 #'
-#' When both \code{names.vec} and \code{own.coordinates} are provided, it is essential that the length of \code{names.vec} matches the number of rows in \code{own.coordinates}, otherwise the names are not plotted (despite the setting \code{names = TRUE}).
+#' When both \code{names_vec} and \code{own_coordinates} are provided, it is essential that the length of \code{names_vec} matches the number of rows in \code{own_coordinates}, otherwise the names are not plotted (despite the setting \code{names = TRUE}).
 #'
 #' @return A plot.
 #'
@@ -41,17 +41,17 @@
 #' # Plotting 2D circle point mesh with sensors as orange points
 #' par(mar = c(0,0,0,0))
 #' M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256", type = "circle")
-#' plot_point_mesh(M$D2, col.sensors = "orange")
+#' plot_point_mesh(M$D2, col_sensors = "orange")
 #'
 #' # Plotting the same mesh with marking only midline electrodes
 #' midline <- HCGSN256$D2[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204),]
-#' names.vec <- HCGSN256$sensor[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204)]
+#' names_vec <- HCGSN256$sensor[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204)]
 #' par(mar = c(0,0,0,0))
-#' plot_point_mesh(M$D2, names = TRUE, names.vec = names.vec, own.coordinates = midline)
+#' plot_point_mesh(M$D2, names = TRUE, names_vec = names_vec, own_coordinates = midline)
 #'
-plot_point_mesh <- function(mesh, sensors = TRUE, names = FALSE, names.vec = NULL,
-                            col = "gray", cex = 0.4, col.sensors = "green",
-                            own.coordinates = NULL ) {
+plot_point_mesh <- function(mesh, sensors = TRUE, names = FALSE, names_vec = NULL,
+                            col = "gray", cex = 0.4, col_sensors = "green",
+                            own_coordinates = NULL ) {
 
   if (!(is.logical(sensors))) {
     stop("Argument 'sensors' has to be logical.")
@@ -60,43 +60,43 @@ plot_point_mesh <- function(mesh, sensors = TRUE, names = FALSE, names.vec = NUL
     stop("Argument 'names' has to be logical.")
   }
 
-  if (names == TRUE && !is.null(own.coordinates) && is.null(names.vec)) {
-    stop("With using own.coordinates please define the names.vec or set names to FALSE.")
+  if (names == TRUE && !is.null(own_coordinates) && is.null(names_vec)) {
+    stop("With using own_coordinates please define the names_vec or set names to FALSE.")
   }
 
-  if (names == TRUE && is.null(names.vec)) {
-    names.vec <- diegr::HCGSN256$sensor
+  if (names == TRUE && is.null(names_vec)) {
+    names_vec <- diegr::HCGSN256$sensor
   }
 
 
   if (all(c("x", "y", "z") %in% colnames(mesh))) {
     rgl::points3d(mesh$x, mesh$y, mesh$z, col = {{ col }}, cex = {{ cex }})
 
-    if (is.null(own.coordinates)) {
-      own.coordinates <- diegr::HCGSN256$D3
+    if (is.null(own_coordinates)) {
+      own_coordinates <- diegr::HCGSN256$D3
     }
 
     if (sensors == TRUE) {
 
-      rgl::points3d(own.coordinates, col = {{ col.sensors}}, size = 5)
+      rgl::points3d(own_coordinates, col = {{ col_sensors}}, size = 5)
     }
 
     if (names == TRUE) {
 
-      if (length(names.vec) != length(own.coordinates$x)) {
-        warning("The length of 'names.vec' must be the same as the number of coordinates rows. Names are not plotted.")
-      } else { rgl::text3d(own.coordinates, texts = names.vec, cex = 0.7) }
+      if (length(names_vec) != length(own_coordinates$x)) {
+        warning("The length of 'names_vec' must be the same as the number of coordinates rows. Names are not plotted.")
+      } else { rgl::text3d(own_coordinates, texts = names_vec, cex = 0.7) }
     }
 
   }
 
   else if (all(c("x", "y") %in% colnames(mesh))) {
 
-    if (is.null(own.coordinates)) {
-      own.coordinates <- diegr::HCGSN256$D2
+    if (is.null(own_coordinates)) {
+      own_coordinates <- diegr::HCGSN256$D2
     }
 
-    M <- max(max(mesh[["y"]], na.rm = TRUE), max(own.coordinates[["y"]]))
+    M <- max(max(mesh[["y"]], na.rm = TRUE), max(own_coordinates[["y"]]))
     x0 <- mean(mesh[["x"]], na.rm = TRUE)
 
     g <- ggplot(mesh, aes(x = .data$x, y = .data$y)) +
@@ -114,14 +114,14 @@ plot_point_mesh <- function(mesh, sensors = TRUE, names = FALSE, names.vec = NUL
 
     if (sensors == TRUE) {
        g <- g +
-        annotate("point", x = own.coordinates$x, y = own.coordinates$y, col = { col.sensors })
+        annotate("point", x = own_coordinates$x, y = own_coordinates$y, col = { col_sensors })
     }
 
     if (names == TRUE) {
-      if (length(names.vec) != length(own.coordinates$x)) {
-        warning("The length of 'names.vec' must be the same as the number of coordinates rows. Names are not plotted.")
+      if (length(names_vec) != length(own_coordinates$x)) {
+        warning("The length of 'names_vec' must be the same as the number of coordinates rows. Names are not plotted.")
       } else {
-        g <- g + geom_text(data = own.coordinates, aes(label = names.vec), size = 2, vjust = -0.9) }
+        g <- g + geom_text(data = own_coordinates, aes(label = names_vec), size = 2, vjust = -0.9) }
           }
 
     g

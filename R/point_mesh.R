@@ -9,7 +9,7 @@
 #' @param n Optionally, the required number of mesh points. Default setting is \code{n = 10 000}.
 #' @param r Optionally, desired radius of a circular mesh. If not defined, it is selected according to the sensor locations.
 #' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0.
-#' @param own.coordinates Optionally, a list with own sensor coordinates for mesh building, if no pre-defined template is to be used. See Details for more information.
+#' @param own_coordinates Optionally, a list with own sensor coordinates for mesh building, if no pre-defined template is to be used. See Details for more information.
 #' @param type A character indicating the shape of the mesh with 2 possible values: \code{"circle"} for circular mesh, \code{"polygon"} for irregular polygon shape with boundaries defined by sensor locations (default).
 #'
 #' @details
@@ -17,7 +17,7 @@
 #'
 #' The number \code{n} for controlling the mesh density is only an approximate value. The final number of mesh nodes depends on the exact shape of the polygon (created as a convex hull of the sensor locations), and is only close to, not exactly equal to, the number \code{n}.
 #'
-#' The \code{own.coordinates} enables computing a mesh from user's own sensor locations. The input must be a list containing following elements:
+#' The \code{own_coordinates} enables computing a mesh from user's own sensor locations. The input must be a list containing following elements:
 #' \itemize{
 #' \item \code{D2} a tibble or data frame with sensor coordinates in named \code{x} and \code{y} columns,
 #' \item \code{D3} a tibble or data frame with sensor coordinates in named \code{x}, \code{y} and \code{z} columns.
@@ -48,17 +48,17 @@
 #'
 #' # Computing coordinates of a polygon mesh in 2D and 3D in one step (starting number 3000 points):
 #' M <- point_mesh(n = 3000, template = "HCGSN256")
-point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own.coordinates = NULL, type = 'polygon') {
+point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordinates = NULL, type = 'polygon') {
 
-  if (is.null(template) && !is.null(own.coordinates)) {
-    if (!"D2" %in% names(own.coordinates)) {
-      stop("There must be an element named D2 in the own.coordinates list.")
+  if (is.null(template) && !is.null(own_coordinates)) {
+    if (!"D2" %in% names(own_coordinates)) {
+      stop("There must be an element named D2 in the own_coordinates list.")
     }
-    if (any(dim == 3) && !"D3" %in% names(own.coordinates)) {
-      stop("There must be an element named D3 in the own.coordinates list for computing 3D mesh.")
+    if (any(dim == 3) && !"D3" %in% names(own_coordinates)) {
+      stop("There must be an element named D3 in the own_coordinates list for computing 3D mesh.")
     }
-    coordinates <- {{ own.coordinates }}
-  } else if (is.null(template) && is.null(own.coordinates)) {
+    coordinates <- {{ own_coordinates }}
+  } else if (is.null(template) && is.null(own_coordinates)) {
     coordinates <- diegr::HCGSN256 #stop("Please choose a template.")
    }
 
@@ -89,54 +89,54 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own.coordina
   }
 
   N <- round(sqrt(2*n))
-  x.vec <- rep(seq(x0 - r, x0 + r, length.out = N), N)
-  y.vec <- rep(seq(y0 - r, y0 + r, length.out = N), each = N)
-  mesh.circle <- cbind(x.vec, y.vec)
+  x_vec <- rep(seq(x0 - r, x0 + r, length.out = N), N)
+  y_vec <- rep(seq(y0 - r, y0 + r, length.out = N), each = N)
+  mesh_circle <- cbind(x_vec, y_vec)
 
-  eu.vec <- sqrt((x.vec - x0)^2 + (y.vec - y0)^2)
-  index <- which(eu.vec <= r)
-  mesh.circle <- mesh.circle[index,]
-  mesh.circle <- data.frame(x = mesh.circle[,1], y = mesh.circle[,2])
+  eu_vec <- sqrt((x_vec - x0)^2 + (y_vec - y0)^2)
+  index <- which(eu_vec <= r)
+  mesh_circle <- mesh_circle[index,]
+  mesh_circle <- data.frame(x = mesh_circle[,1], y = mesh_circle[,2])
 
-  coords.ch <- coords[conv_hull,]
-  coords.ch <- rbind(coords.ch, coords.ch[1,])
+  coords_ch <- coords[conv_hull,]
+  coords_ch <- rbind(coords_ch, coords_ch[1,])
 
   if (identical(dim, 2)) {
 
     switch(type,
            "circle" = {
-             mesh.out <- list(D2 = mesh.circle)
+             mesh_out <- list(D2 = mesh_circle)
            },
            "polygon" = {
-             inside <- sp::point.in.polygon(mesh.circle$x, mesh.circle$y, coords.ch$x, coords.ch$y)
-             mesh.polygon <- mesh.circle[inside > 0,]
-             mesh.out <- list(D2 = data.frame(x = mesh.polygon[,1], y = mesh.polygon[,2]))
+             inside <- sp::point.in.polygon(mesh_circle$x, mesh_circle$y, coords_ch$x, coords_ch$y)
+             mesh_polygon <- mesh_circle[inside > 0,]
+             mesh_out <- list(D2 = data.frame(x = mesh_polygon[,1], y = mesh_polygon[,2]))
            },
            stop("Invalid type argument")
     )
   } else if (identical(dim, 3)) {
     switch(type,
            "circle" = {
-             mesh.out <- list(D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh.circle))
+             mesh_out <- list(D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh_circle))
            },
            "polygon" = {
-             inside <- sp::point.in.polygon(mesh.circle$x, mesh.circle$y, coords.ch$x, coords.ch$y)
-             mesh.polygon <- mesh.circle[inside > 0,]
-             mesh.out <- list(D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh.polygon))
+             inside <- sp::point.in.polygon(mesh_circle$x, mesh_circle$y, coords_ch$x, coords_ch$y)
+             mesh_polygon <- mesh_circle[inside > 0,]
+             mesh_out <- list(D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh_polygon))
            },
            stop("Invalid type argument")
     )
   } else if (identical(dim, c(2, 3)) || identical(dim, c(3, 2))) {
     switch(type,
            "circle" = {
-             mesh.out <- list(D2 = data.frame(x = mesh.circle[,1], y = mesh.circle[,2]),
-                              D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh.circle))
+             mesh_out <- list(D2 = data.frame(x = mesh_circle[,1], y = mesh_circle[,2]),
+                              D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh_circle))
            },
            "polygon" = {
-             inside <- sp::point.in.polygon(mesh.circle$x, mesh.circle$y, coords.ch$x, coords.ch$y)
-             mesh.polygon <- mesh.circle[inside > 0,]
-             mesh.out <- list(D2 = data.frame(x = mesh.polygon[,1], y = mesh.polygon[,2]),
-                              D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh.polygon))
+             inside <- sp::point.in.polygon(mesh_circle$x, mesh_circle$y, coords_ch$x, coords_ch$y)
+             mesh_polygon <- mesh_circle[inside > 0,]
+             mesh_out <- list(D2 = data.frame(x = mesh_polygon[,1], y = mesh_polygon[,2]),
+                              D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh_polygon))
            },
            stop("Invalid type argument")
     )
@@ -144,11 +144,11 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own.coordina
     stop("Invalid dim argument")
   }
 
-  mesh.out$template <- {{ template }}
-  mesh.out$r <- r
-  class(mesh.out) <- c("mesh", class(mesh.out))
+  mesh_out$template <- {{ template }}
+  mesh_out$r <- r
+  class(mesh_out) <- c("mesh", class(mesh_out))
 
-  return(mesh.out)
+  return(mesh_out)
 
 }
 
@@ -172,8 +172,8 @@ spline_matrix <- function(X, Xcp = X) {
   X1 <- t(matrix(rep(t(Xcp), k), nrow = d))
   X2 <- matrix(rep(X, each = kcp), ncol = d)
 
-  diff.sq <- (X1 - X2)^2
-  argument <- rowSums(diff.sq)
+  diff_sq <- (X1 - X2)^2
+  argument <- rowSums(diff_sq)
   if (d == 2) {
     S <- 1 / (8 * pi) * (argument) * log(sqrt(argument))
     S[argument == 0] <- 0
@@ -210,12 +210,12 @@ XP_IM <- function(X, Xcp) {
   kcp <- dim(Xcp)[1]
   d <- dim(X)[2]
 
-  X.P <- matrix(0, nrow = kcp + d + 1, ncol = k + d + 1)
-  X.P[1:kcp, 1:k] <- spline_matrix(X, Xcp)
-  X.P[1:kcp, (k + 1):(k + d + 1)] <- cbind(1, Xcp)
-  X.P[(kcp + 1):(kcp + d + 1), 1:k] <- rbind(1, t(X))
+  X_P <- matrix(0, nrow = kcp + d + 1, ncol = k + d + 1)
+  X_P[1:kcp, 1:k] <- spline_matrix(X, Xcp)
+  X_P[1:kcp, (k + 1):(k + d + 1)] <- cbind(1, Xcp)
+  X_P[(kcp + 1):(kcp + d + 1), 1:k] <- rbind(1, t(X))
 
-  return(X.P)
+  return(X_P)
 }
 
 
@@ -237,9 +237,9 @@ recompute_3d <- function(X2D, X3D, mesh) {
     mesh <- na.omit(mesh)
   }
 
-  k.cp <- dim(mesh)[1]
-  Y.Pcp <- IM(X2D, X3D, mesh)$Y.hat
-  Y <- data.frame(x = Y.Pcp[1:k.cp, 1], y = Y.Pcp[1:k.cp, 2], z = Y.Pcp[1:k.cp, 3])
+  kcp <- dim(mesh)[1]
+  Y_Pcp <- IM(X2D, X3D, mesh)$Y_hat
+  Y <- data.frame(x = Y_Pcp[1:kcp, 1], y = Y_Pcp[1:kcp, 2], z = Y_Pcp[1:kcp, 3])
   return(Y)
 }
 

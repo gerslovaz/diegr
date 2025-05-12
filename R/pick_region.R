@@ -46,55 +46,55 @@ pick_region <- function(coords = NULL, hemisphere = c("left", "right", "midline"
     ROI <- diegr::HCGSN256$ROI
   }
 
-  idx.reg <- grep(paste(region, collapse = "|"), ROI)
-  new.coords <- coords[idx.reg,]
+  idxreg <- grep(paste(region, collapse = "|"), ROI)
+  new_coords <- coords[idxreg,]
 
-  if (!"x" %in% colnames(new.coords) && is.matrix(new.coords) ) {
-    x <- new.coords[,1]
+  if (!"x" %in% colnames(new_coords) && is.matrix(new_coords) ) {
+    x <- new_coords[,1]
   } else {
-    x <- new.coords$x
+    x <- new_coords$x
   }
 
-  idx.l <- c()
-  idx.r <- c()
-  idx.m <- c()
+  idxl <- c()
+  idxr <- c()
+  idxm <- c()
 
   if (any(hemisphere == "left")) {
-    idx.l <- which(x < 0)
+    idxl <- which(x < 0)
   }
   if (any(hemisphere == "right")) {
-    idx.r <- which(x > 0)
+    idxr <- which(x > 0)
   }
   if (any(hemisphere == "midline")) {
-    idx.m <- which(x == 0)
+    idxm <- which(x == 0)
   }
-  idx <- c(idx.l, idx.m, idx.r)
+  idx <- c(idxl, idxm, idxr)
   idx <- sort(idx)
 
-  new.coords <- new.coords[idx,]
+  new_coords <- new_coords[idx,]
 
-  return(new.coords)
+  return(new_coords)
 }
 
-pick_data <- function(data, subject.rg = NULL, sensor.rg = NULL,
-                      time.rg = NULL, epoch.rg = NULL) {
+pick_data <- function(data, subject_rg = NULL, sensor_rg = NULL,
+                      time_rg = NULL, epoch_rg = NULL) {
   ## function for creating subset of data according chosen parameters
 
   conditions <- list()
 
-  if (!is.null(subject.rg)) {
-    conditions <- append(conditions, expr(.data$subject %in% {{ subject.rg }}))
+  if (!is.null(subject_rg)) {
+    conditions <- append(conditions, expr(.data$subject %in% {{ subject_rg }}))
   }
-  if (!is.null(sensor.rg)) {
-    conditions <- append(conditions, expr(.data$sensor %in% {{ sensor.rg }}))
-  }
-
-  if (!is.null(time.rg)) {
-    conditions <- append(conditions, expr(.data$time %in% {{ time.rg }}))
+  if (!is.null(sensor_rg)) {
+    conditions <- append(conditions, expr(.data$sensor %in% {{ sensor_rg }}))
   }
 
-  if (!is.null(epoch.rg)) {
-    conditions <- append(conditions, expr(.data$epoch %in% {{ epoch.rg }}))
+  if (!is.null(time_rg)) {
+    conditions <- append(conditions, expr(.data$time %in% {{ time_rg }}))
+  }
+
+  if (!is.null(epoch_rg)) {
+    conditions <- append(conditions, expr(.data$epoch %in% {{ epoch_rg }}))
   }
 
   data |>
@@ -110,9 +110,9 @@ make_rect_polygon <- function(mesh) {
   nx <- length(x)
   ny <- length(y)
 
-  x.seq <- rep(x, ny)
-  y.seq <- rep(y, each = nx)
-  rectangle <- cbind(x.seq, y.seq)
+  xseq <- rep(x, ny)
+  yseq <- rep(y, each = nx)
+  rectangle <- cbind(xseq, yseq)
 
   return(rectangle)
 }

@@ -7,8 +7,8 @@
 #' @param channel A channel to plot.
 #' @param FS The sampling frequency. Default value is 250 Hz.
 #' @param t0 Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).
-#' @param col.palette Optionally, a colour palette for plotting lines. If missing, the rainbow palette is used.
-#' @param base.int Optionally, an interval for baseline correction.
+#' @param col_palette Optionally, a colour palette for plotting lines. If missing, the rainbow palette is used.
+#' @param base_int Optionally, an interval for baseline correction.
 #'
 #' @details
 #' The input data frame or database table must contain at least following columns:
@@ -32,8 +32,8 @@
 #' # and 10 as zero time point
 #' interactive_waveforms(epochdata, subject = 1, channel = "E65", t0 = 10)
 #'
-interactive_waveforms <- function(data, subject, channel, FS = 250, t0 = NULL, col.palette,
-                                  base.int = NULL) {
+interactive_waveforms <- function(data, subject, channel, FS = 250, t0 = NULL, col_palette,
+                                  base_int = NULL) {
 
   if (missing(subject)) {
     stop("Argument 'subject' is missing, with no default.")
@@ -55,8 +55,8 @@ interactive_waveforms <- function(data, subject, channel, FS = 250, t0 = NULL, c
   data <- data |>
     dplyr::filter(.data$subject == {{ subject }} & (.data$sensor == {{ channel }}))  |>
     dplyr::select("time", "signal", "epoch", "subject", "sensor")
-  if (!is.null(base.int)) {
-    newdata <- baseline_correction(data, base.int = { base.int }, type = "absolute")
+  if (!is.null(base_int)) {
+    newdata <- baseline_correction(data, base_int = { base_int }, type = "absolute")
   } else {
     newdata <- collect(data)
     newdata <- newdata |>
@@ -73,9 +73,9 @@ interactive_waveforms <- function(data, subject, channel, FS = 250, t0 = NULL, c
 
   label <- rlang::englue("Subject { subject }, channel { channel }")
 
-  if (missing(col.palette)) {
+  if (missing(col_palette)) {
     n <- length(levels(newdata$epoch))
-    col.palette <- rainbow(n)
+    col_palette <- rainbow(n)
   }
 
   if (is.null(t0)) {
@@ -88,7 +88,7 @@ interactive_waveforms <- function(data, subject, channel, FS = 250, t0 = NULL, c
 
   curv_epoch <- newdata |>
     group_by(.data$epoch) |>
-    plot_ly(x = ~time * k - k0, y = ~signal_base, color = ~epoch, colors = col.palette,
+    plot_ly(x = ~time * k - k0, y = ~signal_base, color = ~epoch, colors = col_palette,
             type = "scatter",  mode = "lines")
   curv_epoch |>
     add_trace(x = ~time * k - k0, y = ~average, type = 'scatter', mode = 'lines',

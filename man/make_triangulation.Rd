@@ -31,8 +31,8 @@ TRI <- make_triangulation(M$D2)
 head(TRI)
 
 # c) Plot the result triangulation as 3D wire model using rgl
-library(rgl)
-wire3d(mesh3d(M$D3$x, M$D3$y, M$D3$z, triangles = t(TRI)))
+ library(rgl)
+ wire3d(mesh3d(M$D3$x, M$D3$y, M$D3$z, triangles = t(TRI)))
 }
 \references{
 Lai M-J, Schumaker LL. \emph{Spline functions on triangulations.} Cambridge University Press; 2007.

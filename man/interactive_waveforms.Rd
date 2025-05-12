@@ -10,8 +10,8 @@ interactive_waveforms(
   channel,
   FS = 250,
   t0 = NULL,
-  col.palette,
-  base.int = NULL
+  col_palette,
+  base_int = NULL
 )
 }
 \arguments{
@@ -25,9 +25,9 @@ interactive_waveforms(
 
 \item{t0}{Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).}
 
-\item{col.palette}{Optionally, a colour palette for plotting lines. If missing, the rainbow palette is used.}
+\item{col_palette}{Optionally, a colour palette for plotting lines. If missing, the rainbow palette is used.}
 
-\item{base.int}{Optionally, an interval for baseline correction.}
+\item{base_int}{Optionally, an interval for baseline correction.}
 }
 \value{
 A plotly graph.

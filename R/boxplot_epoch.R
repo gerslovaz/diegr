@@ -51,8 +51,8 @@ boxplot_epoch <- function(data,
   }
 
   if (is.null(time_lim)) {
-    min.t <- min(dplyr::pull(data, .data$time))
-    time_lim <- c(min.t:(min.t + 9))
+    min_t <- min(dplyr::pull(data, .data$time))
+    time_lim <- c(min_t:(min_t + 9))
     warning("The argument 'time_lim' was not defined, the first ten time points from data are plotted.")
   }
 

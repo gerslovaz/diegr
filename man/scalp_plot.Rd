@@ -9,8 +9,8 @@ scalp_plot(
   mesh,
   tri,
   coords = NULL,
-  col.range = NULL,
-  col.scale = NULL
+  col_range = NULL,
+  col_scale = NULL
 )
 }
 \arguments{
@@ -22,9 +22,9 @@ scalp_plot(
 
 \item{coords}{Sensor coordinates as a tibble or data frame with named \code{x} and \code{y} columns. If not defined, the HCGSN256 template is used.}
 
-\item{col.range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of the input signal is used.}
+\item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of the input signal is used.}
 
-\item{col.scale}{Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col.range}.}
+\item{col_scale}{Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.}
 }
 \value{
 A rgl plot of scalp EEG signal.
@@ -37,8 +37,8 @@ The parameter \code{mesh} should optimally be a \code{"mesh"} object (output fro
 If the input \code{mesh} is a data frame or a matrix with only 3D coordinates of a point mesh, the use of previously created triangulation (through \code{tri} argument) is necessary.
 To compare results between 2D topographical plot and 3D scalp plot use the same mesh in both cases.
 
-Be careful when choosing the argument \code{col.range}. If the input \code{signal} contains values outside the chosen range, this will cause "holes" in the resulting plot.
-To compare results for different subjects or conditions, set the same values of \code{col.range} and \code{col.scale} arguments in all cases.
+Be careful when choosing the argument \code{col_range}. If the input \code{signal} contains values outside the chosen range, this will cause "holes" in the resulting plot.
+To compare results for different subjects or conditions, set the same values of \code{col_range} and \code{col_scale} arguments in all cases.
 The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
 }
 \examples{
@@ -54,5 +54,5 @@ dplyr::mutate(average = mean(.data$signal, na.rm = TRUE))
 s1 <- s1$average[1:204]
 
 # b) plotting the scalp polygon map
-scalp_plot(signal = s1, col.range = c(-30, 15))
+scalp_plot(signal = s1, col_range = c(-30, 15))
 }

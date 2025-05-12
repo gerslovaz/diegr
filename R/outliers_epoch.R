@@ -24,8 +24,8 @@
 #' - \code{hampel} for the Hampel filter method, values outside the interval \code{[median - 3 * MAD, median + 3 * MAD]}, where MAD denotes median absolute deviation, are considered as outliers
 #'
 #' @return A list with following components:
-#' \item{epoch.table}{A data frame with epoch ID and the number of time points in which the epoch was evaluated as outlier. (Only epochs with occurrence of outliers in at least one time point are presented.)}
-#' \item{outliers.data}{A data frame with subset of data corresponding to the outliers found.}
+#' \item{epoch_table}{A data frame with epoch ID and the number of time points in which the epoch was evaluated as outlier. (Only epochs with occurrence of outliers in at least one time point are presented.)}
+#' \item{outliers_data}{A data frame with subset of data corresponding to the outliers found.}
 #'
 #' @importFrom grDevices boxplot.stats
 #' @importFrom stats lm mad median quantile sd
@@ -43,9 +43,9 @@
 outliers_epoch <- function(data, subject = NULL, sensor = NULL, time = NULL, method, p = 0.975){
 
   if (is.null(time)) {
-    newdata <- pick_data(data, subject.rg = {{ subject }}, sensor.rg = {{ sensor }})
+    newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ sensor }})
   } else {
-    newdata <- pick_data(data, subject.rg = {{ subject }}, sensor.rg = {{ sensor }}, time.rg = {{ time }})
+    newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ sensor }}, time_rg = {{ time }})
   }
    newdata <- newdata |>
      dplyr::select("subject", "time", "signal", "epoch", "sensor")
@@ -83,11 +83,11 @@ outliers_epoch <- function(data, subject = NULL, sensor = NULL, time = NULL, met
       dplyr::select("time", "signal", "epoch", "sensor")
   }
 
-  epoch.vec <- outdata$epoch
-  epoch.tbl <- table(droplevels(epoch.vec))
-  epoch.tbl <- as.data.frame(epoch.tbl)
-  colnames(epoch.tbl) <- c("Epoch", "Count")
-  print(epoch.tbl)
+  epoch_vec <- outdata$epoch
+  epoch_tbl <- table(droplevels(epoch_vec))
+  epoch_tbl <- as.data.frame(epoch_tbl)
+  colnames(epoch_tbl) <- c("Epoch", "Count")
+  print(epoch_tbl)
 
-  invisible(list(epoch.table = epoch.tbl, outliers.data = outdata))
+  invisible(list(epoch_table = epoch_tbl, outliers_data = outdata))
 }

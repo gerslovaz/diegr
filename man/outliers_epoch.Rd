@@ -28,8 +28,8 @@ outliers_epoch(
 }
 \value{
 A list with following components:
-\item{epoch.table}{A data frame with epoch ID and the number of time points in which the epoch was evaluated as outlier. (Only epochs with occurrence of outliers in at least one time point are presented.)}
-\item{outliers.data}{A data frame with subset of data corresponding to the outliers found.}
+\item{epoch_table}{A data frame with epoch ID and the number of time points in which the epoch was evaluated as outlier. (Only epochs with occurrence of outliers in at least one time point are presented.)}
+\item{outliers_data}{A data frame with subset of data corresponding to the outliers found.}
 }
 \description{
 Function for selecting outlier epochs for one subject and one sensor in chosen time points. Epochs are marked as outliers based on one of the following criteria: interquartile range criterion, percentile approach or Hampel filter method.

@@ -9,7 +9,7 @@ point_mesh(
   n = 10000,
   r,
   template = NULL,
-  own.coordinates = NULL,
+  own_coordinates = NULL,
   type = "polygon"
 )
 }
@@ -22,7 +22,7 @@ point_mesh(
 
 \item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0.}
 
-\item{own.coordinates}{Optionally, a list with own sensor coordinates for mesh building, if no pre-defined template is to be used. See Details for more information.}
+\item{own_coordinates}{Optionally, a list with own sensor coordinates for mesh building, if no pre-defined template is to be used. See Details for more information.}
 
 \item{type}{A character indicating the shape of the mesh with 2 possible values: \code{"circle"} for circular mesh, \code{"polygon"} for irregular polygon shape with boundaries defined by sensor locations (default).}
 }
@@ -43,7 +43,7 @@ In the case of using Geodesic Sensor Net (\code{template = 'HCGSN256'}), the (0,
 
 The number \code{n} for controlling the mesh density is only an approximate value. The final number of mesh nodes depends on the exact shape of the polygon (created as a convex hull of the sensor locations), and is only close to, not exactly equal to, the number \code{n}.
 
-The \code{own.coordinates} enables computing a mesh from user's own sensor locations. The input must be a list containing following elements:
+The \code{own_coordinates} enables computing a mesh from user's own sensor locations. The input must be a list containing following elements:
 \itemize{
 \item \code{D2} a tibble or data frame with sensor coordinates in named \code{x} and \code{y} columns,
 \item \code{D3} a tibble or data frame with sensor coordinates in named \code{x}, \code{y} and \code{z} columns.
