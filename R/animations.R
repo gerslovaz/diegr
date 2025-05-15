@@ -11,7 +11,8 @@
 #' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
 #' @param legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.
 #' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.
-#' @param output_path File path where the animation will be saved (optional). If not defined, the animation is plotted in the RStudio Viewer.
+#' @param output_path File path where the animation will be saved using `gifski` renderer (optional). If not defined, the animation is plotted in the RStudio Viewer.
+#' @param ... Additional parameters for animation according to [gganimate::animate].
 #'
 #' @details
 #' The time part of input data is assumed to be in numbers of time points, conversion to ms takes place inside the function for drawing the timeline labels.
@@ -26,7 +27,6 @@
 #' @import ggplot2
 #' @import dplyr
 #' @import gganimate
-#' @import gifski
 #' @importFrom grDevices hsv
 #' @importFrom scales rescale
 #' @importFrom rlang .data
@@ -35,14 +35,15 @@
 #' \dontrun{
 #' # This example may take a few seconds to render.
 #' # Run only if you want to generate the full animation.
-#' # Preparing a data structure:
+#' # Prepare a data structure:
 #' s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time %in% c(10:20))
 #' # Plot animation:
 #' animate_topo(s1e05, t_lim = c(0,50))
 #' }
+#'
 animate_topo <- function(data, t_lim, FS = 250, mesh, coords = NULL, col_range = NULL, col_scale = NULL,
                          legend = TRUE, contour = FALSE,
-                         output_path = NULL){
+                         output_path = NULL, ...){
 
   if (!(is.logical(contour))) {
     stop("Argument 'contour' has to be logical.")
@@ -54,8 +55,7 @@ animate_topo <- function(data, t_lim, FS = 250, mesh, coords = NULL, col_range =
 
   if (is.null(coords)) {
     # use HCGSN256 template
-    coords <- diegr::HCGSN256$D2 |>
-      mutate(sensor = diegr::HCGSN256$sensor)
+    coords <- diegr::HCGSN256$D2
   }
 
   if (missing(mesh)) {
@@ -99,7 +99,7 @@ animate_topo <- function(data, t_lim, FS = 250, mesh, coords = NULL, col_range =
     col_scale <- create_scale(col_range)
   }
 
-  g <- ggplot(newdata, aes(x = .data$x, y = .data$y)) +
+  g <- ggplot(newdata, aes(x = .data$mesh_coord$x, y = .data$mesh_coord$y)) +
     geom_raster(aes(fill = .data$y_IM)) +
     scale_fill_gradientn(
       colors = col_scale$colors,
@@ -148,28 +148,35 @@ animate_topo <- function(data, t_lim, FS = 250, mesh, coords = NULL, col_range =
 
   g <- g + gganimate::transition_manual(.data$time) # animation
 
-  anim <- gganimate::animate(g, renderer = gganimate::gifski_renderer())
+  if (!is.null(output_path)) {
+    if (!requireNamespace("gifski", quietly = TRUE)) {
+      stop("To export animation, the 'gifski' package is required.")
+    }
+    anim <- gganimate::animate(g, renderer = gganimate::gifski_renderer(), ...)
 
-  if (!is.null(output_path)) { # save animation
     gganimate::anim_save(output_path, animation = anim)
     message("Animation saved into: ", output_path)
   } else {
-    print(anim)
-  }
+  print(gganimate::animate(g, ...))
+}
 
 }
 
 
 prepare_anim_structure <- function(data, coords, mesh_mat) {
   ## create structure for animate_topo from database
+  ## need to change also for 3D case
 
   if (inherits(data, "tbl_sql")) {
     data <- dplyr::collect(data)
   }
 
-  # add x and y coordinates of sensors to the tibble with time and signal data
+  coords_sen <- coords |>
+    mutate(sensor = diegr::HCGSN256$sensor)
+
+  # add coordinates of sensors to the tibble with time and signal data
   tib_signal <- data |>
-    left_join(coords, by = "sensor")
+    left_join(coords_sen, by = "sensor")
 
 
   # splitting the tibble and computing IM model on splitted tibble
@@ -177,11 +184,12 @@ prepare_anim_structure <- function(data, coords, mesh_mat) {
 
   tib_IM <- purrr::map_dfr(names(tib_split), function(t) {
     df_t <- tib_split[[t]]
-    interpolated_values <- IM(df_t[,c("x", "y")], df_t$signal, mesh_mat)$Y_hat
+    ## musim odstranit ten sensor sloupec, jinak mi to vyhazuje chybu
+    interpolated_values <- IM(coords, df_t$signal, mesh_mat)$Y_hat #df_t[,c("x", "y")]
 
     tibble(
       time = as.numeric(t),
-      x = mesh_mat[,1], y = mesh_mat[,2],
+      mesh_coord = mesh_mat,#x = mesh_mat[,1], y = mesh_mat[,2],
       y_IM = interpolated_values[1:dim(mesh_mat)[1]]
     )
   })
@@ -189,5 +197,138 @@ prepare_anim_structure <- function(data, coords, mesh_mat) {
   return(tib_IM)
 }
 
+
+#' 3D scalp plot animation in time
+#'
+#' @param data An input data frame or tibble with required columns: \code{time} - the number of time point, \code{sensor} - the sensor label, \code{signal} - EEG signal value to plot.
+#' @param mesh An object of class \code{"mesh"} used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. Can also be a data frame or a matrix with x, y and z coordinates of a point mesh. See \code{\link{scalp_plot}} for details about the structure.
+#' @param tri A matrix with indices of the triangles. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the input mesh object (or a list).
+#' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{z} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.
+#' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.
+#' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
+#' @param sec The time interval used between individual animation frames, in seconds (default: 0.3).
+#' @param frames_dir Directory where the individual frames will be saved. If NULL, the video is only displayed in viewer and the frames are not saved.
+#' @param output_path Optional path to the output mp4 video file (".mp4" extension is required for correct rendering). If NULL, no video is created.
+#' @param framerate Number of frames per second for the output mp4 video (default: 3).
+#'
+#' @returns
+#' The output depends on the provided arguments:
+#' - If `frames_dir` is specified, individual animation frames (PNG) are saved to that directory.
+#' - If `output_path` is specified, a video (MP4) is created and saved using the `av` package.
+#' - Otherwise, the animation is displayed in an interactive rgl window.
+#'
+#' @export
+#'
+#' @importFrom rlang .data
+#' @import rgl
+#'
+#'
+#' @examples
+#' \dontrun{
+#' # This example may take a few seconds to render.
+#' # Run only if you want to generate the full animation.
+#' # Prepare a data structure:
+#' s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time %in% c(10:20))
+#' # Plot animation with default mesh and triangulation:
+#' animate_scalp(s1e05)
+#' }
+animate_scalp <- function(data, mesh, tri, coords = NULL, col_range = NULL, col_scale = NULL,
+                          sec = 0.3, frames_dir = NULL, output_path = NULL, framerate = 3) {
+  if (is.null(coords)) {
+    # use HCGSN256 template
+    coords <- diegr::HCGSN256$D3
+  }
+
+
+
+  if (missing(mesh)) {
+     mesh <- point_mesh(dim = c(2,3), template = "HCGSN256")
+   }
+  #
+  # if (inherits(mesh, "mesh")) {
+  #   mesh_mat <- mesh$D3
+  # } else {
+  #   mesh_mat <- mesh[,1:3]
+  # }
+
+  if (missing(tri)) {
+    tri <- make_triangulation(mesh$D2)
+  }
+
+  mesh_mat <- mesh$D3
+
+  newdata <- prepare_anim_structure(data, coords, mesh_mat)
+
+  if (is.null(col_scale)) {
+
+    if (is.null(col_range)) {
+      if (all(is.na(newdata$y_IM))) {
+        stop("No valid values in y_IM to create color scale.")
+      }
+      col_range <- c(1.1 * range(newdata$y_IM))
+    }
+
+    col_scale <- create_scale(col_range)
+  }
+
+
+  mesh0 <- rgl::mesh3d(x = mesh_mat$x, y = mesh_mat$y, z = mesh_mat$z, triangles = t(tri))
+
+  plot_3d_time <- function(time_point) {
+    time_data <- newdata |>
+      filter(.data$time == time_point) # filter actual time point
+
+    rgl::clear3d()
+    y_cut <- cut(time_data$y_IM, breaks = col_scale$breaks, include.lowest = TRUE)
+    y_col <- col_scale$colors[y_cut]
+
+    rgl::shade3d(mesh0, col = y_col, lit = FALSE)
+
+  }
+
+  if (!is.null(frames_dir)) { # export frames (and mp4 video)
+    export_video(frames_dir = frames_dir, plot_function = plot_3d_time,
+                 time_points = unique(newdata$time),
+                 output_path = output_path, framerate = framerate)
+  } else {
+
+    for (t in unique(newdata$time)) {  # animation
+      plot_3d_time(t)
+      Sys.sleep({ sec })
+    }
+  }
+
+}
+
+export_video <- function(frames_dir, plot_function, time_points,
+                         output_path, framerate){
+
+    if (!dir.exists(frames_dir)) { # create a dir if not exists
+      dir.create(frames_dir, recursive = TRUE)
+    }
+
+    frame_index <- 1
+
+    for (t in time_points) {
+      plot_function(t)
+
+      snapshot_filename <- sprintf("%s/frame_%03d.png", frames_dir, frame_index)
+      rgl::rgl.snapshot(snapshot_filename)
+
+      frame_index <- frame_index + 1
+    }
+
+    message("Frames saved to: ", normalizePath(frames_dir))
+
+    if (!is.null(output_path)) { # create video in mp4
+      if (!requireNamespace("av", quietly = TRUE)) {
+        stop("To export video, the 'av' package is required.")
+      }
+
+      img_list <- list.files(frames_dir, pattern = "frame_\\d+\\.png", full.names = TRUE)
+      av::av_encode_video(img_list, output = output_path, framerate = framerate)
+      message("Video created at: ", normalizePath(output_path))
+    }
+  }
 
 

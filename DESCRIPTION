@@ -23,10 +23,11 @@ Imports:
     sp,
     scales,
     stats,
-    gifski,
     purrr
 LazyData: true
 Suggests: 
+    av,
+    gifski,
     knitr,
     rmarkdown
 VignetteBuilder: knitr

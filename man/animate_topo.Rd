@@ -7,19 +7,23 @@
 animate_topo(
   data,
   t_lim,
+  FS = 250,
   mesh,
   coords = NULL,
   col_range = NULL,
   col_scale = NULL,
   legend = TRUE,
   contour = FALSE,
-  output_path = NULL
+  output_path = NULL,
+  ...
 )
 }
 \arguments{
 \item{data}{An input data frame or tibble with required columns: \code{time} - the number of time point, \code{sensor} - the sensor label, \code{signal} - EEG signal value to plot.}
 
 \item{t_lim}{Limits of time points (i.e., the length of the timeline displayed below the animation).}
+
+\item{FS}{The sampling frequency. Default value is 250 Hz.}
 
 \item{mesh}{A \code{"mesh"} object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.}
 
@@ -33,22 +37,29 @@ animate_topo(
 
 \item{contour}{Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.}
 
-\item{output_path}{File path where the animation will be saved (optional). If not defined, the animation is plotted in the RStudio Viewer.}
+\item{output_path}{File path where the animation will be saved using \code{gifski} renderer (optional). If not defined, the animation is plotted in the RStudio Viewer.}
+
+\item{...}{Additional parameters for animation according to \link[gganimate:animate]{gganimate::animate}.}
 }
 \value{
 If \code{output_path} is \code{NULL}, the function prints the animation to the RStudio Viewer.
 If \code{output_path} is specified, the animation is saved to the given file path and not displayed.
 }
 \description{
-Topographic map animation in time
+Display a topographic animation of the change in amplitude over time. The function enables direct rendering in Rstudio Viewer or saving the animation in gif format to the chosen location.
+}
+\details{
+The time part of input data is assumed to be in numbers of time points, conversion to ms takes place inside the function for drawing the timeline labels.
+Due to the flexibility of the function (e.g. to mark and animate only a short section from the entire time course or to compare different data in the same time interval), it allows the user to enter and plot an arbitrary timeline values. If some values of the time are outside the \code{t_lim} range, the function writes a warning message - in that case the animation is still rendered, but the timeline will not match reality.
 }
 \examples{
 \dontrun{
 # This example may take a few seconds to render.
 # Run only if you want to generate the full animation.
-# Preparing a data structure:
+# Prepare a data structure:
 s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time \%in\% c(10:20))
 # Plot animation:
 animate_topo(s1e05, t_lim = c(0,50))
 }
+
 }
