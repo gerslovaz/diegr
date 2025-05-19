@@ -211,6 +211,11 @@ prepare_anim_structure <- function(data, coords, mesh_mat) {
 #' @param output_path Optional path to the output mp4 video file (".mp4" extension is required for correct rendering). If NULL, no video is created.
 #' @param framerate Number of frames per second for the output mp4 video (default: 3).
 #'
+#' @details
+#' Setting the parameter `tri` requires defining a `mesh` parameter.
+#' The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
+#' If the input \code{mesh} is a data frame or a matrix with only 3D coordinates of a point mesh, the use of previously created triangulation (through \code{tri} argument) is necessary.
+#'
 #' @returns
 #' The output depends on the provided arguments:
 #' - If `frames_dir` is specified, individual animation frames (PNG) are saved to that directory.
@@ -232,18 +237,57 @@ prepare_anim_structure <- function(data, coords, mesh_mat) {
 #' # Plot animation with default mesh and triangulation:
 #' animate_scalp(s1e05)
 #' }
-animate_scalp <- function(data, mesh, tri, coords = NULL, col_range = NULL, col_scale = NULL,
+animate_scalp <- function(data, mesh, tri = NULL, coords = NULL, col_range = NULL, col_scale = NULL,
                           sec = 0.3, frames_dir = NULL, output_path = NULL, framerate = 3) {
   if (is.null(coords)) {
     # use HCGSN256 template
     coords <- diegr::HCGSN256$D3
   }
 
-
-
   if (missing(mesh)) {
+    if (!is.null(tri)) {
+      stop("The argument 'mesh' must be provided when argument 'tri' is specified.")
+    }
      mesh <- point_mesh(dim = c(2,3), template = "HCGSN256")
-   }
+  }
+
+  control_mesh(mesh, tri = { tri }) # control the input mesh structure
+
+  if ("D3" %in% names(mesh)) {
+    mesh3 <- mesh$D3
+  } else {
+    mesh3 <- mesh
+  }
+
+
+  # if (is.list(mesh) && !is.data.frame(mesh)) {
+  #   if (all(c("D3", "D2") %in% names(mesh))) {
+  #     mesh3 <- mesh$D3
+  #     mesh2 <- mesh$D2
+  #   } else if (!("D2" %in% names(mesh)) && !missing(tri)) {
+  #     mesh3 <- mesh$D3
+  #   } else {
+  #     stop("Elements D2 and D3 are required in input 'mesh' list if argument 'tri' is not defined.")
+  #   }
+  # } else {
+  #   if (!missing(tri)) {
+  #     mesh3 <- mesh
+  #   } else{
+  #     stop("The 'mesh' input with only 3D coordinates of the mesh needs a 'tri' argument setting.")
+  #   }
+  #
+  # }
+  #
+  #
+  # if (dim(mesh3)[2] < 3) {
+  #   stop("The input 3D mesh must contain at least three columns.")
+  # }
+  # if (!all(c("x", "y", "z") %in% colnames(mesh3))) {
+  #   mesh3 <- mesh3[,1:3]
+  #   colnames(mesh3) <- c("x","y","z")
+  #   warning("The input 3D mesh does not contain the columns x, y and z. The first three column were used instead.")
+  # }
+
   #
   # if (inherits(mesh, "mesh")) {
   #   mesh_mat <- mesh$D3
@@ -251,13 +295,11 @@ animate_scalp <- function(data, mesh, tri, coords = NULL, col_range = NULL, col_
   #   mesh_mat <- mesh[,1:3]
   # }
 
-  if (missing(tri)) {
+  if (is.null(tri)) {
     tri <- make_triangulation(mesh$D2)
   }
 
-  mesh_mat <- mesh$D3
-
-  newdata <- prepare_anim_structure(data, coords, mesh_mat)
+  newdata <- prepare_anim_structure(data, coords, mesh3)
 
   if (is.null(col_scale)) {
 
@@ -272,7 +314,7 @@ animate_scalp <- function(data, mesh, tri, coords = NULL, col_range = NULL, col_
   }
 
 
-  mesh0 <- rgl::mesh3d(x = mesh_mat$x, y = mesh_mat$y, z = mesh_mat$z, triangles = t(tri))
+  mesh0 <- rgl::mesh3d(x = mesh3$x, y = mesh3$y, z = mesh3$z, triangles = t(tri))
 
   plot_3d_time <- function(time_point) {
     time_data <- newdata |>
@@ -284,6 +326,10 @@ animate_scalp <- function(data, mesh, tri, coords = NULL, col_range = NULL, col_
 
     rgl::shade3d(mesh0, col = y_col, lit = FALSE)
 
+  }
+
+  if (is.null(frames_dir) && !is.null(output_path)) {
+    warning("The 'frames_dir' setting is required for video export.")
   }
 
   if (!is.null(frames_dir)) { # export frames (and mp4 video)

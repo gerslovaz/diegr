@@ -10,7 +10,8 @@ scalp_plot(
   tri,
   coords = NULL,
   col_range = NULL,
-  col_scale = NULL
+  col_scale = NULL,
+  view = "posterior"
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ scalp_plot(
 \item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of the input signal is used.}
 
 \item{col_scale}{Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.}
+
+\item{view}{A character denoting the view of the plot (according to neurological terminology). Possible values are: \code{"superior", anterior", "posterior", "left", "right"}. If missing, the default view according to user settings is displayed.}
 }
 \value{
 A rgl plot of scalp EEG signal.

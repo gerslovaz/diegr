@@ -216,6 +216,45 @@ scalp_plot(signal = s1, col_range = c(-30, 15))
 
 The `rgl` output enables to zoom and rotate the image with default view of the back of the head.
 
+### Animations
+The package includes the `animate_topo()` function for 2D topographic animation in time and `animate_scalp()` function for 3D scalp animation in time. Both of these functions allow to export the output, a gif animation using `gifski` package for 2D case and a .mp4 video format using `av` package for 3D case. 
+The topographic map animation uses the `gganimate` package and enables ajdusting the output animation settings by adding parameters from the `gganimate::animate` function. The most of input parameters of `animate_topo()` are the same as in `topo_plot()` function, parameters related to animation properties and export are added and also the `t_lim` parameter for setting the length of the timeline displayed below the animation. 
+Example: The animation of time course of the EEG signal for subject 1 and epoch 5 (from `epochdata`) between time points 10 and 20 with the whole range of time 0:50 is created as follows:
+
+```{r}
+#| eval: false
+# filtering the example data 
+s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time %in% c(10:20))
+# Plot animation with setting the range of time:
+animate_topo(s1e05, t_lim = c(0,50))
+# Export the gif animation - this code will create the animation inside your working directory.
+# If you want to export it elsewhere, set the whole path in output_path parameter.
+animate_topo(s1e05, t_lim = c(0,50), output_path = "example_animation.gif")
+```
+
+The scalp animation enables to export a video using the `av` package or save a sequence of frames into chosen directory setting the `frames_dir` parameter. The animation speed can be controlled by the `sec` parameter in the viewer or by the `framerate` parameter for the exported video. The video resolution quality can be affected using `par3d` function, for example `rgl::par3d(windowRect = c(100, 100, 800, 800))`.
+Example of scalp animation with the same data as above:
+
+```{r}
+#| eval: false
+# Plot animation with default mesh and triangulation:
+animate_scalp(s1e05)
+# export the video - the .mp4 extension is required for correct functioning
+rgl::par3d(windowRect = c(100, 100, 800, 800))
+animate_scalp(s1e05, frames_dir = "your_frames_dir_path", output_path = "your_created_video_path.mp4")
+```
+
+
+If you are interested in animation of rotating scalp visualization in fixed time point, you can easily achieve this by using the combination of `rgl::play3d` and `rgl::spin3d` functions according to the following code.
+
+```{r}
+#open3d()
+scalp_plot(signal = s1, col_range = c(-30,15))
+rgl::play3d(rgl::spin3d(axis = c(0, 0, 1), rpm = 10), duration = 10)
+
+# note: the output is not plotted to reduce the vignette file size
+```
+
 #### References
 
 Lai M-J, Schumaker LL. *Spline functions on triangulations.* Cambridge University Press; 2007.

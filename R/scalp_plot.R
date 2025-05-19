@@ -9,6 +9,7 @@
 #' @param coords Sensor coordinates as a tibble or data frame with named \code{x} and \code{y} columns. If not defined, the HCGSN256 template is used.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of the input signal is used.
 #' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
+#' @param view A character denoting the view of the plot (according to neurological terminology). Possible values are: \code{"superior", anterior", "posterior", "left", "right"}. If missing, the default view according to user settings is displayed.
 #'
 #' @details
 #' The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
@@ -42,7 +43,8 @@
 #' scalp_plot(signal = s1, col_range = c(-30, 15))
 
 scalp_plot <- function(signal, mesh, tri,
-                      coords = NULL, col_range = NULL, col_scale = NULL) {
+                      coords = NULL, col_range = NULL, col_scale = NULL,
+                      view = "posterior") {
 
   if (missing(mesh)) {
     mesh <- point_mesh(dim = c(2,3), template = "HCGSN256", type = "polygon")
@@ -95,8 +97,86 @@ scalp_plot <- function(signal, mesh, tri,
   y_cut <- cut(ycp_IM, breaks = col_scale$breaks, include.lowest = TRUE)
   y_col <- col_scale$colors[y_cut]
 
-  rgl::shade3d(rgl::mesh3d(x = mesh3$x, y = mesh3$y, z = mesh3$z, triangles = t(tri)),
-          col = y_col, lit = FALSE)
+
+  if (missing(view)) {
+    rgl::shade3d(rgl::mesh3d(x = mesh3$x, y = mesh3$y, z = mesh3$z, triangles = t(tri)),
+                 col = y_col, lit = FALSE)
+  } else {
+    U0 <- diag(4)
+    Upost <- rgl::rotate3d(U0, pi/2, -1,0,0)
+
+    U <- switch(view,
+                "superior" = U0,
+                "anterior" = rgl::rotate3d(Upost, pi, 0,0,1),
+                "posterior" = Upost,
+                "left" = rgl::rotate3d(Upost, pi/2, 0,0,1),
+                "right" = rgl::rotate3d(Upost, -pi/2, 0,0,1),
+                stop("Invalid view argument."))
+
+    rotate_view(U, plot_function = rgl::shade3d(rgl::mesh3d(x = mesh3$x, y = mesh3$y, z = mesh3$z, triangles = t(tri)),
+                                                col = y_col, lit = FALSE))
+  }
+
  }
 
 
+rotate_view <- function(U, plot_function) {
+
+  current <- rgl::currentSubscene3d()
+  newscene <- rgl::newSubscene3d(copyShapes = TRUE)
+  rgl::useSubscene3d(newscene)
+
+  rgl::par3d(userMatrix = U) # rotate view
+
+  plot_function
+
+  rgl::useSubscene3d(current) # original subscene
+}
+
+
+control_mesh <- function(mesh, tri = NULL) {
+  # control the structure of the mesh
+
+  req_cols <- function(obj, required_cols) {
+    is.atomic(names(obj)) && all(required_cols %in% names(obj))
+  }
+
+  if (is.null(tri)) {
+
+    if (inherits(mesh, "mesh")) {
+      #mesh2 <- mesh$D2
+      #mesh3 <- mesh$D3
+    } else if (is.list(mesh) && all(c("D2", "D3") %in% names(mesh))) {
+      if (!req_cols(mesh$D2, c("x", "y"))) {
+        stop("Columns 'x', 'y' are required in 'D2' for missing 'tri' argument.")
+      } else {
+        #mesh2 <- mesh$D2
+      }
+      if (!req_cols(mesh$D3, c("x", "y", "z"))) {
+        stop("Columns 'x', 'y', 'z' are required in 'D3' part of a mesh.")
+      } else {
+        #mesh3 <- mesh$D3
+      }
+    } else {
+      stop("Elements D2 and D3 are required in input 'mesh' list if argument 'tri' is not defined.")
+    }
+
+  } else {
+
+    if (inherits(mesh, "mesh")) {
+      #mesh3 <- mesh$D3
+    } else if (is.list(mesh) && "D3" %in% names(mesh)) {
+      if (!req_cols(mesh$D3, c("x", "y", "z"))) {
+        stop("Columns 'x', 'y', 'z' are required in 'D3' part of a mesh.")
+      }
+      #mesh3 <- mesh$D3
+
+    } else if (req_cols(mesh, c("x", "y", "z"))) {
+      #mesh3 <- mesh
+
+    } else {
+      stop("Invalid 'mesh' input.")
+    }
+  }
+
+}

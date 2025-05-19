@@ -7,7 +7,7 @@
 animate_scalp(
   data,
   mesh,
-  tri,
+  tri = NULL,
   coords = NULL,
   col_range = NULL,
   col_scale = NULL,
@@ -48,6 +48,11 @@ The output depends on the provided arguments:
 }
 \description{
 3D scalp plot animation in time
+}
+\details{
+Setting the parameter \code{tri} requires defining a \code{mesh} parameter.
+The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
+If the input \code{mesh} is a data frame or a matrix with only 3D coordinates of a point mesh, the use of previously created triangulation (through \code{tri} argument) is necessary.
 }
 \examples{
 \dontrun{
