@@ -27,7 +27,7 @@ scalp_plot(
 
 \item{col_scale}{Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.}
 
-\item{view}{A character denoting the view of the plot (according to neurological terminology). Possible values are: \code{"superior", anterior", "posterior", "left", "right"}. If missing, the default view according to user settings is displayed.}
+\item{view}{A character denoting the view of the plot (according to neurological terminology). Possible values are: \code{"superior", "anterior", "posterior", "left", "right"}. If missing, the default view according to user settings is displayed.}
 }
 \value{
 A rgl plot of scalp EEG signal.

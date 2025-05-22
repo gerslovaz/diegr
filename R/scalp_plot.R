@@ -9,7 +9,7 @@
 #' @param coords Sensor coordinates as a tibble or data frame with named \code{x} and \code{y} columns. If not defined, the HCGSN256 template is used.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of the input signal is used.
 #' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
-#' @param view A character denoting the view of the plot (according to neurological terminology). Possible values are: \code{"superior", anterior", "posterior", "left", "right"}. If missing, the default view according to user settings is displayed.
+#' @param view A character denoting the view of the plot (according to neurological terminology). Possible values are: \code{"superior", "anterior", "posterior", "left", "right"}. If missing, the default view according to user settings is displayed.
 #'
 #' @details
 #' The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
@@ -133,13 +133,13 @@ rotate_view <- function(U, plot_function) {
   rgl::useSubscene3d(current) # original subscene
 }
 
+req_cols <- function(obj, required_cols) {
+  # control required columns
+  is.atomic(names(obj)) && all(required_cols %in% names(obj))
+}
 
 control_mesh <- function(mesh, tri = NULL) {
   # control the structure of the mesh
-
-  req_cols <- function(obj, required_cols) {
-    is.atomic(names(obj)) && all(required_cols %in% names(obj))
-  }
 
   if (is.null(tri)) {
 

@@ -9,6 +9,7 @@ compute_mean(
   subject = NULL,
   channel = NULL,
   group = "time",
+  level = "epoch",
   ex_epoch = NULL,
   time = NULL,
   base_int = NULL,

@@ -62,11 +62,25 @@ animate_topo <- function(data, t_lim, FS = 250, mesh, coords = NULL, col_range =
     mesh <- point_mesh(dim = 2, template = "HCGSN256")
   }
 
-  if (inherits(mesh, "mesh")) {
+  if ("D2" %in% names(mesh)) {
     mesh_mat <- mesh$D2
+  } else if (req_cols(mesh, c("x", "y"))) {
+    mesh_mat <- mesh[, c("x", "y")]
   } else {
-    mesh_mat <- mesh[,1:2] ## hm, tady to jeste je trochu problem, kdyby nekdo mel v mesh osy x a y jinde nez na prvnich dvou mistech - chci to vybirat takto nebo podle jmen? dobre pak popsat v helpu
+    if (is.null(dim(mesh))) {
+      stop("At least two columns are required in `mesh` input parameter.")
+    } else if (ncol(mesh) < 2) {
+      stop("At least two columns are required in `mesh` input parameter.")
+    }
+
+    mesh_mat <- data.frame("x" = mesh[,1], "y" = mesh[,2])
   }
+
+  # if (inherits(mesh, "mesh")) {
+  #   mesh_mat <- mesh$D2
+  # } else {
+  #   mesh_mat <- mesh[,1:2] ## hm, tady to jeste je trochu problem, kdyby nekdo mel v mesh osy x a y jinde nez na prvnich dvou mistech - chci to vybirat takto nebo podle jmen? dobre pak popsat v helpu
+  # }
 
   newdata <- prepare_anim_structure(data, coords, mesh_mat)
 
@@ -185,11 +199,11 @@ prepare_anim_structure <- function(data, coords, mesh_mat) {
   tib_IM <- purrr::map_dfr(names(tib_split), function(t) {
     df_t <- tib_split[[t]]
     ## musim odstranit ten sensor sloupec, jinak mi to vyhazuje chybu
-    interpolated_values <- IM(coords, df_t$signal, mesh_mat)$Y_hat #df_t[,c("x", "y")]
+    interpolated_values <- IM(coords, df_t$signal, mesh_mat)$Y_hat
 
     tibble(
       time = as.numeric(t),
-      mesh_coord = mesh_mat,#x = mesh_mat[,1], y = mesh_mat[,2],
+      mesh_coord = mesh_mat,
       y_IM = interpolated_values[1:dim(mesh_mat)[1]]
     )
   })
@@ -216,10 +230,12 @@ prepare_anim_structure <- function(data, coords, mesh_mat) {
 #' The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
 #' If the input \code{mesh} is a data frame or a matrix with only 3D coordinates of a point mesh, the use of previously created triangulation (through \code{tri} argument) is necessary.
 #'
+#' Note: For exporting the video, setting `frames_dir` together with `output_path` is required.
+#'
 #' @returns
 #' The output depends on the provided arguments:
 #' - If `frames_dir` is specified, individual animation frames (PNG) are saved to that directory.
-#' - If `output_path` is specified, a video (MP4) is created and saved using the `av` package.
+#' - If also `output_path` is specified, a video (MP4) is created and saved using the `av` package.
 #' - Otherwise, the animation is displayed in an interactive rgl window.
 #'
 #' @export
@@ -258,42 +274,6 @@ animate_scalp <- function(data, mesh, tri = NULL, coords = NULL, col_range = NUL
   } else {
     mesh3 <- mesh
   }
-
-
-  # if (is.list(mesh) && !is.data.frame(mesh)) {
-  #   if (all(c("D3", "D2") %in% names(mesh))) {
-  #     mesh3 <- mesh$D3
-  #     mesh2 <- mesh$D2
-  #   } else if (!("D2" %in% names(mesh)) && !missing(tri)) {
-  #     mesh3 <- mesh$D3
-  #   } else {
-  #     stop("Elements D2 and D3 are required in input 'mesh' list if argument 'tri' is not defined.")
-  #   }
-  # } else {
-  #   if (!missing(tri)) {
-  #     mesh3 <- mesh
-  #   } else{
-  #     stop("The 'mesh' input with only 3D coordinates of the mesh needs a 'tri' argument setting.")
-  #   }
-  #
-  # }
-  #
-  #
-  # if (dim(mesh3)[2] < 3) {
-  #   stop("The input 3D mesh must contain at least three columns.")
-  # }
-  # if (!all(c("x", "y", "z") %in% colnames(mesh3))) {
-  #   mesh3 <- mesh3[,1:3]
-  #   colnames(mesh3) <- c("x","y","z")
-  #   warning("The input 3D mesh does not contain the columns x, y and z. The first three column were used instead.")
-  # }
-
-  #
-  # if (inherits(mesh, "mesh")) {
-  #   mesh_mat <- mesh$D3
-  # } else {
-  #   mesh_mat <- mesh[,1:3]
-  # }
 
   if (is.null(tri)) {
     tri <- make_triangulation(mesh$D2)

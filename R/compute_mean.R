@@ -34,150 +34,41 @@
 #' str(avg)
 #' # plot the result with topo_plot()
 #' topo_plot(avg$average)
-compute_mean <- function(data, subject = NULL, channel = NULL, group = "time", ex_epoch = NULL,
-                         time = NULL, base_int = NULL, raw = TRUE, type = "point"){
+compute_mean <- function(data, subject = NULL, channel = NULL, group = "time", level = "epoch",
+                         ex_epoch = NULL, time = NULL,
+                         base_int = NULL, raw = TRUE, type = "point"){
 
   if (!is.null(ex_epoch)) {
     data <- exclude_epoch(data, ex_epoch = {{ ex_epoch }})
   }
 
-  # if (missing(channel)) { ## tady to potrebuju jeste nejak osetrit
-  #   if (missing(region)) {
-  #     region <- c("frontal", "central", "parietal", "occipital", "temporal")
-  #   }
-  #   if (missing(hemisphere)) {
-  #     hemisphere <- c("left", "right", "midline")
-  #   }
-  #   region_id <- diegr::pick_region(hemisphere = hemisphere, region = region)
-  #   channel_id <- region_id$sensor
-  # } else {
-  #   channel_id <- channel
-  # }  ## napsat do popisku, ze pri soucasne volbe channel, region a hemisphere se uprednostni channel a zbytek se ignoruje
+  newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ channel }}) # subset data
 
+  if (!raw && !"signal_base" %in% colnames(newdata)) {
+    stop("There is no column 'signal_base' in corrected input data.")
+  }
 
+  if (raw) {
 
-  newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ channel }})
-
-  if (raw == FALSE) {
-    if ("signal_base" %in% colnames(newdata)) {
-      newdata <- pick_data(newdata, time_rg = {{ time }})
-      #newdata <- newdata |>
-      #  dplyr::select("subject", "sensor", "epoch", "time", "signal_base")
-      newdata <- collect(newdata)
-    } else {
-      stop("There is no column 'signal_base' in corrected input data.")
-    }
-  } else {
-    if (!is.null(base_int)) {
+    if (!is.null(base_int)) { # baseline correction
       newdata <- baseline_correction(newdata, base_int = { base_int }, type = "absolute")
       newdata <- pick_data(newdata, time_rg = {{ time }})
     } else {
       newdata <- pick_data(newdata, time_rg = {{ time }})
-      #newdata <- newdata |>
-      #  dplyr::select("subject", "sensor", "epoch", "time", "signal")
-      newdata <- collect(newdata)
-      newdata <- newdata |>
-        dplyr::mutate(signal_base = .data$signal)
     }
-  }
-
-  #level_e <- levels(newdata$epoch)
-  #n_e <- length(level_e)  # number of epochs
-
-  if (type == "point") {
-
-    group_arg <- switch(group,
-                        "time" = "time",
-                        "space" = "sensor",
-                        stop("Invalid group argument."))
-
-    newdata <- newdata |>
-      dplyr::group_by(!!sym(group_arg)) |>
-      dplyr::summarise(average = mean(.data$signal_base, na.rm = TRUE), sd = sd(.data$signal_base, na.rm = TRUE))
-
-    output_list <- switch(group,
-                          "time" = { list(time = newdata$time, average = newdata$average) },
-                          "space" = { list(sensor = newdata$sensor, average = newdata$average) }
-    )
 
   }
 
-  if (group == "time") {
-
-    if (type == "jack") {
-      # pouze jeden sensor!!!!
-      ## takto je jack jen pro jeden subjekt, kdyz jich budu mit vice s ruznym poctem epoch, nebude to fungovat
-      n_t <- length(unique(newdata$time)) # number of time points
-
-      if (!is.factor(newdata$epoch)) {
-        newdata$epoch <- as.factor(newdata$epoch)
-      }
-
-      level_e <- levels(newdata$epoch)
-      n_e <- length(level_e)  # number of epochs
-      leave_one_out_means <- matrix(NA, ncol = n_t, nrow = n_e)
-
-      for (i in 1:n_e) {
-        mean_i <- newdata |>
-          exclude_epoch(ex_epoch = level_e[i]) |>
-          dplyr::group_by(.data$subject, .data$time) |>
-          dplyr::summarise(average = mean(.data$signal_base, na.rm = TRUE))
-        leave_one_out_means[i, ] <- mean_i$average
-      }
-
-      loomean <- colMeans(leave_one_out_means)
-      diff_m <- sweep(leave_one_out_means, 2, colMeans(leave_one_out_means), "-")
-      loo_var <- (n_e - 1) / n_e * colSums(diff_m^2)
-
-      output_list <- list(time = newdata$time, average = loomean, sd = sqrt(loo_var))
-     }
-    # else {
-    #   newdata <- newdata |>
-    #     dplyr::group_by(.data$subject, .data$time) |>
-    #     dplyr::summarise(average = mean(.data$signal_base, na.rm = TRUE), sd = sd(.data$signal_base, na.rm = TRUE))
-    #
-    #   output_list <- list(time = newdata$time, average = newdata$average, sd = newdata$sd)
-    # }
-
-  } else if (group == "space") {
-    if (type == "jack") {
-      n_s <- length(unique(newdata$sensor)) # number of sensors
-
-      if (!is.factor(newdata$epoch)) {
-        newdata$epoch <- as.factor(newdata$epoch)
-      }
-      level_e <- levels(newdata$epoch)
-      n_e <- length(level_e)  # number of epochs
-      leave_one_out_means <- matrix(NA, ncol = n_s, nrow = n_e)
-
-      for (i in 1:n_e) {
-        mean_i <- newdata |>
-          exclude_epoch(ex_epoch = level_e[i]) |>
-          dplyr::group_by(.data$sensor) |>
-          dplyr::summarise(average = mean(.data$signal_base, na.rm = TRUE))
-        leave_one_out_means[i, ] <- mean_i$average
-      }
-      loomean <- colMeans(leave_one_out_means)
-      output_list <- list(sensor = mean_i$sensor, average = loomean)
-
-    }
-    # else{
-    #   newdata <- newdata |>
-    #     dplyr::mutate(sensor = factor(.data$sensor, levels = unique(.data$sensor))) |>
-    #     dplyr::group_by(.data$sensor) |>
-    #     dplyr::summarise(average = mean(.data$signal_base, na.rm = TRUE), sd = sd(.data$signal_base, na.rm = TRUE))
-    #
-    #   output_list <- list(sensor = newdata$sensor, average = newdata$average, sd = newdata$sd)
-    # }
-
-  } else {
-    stop("Allowed 'group' argument values are only 'time' or 'space'.")
+  if (type == "point") { # pointwise average
+    output_df <- pointwise_mean(newdata, group = { group }, level = { level }, raw = { raw })
   }
 
-  ## pokud vyberu napr. vice elektrod a chci porovnani mezi sebou, musim najit zpusob, jak to automaticky vytahovat z dat, coz nebude uplne jednoduche...
-  ## teoreticky spise proste spocitat prumer pro vybrane elektrody nez to ukladat oboje? ovsem musi se to udelat komplexne i pro pripady prumeru subjektu, kdy ma kazdy jiny pocet epoch... melo by to jit nejak postupne...
+  if (type == "jack") { # jackknife average
+    output_df <- jackknife_mean(newdata, group = { group }, level = { level }, raw = { raw })
+  }
 
-  return(output_list)
+
+  return(output_df)
 
 }
 
@@ -186,12 +77,153 @@ compute_mean <- function(data, subject = NULL, channel = NULL, group = "time", e
 
 
 exclude_epoch <- function(data, ex_epoch){
+  # exclude chosen epoch(s)
   newdata <- data |>
     dplyr::filter(!.data$epoch %in% {{ ex_epoch }})
 
   return(newdata)
 }
 
+
+########### TO-DO: otestovat to pro group = space
+
+
+########## POZOR NA GRUPOVANI - u sensoru mam asi na vystupu potom lexikograficke serazeni, coz je ale neco, co nechci
+########## musim tomu nejak predejit, nebo upravit vystup, kazdopadne ale musim osetrit to, aby bylo spravne poradi pro spravne pojmenovani!!!!!!!!!!!!!!!!!!
+#### je to jeste horsi, nekdy to je E1, E2, E3, ... a nekdy E1, E10, E100, ... tohle chce idealne sjednotit
+#### ale hlavne je dulezite, aby to pak slo spravne do topoplotu!!! - viz reseni v shiny
+
+
+
+
+
+
+## zamyslet se nad tim, kdyz to budu chtit pro vice elektrod spolu vs. kazdou zvlast... dava smysl chtit to nekdy spolu? napr. pro prumer regionu? nebo to budeme pouzivat jen na filtraci "preproces" a tak to budeme chtit po elektrodach?
+
+
+# mm1 <- compute_mean(data_hc, subject = 1, channel = "E15")
+# mm1b <- compute_mean(data_hc, subject = 1, channel = "E15", base.int = c(125:250))
+# plot(mm1$average, type = "l", ylim = c(-50,50), col = "blue")
+# lines(mm1$average + mm1$sd, lty = 2, col = "royalblue")
+# lines(mm1$average - mm1$sd, lty = 2, col = "royalblue")
+# lines(mm1b$average, col = "red")
+# lines(mm1b$average + mm1b$sd, lty = 2, col = "coral")
+# lines(mm1b$average - mm1b$sd, lty = 2, col = "coral")
+# abline(v = 250, lty = 3, col = "gray60")
+# abline(h = 0, lty = 3, col = "gray40")
+# legend(0, 50, legend = c("raw", "baseline corected"), col = c("blue", "red"), lty = 1, cex = 0.8)
+# title("Subject HC01, sensor E15")
+#
+#
+
+## vymyslet funkci na zobrazeni prumeru - samotny plus nejake porovnani
+## muzu chtit ruzne el., ruzne skupiny/subjekty, raw vs. baseline apod.
+## vymyslet, pro co vse chci samostatnou funkci a co necham na uzivateli, at si to kresli sam
+
+
+
+pointwise_mean <- function(data, group = c("time", "space"),
+                           level = c("epoch", "sensor", "subject"), raw = TRUE) {
+  # compute pointwise mean across different levels
+
+  signal_value <- if (raw) sym("signal") else sym("signal_base") # signal vs. signal_base
+
+  level <- match.arg(level)
+
+  if (group == "time") {
+    group_vars <- switch(
+      level,
+      "epoch"  = syms(c("subject", "sensor", "time")),
+      "sensor"  = syms(c("subject", "time")),
+      "subject" = syms(c("time")),
+      stop("Invalid 'level' argument.")
+    ) # different levels of group_by for time mean
+  } else if (group == "space") {
+    group_vars <- switch(
+      level,
+      "epoch"  = syms(c("subject", "time", "sensor")),
+      "sensor"  = syms(c("subject", "sensor")),
+      "subject" = syms(c("sensor")),
+      stop("Invalid 'level' argument.")
+      ) # different levels of group_by for space mean
+  } else {
+    stop("Invalid 'group' argument.")
+  }
+
+  avg_data <- data |>
+    group_by(!!!group_vars) |>
+    summarise(avg = mean(!!signal_value, na.rm = TRUE), .groups = "drop") |>
+    collect()
+  return(avg_data)
+}
+
+leave_one_mean <- function(x, id) {
+
+    vec_ids <- unique(id)
+    if (length(vec_ids) <= 1) {
+      stop("There is no jackknife mean for less then 2 elements.")
+    }
+
+    means <- vapply(vec_ids, function(i) {
+      mean(x[id != i], na.rm = TRUE)
+    }, numeric(1))
+
+    mean(means, na.rm = TRUE)
+
+}
+
+
+jackknife_mean <- function(data, group = c("time", "space"),
+                                   level = c("epoch", "sensor", "subject"),
+                                   raw = TRUE) {
+  # compute jackknife mean across different levels
+
+  signal_value <- if (raw) sym("signal") else sym("signal_base")
+  level <- match.arg(level)
+
+  if (group == "time") {
+    group_vars <- switch(
+      level,
+      "epoch"  = syms(c("subject", "sensor", "time")),
+      "sensor" = syms(c("subject", "time")),
+      "subject" = syms(c("time")),
+      stop("Invalid 'level' argument.")
+    )
+    id_sym <- switch(
+      level,
+      "epoch"  = sym("epoch"),
+      "sensor" = sym("sensor"),
+      "subject" = sym("subject")
+    )
+  } else if (group == "space") {
+    group_vars <- switch(
+      level,
+      "epoch"  = syms(c("subject", "time", "sensor")),
+      "sensor" = syms(c("subject", "sensor")),
+      "subject" = syms(c("sensor")),
+      stop("Invalid 'level' argument.")
+    )
+    id_sym <- switch(
+      level,
+      "epoch"  = sym("epoch"),
+      "sensor" = sym("time"),
+      "subject" = sym("subject")
+    )
+  } else {
+    stop("Invalid 'group' argument.")
+  }
+
+  avg_data <- data |>
+    group_by(!!!group_vars) |>
+    summarise(avg = leave_one_mean(!!signal_value, id = !!id_sym), .groups = "drop") |>
+    collect()
+
+  return(avg_data)
+}
+
+
+#############################################################
+## old functions
 jack_epoch <- function(data, group) {
   ## jackknife average on epoch level for one subject and one sensor/time point
 
@@ -293,9 +325,9 @@ jack_subject <- function(data, group = "time") {
   }
 
   group_arg <- switch(group,
-                     "time" = "time",
-                     "space" = "sensor",
-                     stop("Invalid group argument."))
+                      "time" = "time",
+                      "space" = "sensor",
+                      stop("Invalid group argument."))
 
   n_s <- length(unique(data$subject))
 
@@ -315,46 +347,10 @@ jack_subject <- function(data, group = "time") {
 
   loomean <- colMeans(leave_one_out_means)
   output_list <- switch(group,
-                  "time" = { list(time = mean_i$time, average = loomean) },
-                  "space" = { list(sensor = mean_i$sensor, average = loomean) }
+                        "time" = { list(time = mean_i$time, average = loomean) },
+                        "space" = { list(sensor = mean_i$sensor, average = loomean) }
   )
 
   return(output_list)
 
 }
-########### TO-DO: otestovat to pro group = space
-########### prepsat take dalsi urovne do obecne formy, pokud to pujde
-########### mozna by to slo spojit do jedne funkce, kde by se rozhodovalo podle arg. level?
-########## UPRAVIT to se signal_base!!!!
-
-########## POZOR NA GRUPOVANI - u sensoru mam asi na vystupu potom lexikograficke serazeni, coz je ale neco, co nechci
-########## musim tomu nejak predejit, nebo upravit vystup, kazdopadne ale musim osetrit to, aby bylo spravne poradi pro spravne pojmenovani!!!!!!!!!!!!!!!!!!
-#### je to jeste horsi, nekdy to je E1, E2, E3, ... a nekdy E1, E10, E100, ... tohle chce idealne sjednotit
-#### ale hlavne je dulezite, aby to pak slo spravne do topoplotu!!! - viz reseni v shiny
-
-
-
-
-
-
-## zamyslet se nad tim, kdyz to budu chtit pro vice elektrod spolu vs. kazdou zvlast... dava smysl chtit to nekdy spolu? napr. pro prumer regionu? nebo to budeme pouzivat jen na filtraci "preproces" a tak to budeme chtit po elektrodach?
-
-
-# mm1 <- compute_mean(data_hc, subject = 1, channel = "E15")
-# mm1b <- compute_mean(data_hc, subject = 1, channel = "E15", base.int = c(125:250))
-# plot(mm1$average, type = "l", ylim = c(-50,50), col = "blue")
-# lines(mm1$average + mm1$sd, lty = 2, col = "royalblue")
-# lines(mm1$average - mm1$sd, lty = 2, col = "royalblue")
-# lines(mm1b$average, col = "red")
-# lines(mm1b$average + mm1b$sd, lty = 2, col = "coral")
-# lines(mm1b$average - mm1b$sd, lty = 2, col = "coral")
-# abline(v = 250, lty = 3, col = "gray60")
-# abline(h = 0, lty = 3, col = "gray40")
-# legend(0, 50, legend = c("raw", "baseline corected"), col = c("blue", "red"), lty = 1, cex = 0.8)
-# title("Subject HC01, sensor E15")
-#
-#
-
-## vymyslet funkci na zobrazeni prumeru - samotny plus nejake porovnani
-## muzu chtit ruzne el., ruzne skupiny/subjekty, raw vs. baseline apod.
-## vymyslet, pro co vse chci samostatnou funkci a co necham na uzivateli, at si to kresli sam

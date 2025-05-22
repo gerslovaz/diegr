@@ -42,7 +42,7 @@ animate_scalp(
 The output depends on the provided arguments:
 \itemize{
 \item If \code{frames_dir} is specified, individual animation frames (PNG) are saved to that directory.
-\item If \code{output_path} is specified, a video (MP4) is created and saved using the \code{av} package.
+\item If also \code{output_path} is specified, a video (MP4) is created and saved using the \code{av} package.
 \item Otherwise, the animation is displayed in an interactive rgl window.
 }
 }
@@ -53,6 +53,8 @@ The output depends on the provided arguments:
 Setting the parameter \code{tri} requires defining a \code{mesh} parameter.
 The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
 If the input \code{mesh} is a data frame or a matrix with only 3D coordinates of a point mesh, the use of previously created triangulation (through \code{tri} argument) is necessary.
+
+Note: For exporting the video, setting \code{frames_dir} together with \code{output_path} is required.
 }
 \examples{
 \dontrun{
