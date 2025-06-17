@@ -1,22 +1,25 @@
 #' Plot interactive waveform graph
 #'
-#' @description Function for plotting time series of EEG signal colour-coded by epoch in interactive plotly graph. The output in plotly format enables to easily edit the image layout.
+#' @description Function for plotting time series of EEG signal colour-coded by epoch, channel or subject (according to chosen level) in interactive plotly graph. The output in plotly format enables to easily edit the image layout.
 #'
-#' @param data A data frame, tibble or a database table with input data, must contain at least following columns: subject, sensor, time, signal, epoch.
-#' @param subject A subject chosen to plot.
-#' @param channel A channel to plot.
+#' @param data A data frame, tibble or a database table with input data containing a time column and columns corresponding to the selected `level` and `value` parameter.
+#' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal"}.
+#' @param subject A subject(s) chosen to plot.
+#' @param channel A channel(s) to plot.
 #' @param FS The sampling frequency. Default value is 250 Hz.
 #' @param t0 Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).
 #' @param col_palette Optionally, a colour palette for plotting lines. If missing, the rainbow palette is used.
-#' @param base_int Optionally, an interval for baseline correction.
+#' @param level A character specifying the level of the time curves. The possible values are \code{"epoch"}, \code{"sensor"} and \code{"subject"}. See details for more information.
+#' @param avg A logical value indicating, if the average black curve should be plotted. Default is `TRUE`.
 #'
 #' @details
-#' The input data frame or database table must contain at least following columns:
+#' The input data frame or database table must contain at least some of the following columns (according to the `level` parameter - for \code{"sensor"} level no epoch column is needed etc.):
 #' subject - a column with subject IDs,
 #' sensor - a column with sensor labels,
 #' time - a column with time point numbers,
-#' signal - a column with measured EEG signal values,
-#' epoch - a column with epoch numbers.
+#' epoch - a column with epoch numbers,
+#' signal (or other name specified in `amplitude` parameter) - a column with measured EEG signal values.
+#' Note: The higher level assumes the average signal for the given level in input data, for example `sensor` level assumes a mean sensor signal in the `amplitude` column. The input data for individual epochs together with sensor level setting will result in a mess output.
 #'
 #' @return A plotly graph.
 #'
@@ -24,57 +27,101 @@
 #' @rawNamespace import(plotly, except = last_plot)
 #' @importFrom grDevices rainbow
 #' @importFrom rlang .data
+#' @importFrom stats as.formula
 #'
 #' @export
 #'
 #' @examples
-#' # Plot waveforms for subject 1 and electrode "E65" with 250 sampling frequency rate (default)
-#' # and 10 as zero time point
-#' interactive_waveforms(epochdata, subject = 1, channel = "E65", t0 = 10)
-#'
-interactive_waveforms <- function(data, subject, channel, FS = 250, t0 = NULL, col_palette,
-                                  base_int = NULL) {
+#' # 1) Plot epoch waveforms for subject 1 and electrode "E65"
+#' # with 250 sampling frequency rate (default) and 10 as zero time point
+#' interactive_waveforms(epochdata, amplitude = "signal", subject = 1, channel = "E65",
+#' t0 = 10, level = "epoch")
+#' # 2) Plot sensor level waveforms for subject 1 and electrodes "E65" and "E182"
+#' # a) preparing data
+#' sendata <- compute_mean(epochdata, subject = 1, channel = c("E65", "E182"), group = "time",
+#'  level = "epoch")
+#' # b) plot the waveforms without the average
+#' interactive_waveforms(sendata, amplitude = "average", subject = 1, t0 = 10,
+#' level = "sensor", avg = FALSE)
+interactive_waveforms <- function(data, amplitude = "signal", subject = NULL, channel = NULL,
+                                  FS = 250, t0 = NULL, col_palette, level = c("epoch", "sensor", "subject"),
+                                  avg = TRUE) {
 
-  if (missing(subject)) {
-    stop("Argument 'subject' is missing, with no default.")
+  amp_value <- {{ amplitude }}
+  amp_name <- rlang::as_string(amp_value)
+
+  if (!amp_name %in% names(data)) {
+    stop(paste0("There is no column '", amp_name, "' in the input data."))
   }
 
-  if (missing(channel)) {
-    stop("Argument 'channel' is missing, with no default.")
+  # if (missing(subject)) {
+  #   stop("Argument 'subject' is missing, with no default.")
+  # }
+  #
+  # if (missing(channel)) {
+  #   stop("Argument 'channel' is missing, with no default.")
+  # }
+  #
+  # required_cols <- c("time", "signal", "epoch", "sensor", "subject")
+  # missing_cols <- setdiff(required_cols, colnames(data))
+  #
+  # if (length(missing_cols) > 0) {
+  #   stop(paste("The following required data columns are missing:",
+  #              paste(missing_cols, collapse = ", ")))
+  # }
+
+
+
+
+
+
+  # data <- data |>
+  #   dplyr::filter(.data$subject == {{ subject }} & (.data$sensor == {{ channel }}))  |>
+  #   dplyr::select("time", "signal", "epoch", "subject", "sensor")
+  # if (!is.null(base_int)) {
+  #   newdata <- baseline_correction(data, base_int = { base_int }, type = "absolute")
+  # } else {
+  #   newdata <- collect(data)
+  #   newdata <- newdata |>
+  #     dplyr::mutate(signal_base = .data$signal)
+  # }
+
+
+  group_arg <- switch(
+    level,
+    "epoch" = sym("epoch"),
+    "sensor" = sym("sensor"),
+    "subject" = sym("subject"),
+    stop("Invalid level argument.")
+  )
+
+  group_name <- rlang::as_string(group_arg)
+
+  if (!group_name %in% names(data)) {
+    stop(paste0("There is no column '", level, "' required for chosen level."))
   }
 
-  required_cols <- c("time", "signal", "epoch", "sensor", "subject")
-  missing_cols <- setdiff(required_cols, colnames(data))
-
-  if (length(missing_cols) > 0) {
-    stop(paste("The following required data columns are missing:",
-               paste(missing_cols, collapse = ", ")))
-  }
-
-
-  data <- data |>
-    dplyr::filter(.data$subject == {{ subject }} & (.data$sensor == {{ channel }}))  |>
-    dplyr::select("time", "signal", "epoch", "subject", "sensor")
-  if (!is.null(base_int)) {
-    newdata <- baseline_correction(data, base_int = { base_int }, type = "absolute")
-  } else {
-    newdata <- collect(data)
-    newdata <- newdata |>
-      dplyr::mutate(signal_base = .data$signal)
-  }
-
+  newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ channel }})
 
   newdata <- newdata |>
-    dplyr::select("time", "signal_base", "epoch") |>
-    group_by(.data$time) |>
-    mutate(average = mean(.data$signal_base, na.rm = TRUE))
-  #data <- dplyr::collect(data)
-  newdata$epoch <- factor(newdata$epoch)
+    dplyr::select("time", !!amp_value, !!group_arg) #|>
+    #group_by(.data$time) |>
+    #mutate(avg = mean(newdata[[col_name]], na.rm = TRUE))
 
-  label <- rlang::englue("Subject { subject }, channel { channel }")
+  if (avg == TRUE) {
+    avgdata <- newdata |>
+      #dplyr::select("time", !!col_value, !!group_arg) |>
+      group_by(.data$time) |>
+      summarise(avg = mean(.data[[amp_name]], na.rm = TRUE), .groups = "drop")
+  }
+
+
+  if (!is.factor(newdata[[group_name]])) { # convert to factor
+    newdata[[group_name]] <- factor(newdata[[group_name]])
+  }
 
   if (missing(col_palette)) {
-    n <- length(levels(newdata$epoch))
+    n <- length(levels(newdata[[group_name]]))
     col_palette <- rainbow(n)
   }
 
@@ -87,17 +134,24 @@ interactive_waveforms <- function(data, subject, channel, FS = 250, t0 = NULL, c
   k0 <- t0 * k
 
   curv_epoch <- newdata |>
-    group_by(.data$epoch) |>
-    plot_ly(x = ~time * k - k0, y = ~signal_base, color = ~epoch, colors = col_palette,
-            type = "scatter",  mode = "lines")
+    group_by(!!group_arg) |>
+    plot_ly() |>
+    add_trace(x = ~time * k - k0, y = as.formula(paste0("~.data$", amp_name)), color = as.formula(paste0("~", group_name)), colors = col_palette,
+            type = "scatter",  mode = "lines",
+            name = ~.data[[group_name]])
+  if (avg == TRUE) {
+    curv_epoch <- curv_epoch |>
+      add_trace(data = avgdata, x = ~time * k - k0, y = ~.data$avg, type = 'scatter', mode = 'lines',
+                line = list(color = 'black'),
+                name = 'Average')
+  }
+
   curv_epoch |>
-    add_trace(x = ~time * k - k0, y = ~average, type = 'scatter', mode = 'lines',
-              line = list(color = 'black'),
-              name = 'Average') |>
-    layout(xaxis = list(title = "Time (ms)"),
+    plotly::layout(xaxis = list(title = "Time (ms)"),
            yaxis = list(title = TeX("\\mu V")),
-           showlegend = F,
-           title = label) |>
+           showlegend = FALSE
+           ) |>
     config(mathjax = 'cdn')
 
 }
+

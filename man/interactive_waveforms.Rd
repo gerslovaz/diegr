@@ -6,20 +6,24 @@
 \usage{
 interactive_waveforms(
   data,
-  subject,
-  channel,
+  amplitude = "signal",
+  subject = NULL,
+  channel = NULL,
   FS = 250,
   t0 = NULL,
   col_palette,
-  base_int = NULL
+  level = c("epoch", "sensor", "subject"),
+  avg = TRUE
 )
 }
 \arguments{
-\item{data}{A data frame, tibble or a database table with input data, must contain at least following columns: subject, sensor, time, signal, epoch.}
+\item{data}{A data frame, tibble or a database table with input data containing a time column and columns corresponding to the selected \code{level} and \code{value} parameter.}
 
-\item{subject}{A subject chosen to plot.}
+\item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal"}.}
 
-\item{channel}{A channel to plot.}
+\item{subject}{A subject(s) chosen to plot.}
+
+\item{channel}{A channel(s) to plot.}
 
 \item{FS}{The sampling frequency. Default value is 250 Hz.}
 
@@ -27,25 +31,35 @@ interactive_waveforms(
 
 \item{col_palette}{Optionally, a colour palette for plotting lines. If missing, the rainbow palette is used.}
 
-\item{base_int}{Optionally, an interval for baseline correction.}
+\item{level}{A character specifying the level of the time curves. The possible values are \code{"epoch"}, \code{"sensor"} and \code{"subject"}. See details for more information.}
+
+\item{avg}{A logical value indicating, if the average black curve should be plotted. Default is \code{TRUE}.}
 }
 \value{
 A plotly graph.
 }
 \description{
-Function for plotting time series of EEG signal colour-coded by epoch in interactive plotly graph. The output in plotly format enables to easily edit the image layout.
+Function for plotting time series of EEG signal colour-coded by epoch, channel or subject (according to chosen level) in interactive plotly graph. The output in plotly format enables to easily edit the image layout.
 }
 \details{
-The input data frame or database table must contain at least following columns:
+The input data frame or database table must contain at least some of the following columns (according to the \code{level} parameter - for \code{"sensor"} level no epoch column is needed etc.):
 subject - a column with subject IDs,
 sensor - a column with sensor labels,
 time - a column with time point numbers,
-signal - a column with measured EEG signal values,
-epoch - a column with epoch numbers.
+epoch - a column with epoch numbers,
+signal (or other name specified in \code{amplitude} parameter) - a column with measured EEG signal values.
+Note: The higher level assumes the average signal for the given level in input data, for example \code{sensor} level assumes a mean sensor signal in the \code{amplitude} column. The input data for individual epochs together with sensor level setting will result in a mess output.
 }
 \examples{
-# Plot waveforms for subject 1 and electrode "E65" with 250 sampling frequency rate (default)
-# and 10 as zero time point
-interactive_waveforms(epochdata, subject = 1, channel = "E65", t0 = 10)
-
+# 1) Plot epoch waveforms for subject 1 and electrode "E65"
+# with 250 sampling frequency rate (default) and 10 as zero time point
+interactive_waveforms(epochdata, amplitude = "signal", subject = 1, channel = "E65",
+t0 = 10, level = "epoch")
+# 2) Plot sensor level waveforms for subject 1 and electrodes "E65" and "E182"
+# a) preparing data
+sendata <- compute_mean(epochdata, subject = 1, channel = c("E65", "E182"), group = "time",
+ level = "epoch")
+# b) plot the waveforms without the average
+interactive_waveforms(sendata, amplitude = "average", subject = 1, t0 = 10,
+level = "sensor", avg = FALSE)
 }

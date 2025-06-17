@@ -6,55 +6,68 @@
 \usage{
 compute_mean(
   data,
+  amplitude = "signal_base",
   subject = NULL,
   channel = NULL,
   group = "time",
   level = "epoch",
   ex_epoch = NULL,
   time = NULL,
-  base_int = NULL,
-  raw = TRUE,
   type = "point"
 )
 }
 \arguments{
-\item{data}{A data frame, tibble or a database table with input data, required columns: subject, sensor, epoch, time and signal (for raw data) or signal_base (for baseline corrected data).}
+\item{data}{A data frame, tibble or a database table with input data, required columns: subject, sensor, epoch (only for epoch level), time and signal (for raw data) or signal_base (for baseline corrected data).}
 
-\item{subject}{A vector of subject indices to be included in the average calculation. If multiple values are provided, the overall mean across all subjects will be calculated.}
+\item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal_base"} for computing average from baseline corrected signal.}
+
+\item{subject}{A vector of subject indices to be included in the average calculation.}
 
 \item{channel}{A character vector specifying the channels to be averaged.  If NULL, all channels present in input data are included.}
 
 \item{group}{A character specifying the grouping factor. Default is \code{"time"} for calculation of the average at individual time points, other possibility is \code{"space"} for calculation of the average at individual space points (sensors).}
 
+\item{level}{A character specifying the level of average calculation. The possible values are \code{"epoch"}, \code{"sensor"} and \code{"subject"}. See details for more information.}
+
 \item{ex_epoch}{Optional. A vector of epoch indices to be excluded from the average calculation.}
 
 \item{time}{A numeric vector specifying the time points used for computing the average signal. If NULL, the whole time interval is included.}
 
-\item{base_int}{Numeric character vector including time points to use as a baseline. See \code{\link{baseline_correction}} for details.}
-
-\item{raw}{A logical value indicating whether the input data are in raw form (\code{raw = TRUE}) or baseline corrected (\code{raw = FALSE}). Default is \code{TRUE}.}
-
-\item{type}{A character specifying the method of calculating the average, \code{"point"} for pointwise arithmetic average (default) and \code{"jack"} for jacknife average.}
+\item{type}{A character specifying the method of calculating the average, \code{"point"} for pointwise arithmetic average (default) and \code{"jack"} for jackknife leave-one-out average.}
 }
 \value{
-A list with result average and standard deviation for each time point (\code{group = "time"}) or sensor (\code{group = "space"}).
+A tibble with result average according to the chosen \code{level} and \code{group} arguments.
 }
 \description{
-Function calculates the average signal for chosen subject (or average of more subjects) in temporal or spatial domain. The function computes a single overall average, considering all provided subjects and channels (or time points). If multiple subjects are provided, the result is the average across all specified subjects. Similarly, if multiple channels/time points are provided, the result is the average of all specified channels/time points.
+Function calculates a pointwise or a jackknife (leave-one-out) average signal for chosen subject (or more subjects) in temporal or spatial domain. The function computes an average at subject, sensor/time point or epoch level (according to the \code{level} parameter).
+}
+\details{
+The \code{level} parameter enables to choose the level at which the average is calculated:
+\itemize{
+\item \code{"epoch"} means averaging on epoch level, the result is the average curve (from all included epochs) for individual sensors and subjects in the \code{group = "time"} case or the average area (from all included epochs) for individual time points and subjects in the \code{group = "space"} case.
+\item \code{"sensor"} means averaging on sensor or time point level, the result is the average curve from all included sensors for individual subjects in the \code{group = "time"} case or the average area from all time points for individual subjects in the \code{group = "space"} case.
+\item \code{"subject"} means averaging on subject level, the result is the average curve or area from all included subjects.
+The function assumes input adapted to the desired level of averaging (i.e. for epoch level the epoch column must be present etc.).
+}
 }
 \examples{
-# Average signal for subject 1 and electrode E1 with baseline correction on interval 1:10
+# Average (pointwise) raw signal for subject 1 and electrode E1
 # without outlier epoch 14
-avg <- compute_mean(epochdata, subject = 1, channel = "E1", base_int = 1:10, ex_epoch = 14)
-avg$average
+avg <- compute_mean(epochdata, amplitude = "signal", subject = 1, channel = "E1", level = "epoch",
+ ex_epoch = 14)
+str(avg)
 # plot the result
 plot(avg$average, type = "l")
 
 # Average signal for subject 1 in all electrodes in time point 11 with baseline correction
 # on interval 1:10 (again without outlier epoch 14)
-avg <- compute_mean(epochdata, subject = 1, time = 11, group = "space",
-base_int = 1:10, ex_epoch = 14)
+# a) prepare corrected data
+data01 <- epochdata |> dplyr::filter(.data$subject == 1)
+basedata <- baseline_correction(data01, base_int = 1:10, type = "absolute")
+# b) compute the average in time point 11
+avg <- compute_mean(basedata, amplitude = "signal_base", time = 11, level = "epoch",
+ group = "space", ex_epoch = 14)
 str(avg)
-# plot the result with topo_plot()
+# c) plot the result with topo_plot()
 topo_plot(avg$average)
 }

@@ -87,7 +87,7 @@ The package assumes that the input data has already been preprocessed (artifacts
 
 The useful tool in outliers detection is interactive plot with boxplots of amplitudes (`boxplot_epoch()`) or response times (`boxplot_rt()`) in individual epochs. The `plotly` output enables to easily determine the epoch number from which outliers come and additionally allows editing of the output image layout.
 
-There is also an interactive graph of amplitudes in individual epochs with the average plotted (`interactive_waveforms()`).
+There is also an interactive graph of amplitudes in individual epochs with (or without) the average plotted (`interactive_waveforms()`). This function can also be used to compare signal for different sensor or subjects according to the `level` argument setting. 
 
 ```{r}
 # in interactive boxplot of signal we choose subject, 
