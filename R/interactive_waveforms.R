@@ -38,8 +38,8 @@
 #' t0 = 10, level = "epoch")
 #' # 2) Plot sensor level waveforms for subject 1 and electrodes "E65" and "E182"
 #' # a) preparing data
-#' sendata <- compute_mean(epochdata, subject = 1, channel = c("E65", "E182"), group = "time",
-#'  level = "epoch")
+#' sendata <- compute_mean(epochdata, amplitude = "signal", subject = 1, channel = c("E65", "E182"),
+#'  group = "time", level = "epoch")
 #' # b) plot the waveforms without the average
 #' interactive_waveforms(sendata, amplitude = "average", subject = 1, t0 = 10,
 #' level = "sensor", avg = FALSE)

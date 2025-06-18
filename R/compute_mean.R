@@ -46,7 +46,7 @@
 #'  group = "space", ex_epoch = 14)
 #' str(avg)
 #' # c) plot the result with topo_plot()
-#' topo_plot(avg$average)
+#' topo_plot(data = avg, amplitude = "average")
 compute_mean <- function(data, amplitude = "signal_base", subject = NULL, channel = NULL, group = "time", level = "epoch",
                          ex_epoch = NULL, time = NULL, type = "point"){
 

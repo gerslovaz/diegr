@@ -5,9 +5,11 @@
 \title{Plot topographic map of EEG signal}
 \usage{
 topo_plot(
-  signal,
+  data,
+  amplitude,
   mesh,
   coords = NULL,
+  template = NULL,
   col_range = NULL,
   col_scale = NULL,
   contour = FALSE,
@@ -17,11 +19,15 @@ topo_plot(
 )
 }
 \arguments{
-\item{signal}{A vector with signal to plot.}
+\item{data}{A data frame, tibble or a database table with input data to plot with at least two columns: \code{sensor} with sensor labels and the column with the EEG amplitude specified in the argument \code{amplitude}.}
+
+\item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values.}
 
 \item{mesh}{A \code{"mesh"} object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.}
 
-\item{coords}{Sensor coordinates as a tibble or data frame with named \code{x} and \code{y} columns. If not defined, the HCGSN256 template is used.}
+\item{coords}{Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the HCGSN256 template is used.}
+
+\item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.}
 
 \item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.}
 
@@ -43,28 +49,32 @@ Plot a topographic circle or polygon map of the EEG signal amplitude using topog
 The output in the form of a ggplot object allows to easily edit the result image properties.
 }
 \details{
-Be careful when choosing the argument \code{col_range}. If the input \code{signal} contains values outside the chosen range, this will cause "holes" in the resulting plot.
+Be careful when choosing the argument \code{col_range}. If the amplitude in input data contains values outside the chosen range, this will cause "holes" in the resulting plot.
 To compare results for different subjects or conditions, set the same values of \code{col_range} and \code{col_scale} arguments in all cases.
 The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
 }
 \examples{
 # Plot average topographic map of signal for subject 2 from the time point 10
-# (the time of the stimulus)
-# the outliers (epoch 14 and 15) are extracted before computing average
+# (the time of the stimulus) without the outliers (epoch 14 and 15)
 
 # a) preparing data
-s1 <- epochdata |>
-dplyr::filter(.data$time == 10 & .data$subject == 2 & !.data$epoch \%in\% c(14,15)) |>
-dplyr::select("signal", "sensor", "epoch") |>
-dplyr::group_by(.data$sensor) |>
-dplyr::mutate(average = mean(.data$signal, na.rm = TRUE))
-s1 <- s1$average[1:204]
+# a1) extract required data
+edata <- epochdata |>
+dplyr::filter(subject == 2 & time \%in\% 1:10 & epoch \%in\% 1:13)
+# a2) baseline correction (needed for suitable topographic map)
+data_base <- baseline_correction(edata, base_int = 1:10)
+# a3) average computing
+data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, time = 10,
+ type = "point")
+
 
 # b) plotting the topographic circle map with contours and legend
 # interval (-30,15) is selected in consideration of the signal progress
-topo_plot(signal = s1, col_range = c(-30, 15), contour = TRUE)
+topo_plot(data = data_mean, amplitude = "average", template = "HCGSN256",
+col_range = c(-30, 15), contour = TRUE)
 
 # c) plotting the same map without contours but with sensor labels
-topo_plot(signal = s1, col_range = c(-30, 15), names = TRUE)
+topo_plot(data = data_mean, amplitude = "average", template = "HCGSN256",
+ col_range = c(-30, 15), names = TRUE)
 
 }

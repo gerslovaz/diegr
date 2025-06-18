@@ -5,9 +5,11 @@
 #' The output in the form of a ggplot object allows to easily edit the result image properties.
 #'
 #'
-#' @param signal A vector with signal to plot.
+#' @param data A data frame, tibble or a database table with input data to plot with at least two columns: \code{sensor} with sensor labels and the column with the EEG amplitude specified in the argument \code{amplitude}.
+#' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values.
 #' @param mesh A \code{"mesh"} object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
-#' @param coords Sensor coordinates as a tibble or data frame with named \code{x} and \code{y} columns. If not defined, the HCGSN256 template is used.
+#' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the HCGSN256 template is used.
+#' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.
 #' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
 #' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.
@@ -17,7 +19,7 @@
 
 #'
 #' @details
-#' Be careful when choosing the argument \code{col_range}. If the input \code{signal} contains values outside the chosen range, this will cause "holes" in the resulting plot.
+#' Be careful when choosing the argument \code{col_range}. If the amplitude in input data contains values outside the chosen range, this will cause "holes" in the resulting plot.
 #' To compare results for different subjects or conditions, set the same values of \code{col_range} and \code{col_scale} arguments in all cases.
 #' The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
 #'
@@ -33,27 +35,38 @@
 #'
 #' @examples
 #' # Plot average topographic map of signal for subject 2 from the time point 10
-#' # (the time of the stimulus)
-#' # the outliers (epoch 14 and 15) are extracted before computing average
+#' # (the time of the stimulus) without the outliers (epoch 14 and 15)
 #'
 #' # a) preparing data
-#' s1 <- epochdata |>
-#' dplyr::filter(.data$time == 10 & .data$subject == 2 & !.data$epoch %in% c(14,15)) |>
-#' dplyr::select("signal", "sensor", "epoch") |>
-#' dplyr::group_by(.data$sensor) |>
-#' dplyr::mutate(average = mean(.data$signal, na.rm = TRUE))
-#' s1 <- s1$average[1:204]
+#' # a1) extract required data
+#' edata <- epochdata |>
+#' dplyr::filter(subject == 2 & time %in% 1:10 & epoch %in% 1:13)
+#' # a2) baseline correction (needed for suitable topographic map)
+#' data_base <- baseline_correction(edata, base_int = 1:10)
+#' # a3) average computing
+#' data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, time = 10,
+#'  type = "point")
+#'
 #'
 #' # b) plotting the topographic circle map with contours and legend
 #' # interval (-30,15) is selected in consideration of the signal progress
-#' topo_plot(signal = s1, col_range = c(-30, 15), contour = TRUE)
+#' topo_plot(data = data_mean, amplitude = "average", template = "HCGSN256",
+#' col_range = c(-30, 15), contour = TRUE)
 #'
 #' # c) plotting the same map without contours but with sensor labels
-#' topo_plot(signal = s1, col_range = c(-30, 15), names = TRUE)
+#' topo_plot(data = data_mean, amplitude = "average", template = "HCGSN256",
+#'  col_range = c(-30, 15), names = TRUE)
 #'
-topo_plot <- function(signal, mesh, coords = NULL,
+topo_plot <- function(data, amplitude, mesh, coords = NULL, template = NULL,
                       col_range = NULL, col_scale = NULL, contour = FALSE, legend = TRUE,
                       names = FALSE, names_vec = NULL) {
+
+  amp_value <- {{ amplitude }}
+  amp_name <- rlang::as_string(amp_value)
+
+  if (!amp_name %in% names(data)) {
+    stop(paste0("There is no column '", amp_name, "' in the input data."))
+  }
 
   if (!(is.logical(contour))) {
     stop("Argument 'contour' has to be logical.")
@@ -68,22 +81,36 @@ topo_plot <- function(signal, mesh, coords = NULL,
   }
 
   if (is.null(col_range)) {
-    col_range <- 1.1 * range(signal)
+    col_range <- 1.1 * range(data[[amp_name]])
   }
   if (is.null(col_scale)) {
     col_scale <- create_scale(col_range)
   }
-  if (names == TRUE && is.null(names_vec)) {
-    if (!is.null(coords)) {
-      stop("With using own coordinates please define the 'names_vec' or set 'names' to FALSE.")
-    } else {names_vec <- diegr::HCGSN256$sensor}
-      }
-  if (is.null(coords)) {
+
+  if (!is.null(template)) {
+    coords <- switch(template,
+                          "HCGSN256" = diegr::HCGSN256$D2)
+    if (is.null(coords)) {
+      stop("Unknown template.")
+    }
+  }
+
+  if (is.null(template) && is.null(coords)) {
     coords <- diegr::HCGSN256$D2
   }
 
 
-  required_cols <- c("x", "y")
+  #if (names == TRUE && is.null(names_vec)) {
+  #  if (!is.null(coords)) {
+  #    stop("With using own coordinates please define the 'names_vec' or set 'names' to FALSE.")
+  #  } else {names_vec <- coords$sensor}
+  #   }
+  #if (is.null(coords)) {
+  #  coords <- diegr::HCGSN256$D2
+  #}
+
+
+  required_cols <- c("x", "y", "sensor")
   missing_cols <- setdiff(required_cols, colnames(coords))
 
   if (length(missing_cols) > 0) {
@@ -91,9 +118,13 @@ topo_plot <- function(signal, mesh, coords = NULL,
                paste(missing_cols, collapse = ", ")))
   }
 
-  if (length(coords[["x"]]) != length(signal)) {
-    stop("Arguments 'signal' and 'coords' must be the same length.")
+  if (names == TRUE && is.null(names_vec)) {
+    names_vec <- coords$sensor
   }
+
+  #if (length(coords[["x"]]) != length(signal)) { ## tohle asi pri novem pristupu match pres sensor nebude treba
+  #  stop("Arguments 'signal' and 'coords' must be the same length.")
+  #}
 
   if (missing(mesh)) {
     mesh <- point_mesh(dim = 2, template = "HCGSN256")
@@ -108,11 +139,14 @@ topo_plot <- function(signal, mesh, coords = NULL,
   M <- max(max(mesh_mat[,2], na.rm = TRUE), max(coords[["y"]]))
   x0 <- mean(mesh_mat[,1], na.rm = TRUE)
 
-  if (ncol(coords) > 2) {
-    coords <- data.frame(x = coords[["x"]], y = coords[["y"]])
-  }
+  coords_df <- data.frame(x = coords[["x"]], y = coords[["y"]])
 
-  y_hat <- IM(coords, signal, mesh_mat)$Y_hat
+  sensor_order <- as.factor(coords$sensor) # reorder data according to sensor
+  data_order <- data |>
+      mutate(sensor = factor(.data$sensor, levels = sensor_order)) |>
+      arrange(.data$sensor)
+
+  y_hat <- IM(coords_df, data_order[[amp_name]], mesh_mat)$Y_hat
   ycp_IM <- y_hat[1:dim(mesh_mat)[1]]
   interp_data <- data.frame(x = mesh_mat[,1], y = mesh_mat[,2], ycp_IM = ycp_IM)
 
@@ -156,7 +190,7 @@ topo_plot <- function(signal, mesh, coords = NULL,
     geom_point(data = coords, aes(x = .data$x, y = .data$y), color = "black", cex = 0.7)
 
   if (names == TRUE) {
-    g <- g + geom_text(data = coords, aes(label = names_vec), size = 2, vjust = -0.9)
+    g <- g + geom_text(data = coords_df, aes(label = names_vec), size = 2, vjust = -0.9)
   }
 
   g +

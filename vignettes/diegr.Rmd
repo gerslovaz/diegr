@@ -164,25 +164,24 @@ Notes:
 
 ```{r, fig.show='hold'}
 #| eval: true
-# Plot average topographic map of signal for subject 1 from the time point 10
-# (the time of the stimulus)
+# Plot average topographic map of baseline corrected signal for subject 1 
+# from the time point 10 (the time of the stimulus)
 # the outlier epoch 14 is extracted before computing average
 
-# a) preparing data
-s1 <- epochdata |>
-dplyr::filter(time == 10 & subject == 1 & !epoch %in% 14) |>
-dplyr::select("signal", "sensor", "epoch") |>
-dplyr::group_by(.data$sensor) |>
-dplyr::mutate(average = mean(.data$signal, na.rm = TRUE))
-s1 <- s1$average[1:204]
+# preparing data
+edata <- epochdata |>
+  dplyr::filter(subject == 1 & time %in% 1:10)
+data_base <- baseline_correction(edata, base_int = 1:10)
+data_mean <- compute_mean(data_base, amplitude = "signal_base", time = 10,
+                          type = "point", ex_epoch = 14)
 
 # plotting the topographic polygon map with contours and legend
 # interval (-30,15) is selected in consideration of the signal progress
-topo_plot(signal = s1, col_range = c(-30, 15), contour = TRUE)
+topo_plot(data = data_mean, amplitude = "average", col_range = c(-30, 15), contour = TRUE)
 
 # plotting the same map without contours and legend 
 # but with sensor labels and adding the title
-g1 <- topo_plot(signal = s1, col_range = c(-30, 15),
+g1 <- topo_plot(data = data_mean, amplitude = "average", col_range = c(-30, 15),
                 names = TRUE, legend = FALSE)
 g1 + ggplot2::ggtitle("Subject 1, time of the stimulus")
 ```

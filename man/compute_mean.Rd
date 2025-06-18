@@ -69,5 +69,5 @@ avg <- compute_mean(basedata, amplitude = "signal_base", time = 11, level = "epo
  group = "space", ex_epoch = 14)
 str(avg)
 # c) plot the result with topo_plot()
-topo_plot(avg$average)
+topo_plot(data = avg, amplitude = "average")
 }

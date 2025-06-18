@@ -48,7 +48,7 @@
 #'
 #' # Computing coordinates of a polygon mesh in 2D and 3D in one step (starting number 3000 points):
 #' M <- point_mesh(n = 3000, template = "HCGSN256")
-point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordinates = NULL, type = 'polygon') {
+point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordinates = NULL, type = "polygon") {
 
   if (is.null(template) && !is.null(own_coordinates)) {
     if (!"D2" %in% names(own_coordinates)) {
@@ -59,7 +59,8 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordina
     }
     coordinates <- {{ own_coordinates }}
   } else if (is.null(template) && is.null(own_coordinates)) {
-    coordinates <- diegr::HCGSN256 #stop("Please choose a template.")
+    coordinates <- diegr::HCGSN256
+
    }
 
 
@@ -72,6 +73,8 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordina
   }
 
   coords <- coordinates$D2
+  coords_xy <- coords |>
+    dplyr::select("x", "y")
   conv_hull <- chull(coords$x, coords$y)
   ch_x <- coords$x[conv_hull]
   ch_y <- coords$y[conv_hull]
@@ -98,7 +101,7 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordina
   mesh_circle <- mesh_circle[index,]
   mesh_circle <- data.frame(x = mesh_circle[,1], y = mesh_circle[,2])
 
-  coords_ch <- coords[conv_hull,]
+  coords_ch <- coords_xy[conv_hull,]
   coords_ch <- rbind(coords_ch, coords_ch[1,])
 
   if (identical(dim, 2)) {
@@ -115,28 +118,32 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordina
            stop("Invalid type argument")
     )
   } else if (identical(dim, 3)) {
+    coords_xyz <- coordinates$D3 |>
+      dplyr::select("x", "y", "z")
     switch(type,
            "circle" = {
-             mesh_out <- list(D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh_circle))
+             mesh_out <- list(D3 = recompute_3d(coords_xy, coords_xyz, mesh_circle))
            },
            "polygon" = {
              inside <- sp::point.in.polygon(mesh_circle$x, mesh_circle$y, coords_ch$x, coords_ch$y)
              mesh_polygon <- mesh_circle[inside > 0,]
-             mesh_out <- list(D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh_polygon))
+             mesh_out <- list(D3 = recompute_3d(coords_xy, coords_xyz, mesh_polygon))
            },
            stop("Invalid type argument")
     )
   } else if (identical(dim, c(2, 3)) || identical(dim, c(3, 2))) {
+    coords_xyz <- coordinates$D3 |>
+      dplyr::select("x", "y", "z")
     switch(type,
            "circle" = {
              mesh_out <- list(D2 = data.frame(x = mesh_circle[,1], y = mesh_circle[,2]),
-                              D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh_circle))
+                              D3 = recompute_3d(coords_xy, coords_xyz, mesh_circle))
            },
            "polygon" = {
              inside <- sp::point.in.polygon(mesh_circle$x, mesh_circle$y, coords_ch$x, coords_ch$y)
              mesh_polygon <- mesh_circle[inside > 0,]
              mesh_out <- list(D2 = data.frame(x = mesh_polygon[,1], y = mesh_polygon[,2]),
-                              D3 = recompute_3d(coordinates$D2, coordinates$D3, mesh_polygon))
+                              D3 = recompute_3d(coords_xy, coords_xyz, mesh_polygon))
            },
            stop("Invalid type argument")
     )
