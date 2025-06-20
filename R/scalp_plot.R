@@ -8,8 +8,9 @@
 #' @param mesh An object of class \code{"mesh"} used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. Can also be a data frame or a matrix with x, y and z coordinates of a point mesh. See details for more information about the structure.
 #' @param tri A matrix with indices of the triangles. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the input mesh object (or a list).
 #' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y}, \code{z} and \cite{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the HCGSN256 template is used.
+#' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of the input signal is used.
-#' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
+#' @param col_scale Optionally, a colour scale to use for plotting. If not defined, it is computed from \code{col_range}.
 #' @param view A character denoting the view of the plot (according to neurological terminology). Possible values are: \code{"superior", "anterior", "posterior", "left", "right"}. If missing, the default view according to user settings is displayed.
 #'
 #' @details
@@ -46,7 +47,8 @@
 #' scalp_plot(data_mean, amplitude = "average", col_range = c(-30, 15))
 
 scalp_plot <- function(data, amplitude, mesh, tri,
-                      coords = NULL, col_range = NULL, col_scale = NULL,
+                      coords = NULL, template = NULL,
+                      col_range = NULL, col_scale = NULL,
                       view = "posterior") {
 
   amp_value <- {{ amplitude }}
@@ -56,8 +58,27 @@ scalp_plot <- function(data, amplitude, mesh, tri,
     stop(paste0("There is no column '", amp_name, "' in the input data."))
   }
 
+  if (!is.null(template)) {
+    coords <- switch(template,
+                     "HCGSN256" = diegr::HCGSN256$D3,
+                     stop("Unknown template."))
+  }
+
+  if (is.null(template) && is.null(coords)) {
+    coords <- diegr::HCGSN256$D3
+  }
+
+  required_cols <- c("x", "y", "z", "sensor")
+  missing_cols <- setdiff(required_cols, colnames(coords))
+
+  if (length(missing_cols) > 0) {
+    stop(paste("The following required columns in 'coords' are missing:",
+               paste(missing_cols, collapse = ", ")))
+  }
+
+
   if (missing(mesh)) {
-    mesh <- point_mesh(dim = c(2,3), template = "HCGSN256", type = "polygon")
+    mesh <- point_mesh(dim = c(2,3), template = {{ template }}, type = "polygon")
   }
 
   if (is.list(mesh) && !is.data.frame(mesh)) {
@@ -96,17 +117,6 @@ scalp_plot <- function(data, amplitude, mesh, tri,
   }
   if (is.null(col_scale)) {
     col_scale <- create_scale(col_range)
-  }
-  if (is.null(coords)) {
-    coords <- diegr::HCGSN256$D3
-  }
-
-  required_cols <- c("x", "y", "z", "sensor")
-  missing_cols <- setdiff(required_cols, colnames(coords))
-
-  if (length(missing_cols) > 0) {
-    stop(paste("The following required columns in 'coords' are missing:",
-               paste(missing_cols, collapse = ", ")))
   }
 
   coords_xyz <- coords |>
