@@ -6,9 +6,11 @@
 \usage{
 animate_scalp(
   data,
+  amplitude,
   mesh,
   tri = NULL,
   coords = NULL,
+  template = NULL,
   col_range = NULL,
   col_scale = NULL,
   sec = 0.3,
@@ -18,13 +20,17 @@ animate_scalp(
 )
 }
 \arguments{
-\item{data}{An input data frame or tibble with required columns: \code{time} - the number of time point, \code{sensor} - the sensor label, \code{signal} - EEG signal value to plot.}
+\item{data}{An input data frame or tibble with at least this required columns: \code{time} - the number of time point, \code{sensor} - the sensor label and the column with the EEG amplitude to plot specified in the argument \code{amplitude}.}
+
+\item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values.}
 
 \item{mesh}{An object of class \code{"mesh"} used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. Can also be a data frame or a matrix with x, y and z coordinates of a point mesh. See \code{\link{scalp_plot}} for details about the structure.}
 
 \item{tri}{A matrix with indices of the triangles. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the input mesh object (or a list).}
 
 \item{coords}{Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{z} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.}
+
+\item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.}
 
 \item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.}
 
@@ -63,6 +69,6 @@ Note: For exporting the video, setting \code{frames_dir} together with \code{out
 # Prepare a data structure:
 s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time \%in\% c(10:20))
 # Plot animation with default mesh and triangulation:
-animate_scalp(s1e05)
+animate_scalp(s1e05, amplitude = "signal")
 }
 }

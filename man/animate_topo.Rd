@@ -6,10 +6,12 @@
 \usage{
 animate_topo(
   data,
+  amplitude,
   t_lim,
   FS = 250,
   mesh,
   coords = NULL,
+  template = NULL,
   col_range = NULL,
   col_scale = NULL,
   legend = TRUE,
@@ -19,7 +21,9 @@ animate_topo(
 )
 }
 \arguments{
-\item{data}{An input data frame or tibble with required columns: \code{time} - the number of time point, \code{sensor} - the sensor label, \code{signal} - EEG signal value to plot.}
+\item{data}{An input data frame or tibble with at least this required columns: \code{time} - the number of time point, \code{sensor} - the sensor label and the column with the EEG amplitude to plot specified in the argument \code{amplitude}.}
+
+\item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values.}
 
 \item{t_lim}{Limits of time points (i.e., the length of the timeline displayed below the animation).}
 
@@ -27,7 +31,9 @@ animate_topo(
 
 \item{mesh}{A \code{"mesh"} object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.}
 
-\item{coords}{Sensor coordinates as a tibble or data frame with named \code{x} and \code{y} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.}
+\item{coords}{Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.}
+
+\item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.}
 
 \item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.}
 
@@ -59,7 +65,7 @@ Due to the flexibility of the function (e.g. to mark and animate only a short se
 # Prepare a data structure:
 s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time \%in\% c(10:20))
 # Plot animation:
-animate_topo(s1e05, t_lim = c(0,50))
+animate_topo(s1e05, amplitude = "signal", t_lim = c(0,50))
 }
 
 }

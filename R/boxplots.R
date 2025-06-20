@@ -7,7 +7,7 @@
 #' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal"}.
 #' @param subject An integer or character ID of selected subject to plot.
 #' @param channel An integer or character ID of channel to plot.
-#' @param time_lim A character vector with time range to plot. If not defined, the first ten time points are plotted.
+#' @param time_lim A character vector with time range to plot.
 #'
 #' @details
 #' The input data frame or database table must contain at least following columns:
@@ -34,21 +34,13 @@ boxplot_epoch <- function(data,
                           amplitude = "signal",
                           subject,
                           channel,
-                          time_lim = NULL) {
+                          time_lim) {
 
   amp_value <- {{ amplitude }}
   amp_name <- rlang::as_string(amp_value)
 
-  if (!amp_name %in% names(data)) {
+  if (!amp_name %in% colnames(data)) {
     stop(paste0("There is no column '", amp_name, "' in the input data."))
-  }
-
-  if (missing(subject)) {
-    stop("Argument 'subject' is missing, with no default.")
-  }
-
-  if (missing(channel)) {
-    stop("Argument 'channel' is missing, with no default.")
   }
 
   required_cols <- c("time", "epoch", "sensor", "subject")
@@ -59,11 +51,6 @@ boxplot_epoch <- function(data,
                paste(missing_cols, collapse = ", ")))
   }
 
-  if (is.null(time_lim)) {
-    min_t <- min(dplyr::pull(data, .data$time))
-    time_lim <- c(min_t:(min_t + 9))
-    warning("The argument 'time_lim' was not defined, the first ten time points from data are plotted.")
-  } ## zkusit jak moc to zpomaluje pri vstupu primo DB
 
   db_sub <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ channel }}, time_rg = {{ time_lim }})
   db_sub <- db_sub |>
@@ -92,7 +79,7 @@ boxplot_epoch <- function(data,
 #' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal"}.
 #' @param subject A vector with IDs of subjects to plot.
 #' @param channel An integer or character ID of channel to plot.
-#' @param time_lim A character vector with time range to plot. If not defined, the first ten time points are plotted.
+#' @param time_lim A character vector with time range to plot.
 #'
 #' @details
 #' The input data frame or database table must contain at least following columns:
@@ -120,17 +107,13 @@ boxplot_subject <- function(data,
                           amplitude = "signal",
                           subject = NULL,
                           channel,
-                          time_lim = NULL) {
+                          time_lim) {
 
   amp_value <- {{ amplitude }}
   amp_name <- rlang::as_string(amp_value)
 
-  if (!amp_name %in% names(data)) {
+  if (!amp_name %in% colnames(data)) {
     stop(paste0("There is no column '", amp_name, "' in the input data."))
-  }
-
-  if (missing(channel)) {
-    stop("Argument 'channel' is missing, with no default.")
   }
 
   required_cols <- c("time", "sensor", "subject")
@@ -139,12 +122,6 @@ boxplot_subject <- function(data,
   if (length(missing_cols) > 0) {
     stop(paste("The following required data columns are missing:",
                paste(missing_cols, collapse = ", ")))
-  }
-
-  if (is.null(time_lim)) {
-    min_t <- min(dplyr::pull(data, .data$time))
-    time_lim <- c(min_t:(min_t + 9))
-    warning("The argument 'time_lim' was not defined, the first ten time points from data are plotted.")
   }
 
   db_sub <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ channel }}, time_rg = {{ time_lim }})
@@ -197,7 +174,7 @@ boxplot_rt <- function(data, subject = NULL){
                paste(missing_cols, collapse = ", ")))
   }
 
-  if (!is.null(subject)){
+  if (!is.null(subject)) {
     data <- pick_data(data, subject_rg = {{ subject }})
   }
 

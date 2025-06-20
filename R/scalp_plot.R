@@ -171,10 +171,6 @@ rotate_view <- function(U, plot_function) {
   rgl::useSubscene3d(current) # original subscene
 }
 
-req_cols <- function(obj, required_cols) {
-  # control required columns
-  is.atomic(names(obj)) && all(required_cols %in% names(obj))
-}
 
 control_mesh <- function(mesh, tri = NULL) {
   # control the structure of the mesh

@@ -2,11 +2,13 @@
 #'
 #' @description Display a topographic animation of the change in amplitude over time. The function enables direct rendering in Rstudio Viewer or saving the animation in gif format to the chosen location.
 #'
-#' @param data An input data frame or tibble with required columns: \code{time} - the number of time point, \code{sensor} - the sensor label, \code{signal} - EEG signal value to plot.
+#' @param data An input data frame or tibble with at least this required columns: \code{time} - the number of time point, \code{sensor} - the sensor label and the column with the EEG amplitude to plot specified in the argument \code{amplitude}.
+#' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values.
 #' @param t_lim Limits of time points (i.e., the length of the timeline displayed below the animation).
 #' @param FS The sampling frequency. Default value is 250 Hz.
 #' @param mesh A \code{"mesh"} object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
-#' @param coords Sensor coordinates as a tibble or data frame with named \code{x} and \code{y} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.
+#' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.
+#' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.
 #' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
 #' @param legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.
@@ -38,12 +40,20 @@
 #' # Prepare a data structure:
 #' s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time %in% c(10:20))
 #' # Plot animation:
-#' animate_topo(s1e05, t_lim = c(0,50))
+#' animate_topo(s1e05, amplitude = "signal", t_lim = c(0,50))
 #' }
 #'
-animate_topo <- function(data, t_lim, FS = 250, mesh, coords = NULL, col_range = NULL, col_scale = NULL,
+animate_topo <- function(data, amplitude, t_lim, FS = 250, mesh, coords = NULL, template = NULL,
+                         col_range = NULL, col_scale = NULL,
                          legend = TRUE, contour = FALSE,
                          output_path = NULL, ...){
+
+  amp_value <- {{ amplitude }}
+  amp_name <- rlang::as_string(amp_value)
+
+  if (!amp_name %in% names(data)) {
+    stop(paste0("There is no column '", amp_name, "' in the input data."))
+  }
 
   if (!(is.logical(contour))) {
     stop("Argument 'contour' has to be logical.")
@@ -53,16 +63,31 @@ animate_topo <- function(data, t_lim, FS = 250, mesh, coords = NULL, col_range =
     stop("Argument 'legend' has to be logical.")
   }
 
-  if (is.null(coords)) {
+  if (!is.null(template)) {
+    coords <- switch(template,
+                     "HCGSN256" = diegr::HCGSN256$D2,
+                     stop("Unknown template.")
+                     )
+  }
+
+  if (is.null(template) && is.null(coords)) {
     # use HCGSN256 template
     coords <- diegr::HCGSN256$D2
   }
 
-  if (missing(mesh)) {
-    mesh <- point_mesh(dim = 2, template = "HCGSN256")
+  required_cols <- c("x", "y", "sensor")
+  missing_cols <- setdiff(required_cols, colnames(coords))
+
+  if (length(missing_cols) > 0) {
+    stop(paste("The following required columns in 'coords' are missing:",
+               paste(missing_cols, collapse = ", ")))
   }
 
-  if ("D2" %in% names(mesh)) {
+  if (missing(mesh)) {
+    mesh <- point_mesh(dim = 2, template = { template })
+  }
+
+  if ("D2" %in% names(mesh)) { # control mesh structure
     mesh_mat <- mesh$D2
   } else if (req_cols(mesh, c("x", "y"))) {
     mesh_mat <- mesh[, c("x", "y")]
@@ -76,13 +101,7 @@ animate_topo <- function(data, t_lim, FS = 250, mesh, coords = NULL, col_range =
     mesh_mat <- data.frame("x" = mesh[,1], "y" = mesh[,2])
   }
 
-  # if (inherits(mesh, "mesh")) {
-  #   mesh_mat <- mesh$D2
-  # } else {
-  #   mesh_mat <- mesh[,1:2] ## hm, tady to jeste je trochu problem, kdyby nekdo mel v mesh osy x a y jinde nez na prvnich dvou mistech - chci to vybirat takto nebo podle jmen? dobre pak popsat v helpu
-  # }
-
-  newdata <- prepare_anim_structure(data, coords, mesh_mat)
+  newdata <- prepare_anim_structure(data, amp_name = amp_name, coords, mesh_mat)
 
   M <- max(mesh_mat[,2], na.rm = TRUE)
   Mm <- min(mesh_mat[,2], na.rm = TRUE)
@@ -177,7 +196,7 @@ animate_topo <- function(data, t_lim, FS = 250, mesh, coords = NULL, col_range =
 }
 
 
-prepare_anim_structure <- function(data, coords, mesh_mat) {
+prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
   ## create structure for animate_topo from database
   ## need to change also for 3D case
 
@@ -185,12 +204,16 @@ prepare_anim_structure <- function(data, coords, mesh_mat) {
     data <- dplyr::collect(data)
   }
 
-  coords_sen <- coords |>
-    mutate(sensor = diegr::HCGSN256$sensor)
+
+  if (all(c("x", "y", "z") %in% names(coords))) {
+    coords_df <- data.frame(x = coords[["x"]], y = coords[["y"]], z = coords[["z"]])
+  } else {
+    coords_df <- data.frame(x = coords[["x"]], y = coords[["y"]])
+  }
 
   # add coordinates of sensors to the tibble with time and signal data
   tib_signal <- data |>
-    left_join(coords_sen, by = "sensor")
+    left_join(coords, by = "sensor") #coords_sen
 
 
   # splitting the tibble and computing IM model on splitted tibble
@@ -198,8 +221,7 @@ prepare_anim_structure <- function(data, coords, mesh_mat) {
 
   tib_IM <- purrr::map_dfr(names(tib_split), function(t) {
     df_t <- tib_split[[t]]
-    ## musim odstranit ten sensor sloupec, jinak mi to vyhazuje chybu
-    interpolated_values <- IM(coords, df_t$signal, mesh_mat)$Y_hat
+    interpolated_values <- IM(coords_df, df_t[[amp_name]], mesh_mat)$Y_hat
 
     tibble(
       time = as.numeric(t),
@@ -214,10 +236,12 @@ prepare_anim_structure <- function(data, coords, mesh_mat) {
 
 #' 3D scalp plot animation in time
 #'
-#' @param data An input data frame or tibble with required columns: \code{time} - the number of time point, \code{sensor} - the sensor label, \code{signal} - EEG signal value to plot.
+#' @param data An input data frame or tibble with at least this required columns: \code{time} - the number of time point, \code{sensor} - the sensor label and the column with the EEG amplitude to plot specified in the argument \code{amplitude}.
+#' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values.
 #' @param mesh An object of class \code{"mesh"} used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. Can also be a data frame or a matrix with x, y and z coordinates of a point mesh. See \code{\link{scalp_plot}} for details about the structure.
 #' @param tri A matrix with indices of the triangles. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the input mesh object (or a list).
 #' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{z} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.
+#' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.
 #' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
 #' @param sec The time interval used between individual animation frames, in seconds (default: 0.3).
@@ -251,20 +275,45 @@ prepare_anim_structure <- function(data, coords, mesh_mat) {
 #' # Prepare a data structure:
 #' s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time %in% c(10:20))
 #' # Plot animation with default mesh and triangulation:
-#' animate_scalp(s1e05)
+#' animate_scalp(s1e05, amplitude = "signal")
 #' }
-animate_scalp <- function(data, mesh, tri = NULL, coords = NULL, col_range = NULL, col_scale = NULL,
+animate_scalp <- function(data, amplitude, mesh, tri = NULL, coords = NULL, template = NULL,
+                          col_range = NULL, col_scale = NULL,
                           sec = 0.3, frames_dir = NULL, output_path = NULL, framerate = 3) {
-  if (is.null(coords)) {
+
+  amp_value <- {{ amplitude }}
+  amp_name <- rlang::as_string(amp_value)
+
+  if (!amp_name %in% names(data)) {
+    stop(paste0("There is no column '", amp_name, "' in the input data."))
+  }
+
+  if (!is.null(template)) {
+    coords <- switch(template,
+                     "HCGSN256" = diegr::HCGSN256$D3,
+                     stop("Unknown template.")
+    )
+  }
+
+  if (is.null(template) && is.null(coords)) {
     # use HCGSN256 template
     coords <- diegr::HCGSN256$D3
   }
+
+  required_cols <- c("x", "y", "z", "sensor")
+  missing_cols <- setdiff(required_cols, colnames(coords))
+
+  if (length(missing_cols) > 0) {
+    stop(paste("The following required columns in 'coords' are missing:",
+               paste(missing_cols, collapse = ", ")))
+  }
+
 
   if (missing(mesh)) {
     if (!is.null(tri)) {
       stop("The argument 'mesh' must be provided when argument 'tri' is specified.")
     }
-     mesh <- point_mesh(dim = c(2,3), template = "HCGSN256")
+     mesh <- point_mesh(dim = c(2,3), template = { template })
   }
 
   control_mesh(mesh, tri = { tri }) # control the input mesh structure
@@ -279,7 +328,7 @@ animate_scalp <- function(data, mesh, tri = NULL, coords = NULL, col_range = NUL
     tri <- make_triangulation(mesh$D2)
   }
 
-  newdata <- prepare_anim_structure(data, coords, mesh3)
+  newdata <- prepare_anim_structure(data, amp_name = amp_name, coords, mesh3)
 
   if (is.null(col_scale)) {
 
