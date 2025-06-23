@@ -6,6 +6,7 @@
 \usage{
 outliers_epoch(
   data,
+  amplitude = "signal",
   subject = NULL,
   sensor = NULL,
   time = NULL,
@@ -14,7 +15,9 @@ outliers_epoch(
 )
 }
 \arguments{
-\item{data}{A data frame, tibble or a database table with input data, required columns: subject, sensor, time, signal, epoch.}
+\item{data}{A data frame, tibble or a database table with input data, required columns: subject, sensor, time, epoch and the column with EEG amplitude named as in \code{amplitude} parameter.}
+
+\item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal"}.}
 
 \item{subject}{An integer or character ID of selected subject.}
 
@@ -39,8 +42,7 @@ The input data frame or database table must contain at least following columns:
 subject - a column with subject IDs,
 sensor - a column with sensor labels,
 time - a column with time point numbers,
-signal - a column with measured EEG signal values,
-epoch - a column with epoch numbers.
+signal (or other name specified in \code{amplitude} parameter) - a column with measured EEG signal values.
 
 The outlier detection method is chosen through \code{method} argument. The possibilities are
 \itemize{
@@ -51,9 +53,10 @@ The outlier detection method is chosen through \code{method} argument. The possi
 }
 \examples{
 # Outlier epoch detection for subject 2, electrode E45 for the whole time range with IQR method
-outliers_epoch(epochdata, subject = 2, sensor = "E45", method = "iqr")
+outliers_epoch(epochdata, amplitude = "signal", subject = 2, sensor = "E45", method = "iqr")
 
 # Outlier epoch detection for subject 2, electrode E45 for the whole time range
 # using percentile method with 1 and 99 percentiles
-outliers_epoch(epochdata, subject = 2, sensor = "E45", method = "percentile", p = 0.99)
+outliers_epoch(epochdata, amplitude = "signal", subject = 2, sensor = "E45",
+ method = "percentile", p = 0.99)
 }

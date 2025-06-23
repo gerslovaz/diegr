@@ -32,7 +32,7 @@
 #' @export
 #'
 #' @examples
-#' # 1) Plot epoch waveforms for subject 1 and electrode "E65"
+#' # 1) Plot epoch waveforms with average curve for subject 1 and electrode "E65"
 #' # with 250 sampling frequency rate (default) and 10 as zero time point
 #' interactive_waveforms(epochdata, amplitude = "signal", subject = 1, channel = "E65",
 #' t0 = 10, level = "epoch")
@@ -54,38 +54,6 @@ interactive_waveforms <- function(data, amplitude = "signal", subject = NULL, ch
     stop(paste0("There is no column '", amp_name, "' in the input data."))
   }
 
-  # if (missing(subject)) {
-  #   stop("Argument 'subject' is missing, with no default.")
-  # }
-  #
-  # if (missing(channel)) {
-  #   stop("Argument 'channel' is missing, with no default.")
-  # }
-  #
-  # required_cols <- c("time", "signal", "epoch", "sensor", "subject")
-  # missing_cols <- setdiff(required_cols, colnames(data))
-  #
-  # if (length(missing_cols) > 0) {
-  #   stop(paste("The following required data columns are missing:",
-  #              paste(missing_cols, collapse = ", ")))
-  # }
-
-
-
-
-
-
-  # data <- data |>
-  #   dplyr::filter(.data$subject == {{ subject }} & (.data$sensor == {{ channel }}))  |>
-  #   dplyr::select("time", "signal", "epoch", "subject", "sensor")
-  # if (!is.null(base_int)) {
-  #   newdata <- baseline_correction(data, base_int = { base_int }, type = "absolute")
-  # } else {
-  #   newdata <- collect(data)
-  #   newdata <- newdata |>
-  #     dplyr::mutate(signal_base = .data$signal)
-  # }
-
 
   group_arg <- switch(
     level,
@@ -104,13 +72,10 @@ interactive_waveforms <- function(data, amplitude = "signal", subject = NULL, ch
   newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ channel }})
 
   newdata <- newdata |>
-    dplyr::select("time", !!amp_value, !!group_arg) #|>
-    #group_by(.data$time) |>
-    #mutate(avg = mean(newdata[[col_name]], na.rm = TRUE))
+    dplyr::select("time", !!amp_value, !!group_arg)
 
   if (avg == TRUE) {
     avgdata <- newdata |>
-      #dplyr::select("time", !!col_value, !!group_arg) |>
       group_by(.data$time) |>
       summarise(avg = mean(.data[[amp_name]], na.rm = TRUE), .groups = "drop")
   }

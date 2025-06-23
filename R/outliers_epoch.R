@@ -3,7 +3,8 @@
 #' @description
 #' Function for selecting outlier epochs for one subject and one sensor in chosen time points. Epochs are marked as outliers based on one of the following criteria: interquartile range criterion, percentile approach or Hampel filter method.
 #'
-#' @param data A data frame, tibble or a database table with input data, required columns: subject, sensor, time, signal, epoch.
+#' @param data A data frame, tibble or a database table with input data, required columns: subject, sensor, time, epoch and the column with EEG amplitude named as in \code{amplitude} parameter.
+#' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal"}.
 #' @param subject An integer or character ID of selected subject.
 #' @param sensor An integer or character ID of selected sensor.
 #' @param time A vector with time range for outliers detection. If not defined, the outliers are searching across all time points in the dataset.
@@ -15,8 +16,7 @@
 #' subject - a column with subject IDs,
 #' sensor - a column with sensor labels,
 #' time - a column with time point numbers,
-#' signal - a column with measured EEG signal values,
-#' epoch - a column with epoch numbers.
+#' signal (or other name specified in `amplitude` parameter) - a column with measured EEG signal values.
 #'
 #' The outlier detection method is chosen through \code{method} argument. The possibilities are
 #' - \code{iqr} for the interquartile range criterion, values outside the interval \code{[lower quartile - 1.5 * IQR, upper quartile + 1.5 * IQR]}, where IQR denotes interquartile range, are considered as outliers
@@ -34,30 +34,39 @@
 #'
 #' @examples
 #' # Outlier epoch detection for subject 2, electrode E45 for the whole time range with IQR method
-#' outliers_epoch(epochdata, subject = 2, sensor = "E45", method = "iqr")
+#' outliers_epoch(epochdata, amplitude = "signal", subject = 2, sensor = "E45", method = "iqr")
 #'
 #' # Outlier epoch detection for subject 2, electrode E45 for the whole time range
 #' # using percentile method with 1 and 99 percentiles
-#' outliers_epoch(epochdata, subject = 2, sensor = "E45", method = "percentile", p = 0.99)
+#' outliers_epoch(epochdata, amplitude = "signal", subject = 2, sensor = "E45",
+#'  method = "percentile", p = 0.99)
 
-outliers_epoch <- function(data, subject = NULL, sensor = NULL, time = NULL, method, p = 0.975){
+outliers_epoch <- function(data, amplitude = "signal", subject = NULL, sensor = NULL, time = NULL,
+                           method, p = 0.975){
 
-  if (is.null(time)) {
-    newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ sensor }})
-  } else {
-    newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ sensor }}, time_rg = {{ time }})
+  amp_value <- {{ amplitude }}
+  amp_name <- rlang::as_string(amp_value)
+
+  if (!amp_name %in% colnames(data)) {
+    stop(paste0("There is no column '", amp_name, "' in the input data."))
   }
+
+  #if (is.null(time)) {
+  #  newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ sensor }})
+  #} else {
+    newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ sensor }}, time_rg = {{ time }})
+  #}
    newdata <- newdata |>
-     dplyr::select("subject", "time", "signal", "epoch", "sensor")
+     dplyr::select("subject", "time", "epoch", "sensor", amp_name)
    newdata <- dplyr::collect(newdata)
    newdata$epoch <- factor(newdata$epoch)
 
   if (method == "iqr") {
     outdata <- newdata |>
       dplyr::group_by(.data$time) |>
-      dplyr::mutate(outliers = .data$signal %in% boxplot.stats(.data$signal)$out) |>
+      dplyr::mutate(outliers = .data[[amp_name]] %in% boxplot.stats(.data[[amp_name]])$out) |>
       dplyr::filter(.data$outliers == TRUE) |>
-      dplyr::select("time", "signal", "epoch", "sensor")
+      dplyr::select("time", "epoch", "sensor", amp_name)
   }
 
   if (method == "percentile") {
@@ -70,17 +79,17 @@ outliers_epoch <- function(data, subject = NULL, sensor = NULL, time = NULL, met
     }
     outdata <- newdata |>
       dplyr::group_by(.data$time) |>
-      dplyr::mutate(outliers = .data$signal < quantile(.data$signal, 1 - p) | .data$signal > quantile(.data$signal, p)) |>
+      dplyr::mutate(outliers = .data[[amp_name]] < quantile(.data[[amp_name]], 1 - p) | .data[[amp_name]] > quantile(.data[[amp_name]], p)) |>
       dplyr::filter(.data$outliers == TRUE) |>
-      dplyr::select("time", "signal", "epoch", "sensor")
+      dplyr::select("time", "epoch", "sensor", amp_name)
   }
 
   if (method == "hampel") {
     outdata <- newdata |>
       dplyr::group_by(.data$time) |>
-      dplyr::mutate(outliers = .data$signal < median(.data$signal) - 3 * mad(.data$signal, constant = 1) | .data$signal > median(.data$signal) + 3 * mad(.data$signal, constant = 1)) |>
+      dplyr::mutate(outliers = .data[[amp_name]] < median(.data[[amp_name]]) - 3 * mad(.data[[amp_name]], constant = 1) | .data[[amp_name]] > median(.data[[amp_name]]) + 3 * mad(.data[[amp_name]], constant = 1)) |>
       dplyr::filter(.data$outliers == TRUE) |>
-      dplyr::select("time", "signal", "epoch", "sensor")
+      dplyr::select("time", "epoch", "sensor", amp_name)
   }
 
   epoch_vec <- outdata$epoch

@@ -51,7 +51,7 @@ signal (or other name specified in \code{amplitude} parameter) - a column with m
 Note: The higher level assumes the average signal for the given level in input data, for example \code{sensor} level assumes a mean sensor signal in the \code{amplitude} column. The input data for individual epochs together with sensor level setting will result in a mess output.
 }
 \examples{
-# 1) Plot epoch waveforms for subject 1 and electrode "E65"
+# 1) Plot epoch waveforms with average curve for subject 1 and electrode "E65"
 # with 250 sampling frequency rate (default) and 10 as zero time point
 interactive_waveforms(epochdata, amplitude = "signal", subject = 1, channel = "E65",
 t0 = 10, level = "epoch")

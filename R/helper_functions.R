@@ -38,6 +38,73 @@ exclude_epoch <- function(data, ex_epoch){
 }
 # in: compute_mean
 
+spline_matrix <- function(X, Xcp = X) {
+  ## compute S matrix to using in spline methods for d in c(1,2,3)
+  if (!is.matrix(X)) {
+    X <- as.matrix(X)
+  }
+  if (!is.matrix(Xcp)) {
+    Xcp <- as.matrix(Xcp)
+  }
+
+  if (ncol(X) != ncol(Xcp)) {
+    stop("The matrices X and Xcp for spline matrix computing must have the same number of columns")
+  }
+
+  k <- dim(X)[1]
+  kcp <- dim(Xcp)[1]
+  d <- dim(X)[2]
+  X1 <- t(matrix(rep(t(Xcp), k), nrow = d))
+  X2 <- matrix(rep(X, each = kcp), ncol = d)
+
+  diff_sq <- (X1 - X2)^2
+  argument <- rowSums(diff_sq)
+  if (d == 2) {
+    S <- 1 / (8 * pi) * (argument) * log(sqrt(argument))
+    S[argument == 0] <- 0
+  } else if (d == 3) {
+    S <- -1 / (8 * pi) * sqrt(argument)
+    S[argument == 0] <- 0
+  } else if (d == 1) {
+    S <- 1/12 * abs(X1 - X2)^3
+  } else {
+    stop("X input in spline_matrix must be dim 1, 2 or 3")
+  }
+
+  S <- matrix(S, kcp, k, byrow = FALSE)
+  return(S)
+}
+
+XP_IM <- function(X, Xcp) {
+  ## compute X_p for interpolation spline method
+  if (!is.matrix(X)) {
+    X <- as.matrix(X)
+  }
+  if (missing(Xcp)) {
+    Xcp <- X
+  }
+  if (!is.matrix(Xcp)) {
+    Xcp <- as.matrix(Xcp)
+  }
+
+  if (ncol(X) != ncol(Xcp)) {
+    stop("The matrices X and Xcp for X.P computing must have the same number of columns")
+  }
+
+  k <- dim(X)[1]
+  kcp <- dim(Xcp)[1]
+  d <- dim(X)[2]
+
+  X_P <- matrix(0, nrow = kcp + d + 1, ncol = k + d + 1)
+  X_P[1:kcp, 1:k] <- spline_matrix(X, Xcp)
+  X_P[1:kcp, (k + 1):(k + d + 1)] <- cbind(1, Xcp)
+  X_P[(kcp + 1):(kcp + d + 1), 1:k] <- rbind(1, t(X))
+
+  return(X_P)
+}
+
+
+
 IM <- function(X, Y, Xcp = X) {
   ## interpolating using spline
   if (!is.matrix(X)) {
@@ -53,7 +120,7 @@ IM <- function(X, Y, Xcp = X) {
   d1 <- ncol(X)
   d2 <- ncol(Y)
 
-  X_P <- XP_IM(X)
+  X_P <- XP_IM(X, X)
   Y_P <- rbind(Y, matrix(0, d1 + 1, d2))
   beta_hat <- solve(X_P) %*% Y_P
 
@@ -66,6 +133,32 @@ IM <- function(X, Y, Xcp = X) {
 
   return(list(Y_hat = y_Pcp, beta_hat = beta_hat))
 }
+
+recompute_3d <- function(X2D, X3D, mesh) {
+  ## recompute 3D net from 2D coordinates
+  if (!is.matrix(X2D)) {
+    X2D <- as.matrix(X2D)
+  }
+
+  if (!is.matrix(X3D)) {
+    X3D <- as.matrix(X3D)
+  }
+
+  if (is.list(mesh) && "D2" %in% names(mesh)) {
+    mesh <- mesh$D2
+  }
+
+  if (any(is.na(mesh))) {
+    mesh <- na.omit(mesh)
+  }
+
+  kcp <- dim(mesh)[1]
+  Y_Pcp <- IM(X2D, X3D, mesh)$Y_hat
+  Y <- data.frame(x = Y_Pcp[1:kcp, 1], y = Y_Pcp[1:kcp, 2], z = Y_Pcp[1:kcp, 3])
+  return(Y)
+}
+
+
 
 
 XP_PRM <- function(X, lambda) {
@@ -134,3 +227,32 @@ DCV_score <- function(X, Y, lambda){
   DCV <- k * sum((model$Y_hat - Y)^2) / (k - 1.5 * sum(model$diag_hat))^2
   return(DCV)
 }
+
+
+pick_data <- function(data, subject_rg = NULL, sensor_rg = NULL,
+                      time_rg = NULL, epoch_rg = NULL) {
+  ## function for creating subset of data according chosen parameters
+
+  conditions <- list()
+
+  if (!is.null(subject_rg)) {
+    conditions <- append(conditions, expr(.data$subject %in% {{ subject_rg }}))
+  }
+  if (!is.null(sensor_rg)) {
+    conditions <- append(conditions, expr(.data$sensor %in% {{ sensor_rg }}))
+  }
+
+  if (!is.null(time_rg)) {
+    conditions <- append(conditions, expr(.data$time %in% {{ time_rg }}))
+  }
+
+  if (!is.null(epoch_rg)) {
+    conditions <- append(conditions, expr(.data$epoch %in% {{ epoch_rg }}))
+  }
+
+  data |>
+    dplyr::filter(!!!conditions)
+
+}
+
+

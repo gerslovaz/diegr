@@ -76,29 +76,3 @@ pick_region <- function(coords = NULL, hemisphere = c("left", "right", "midline"
   return(new_coords)
 }
 
-pick_data <- function(data, subject_rg = NULL, sensor_rg = NULL,
-                      time_rg = NULL, epoch_rg = NULL) {
-  ## function for creating subset of data according chosen parameters
-
-  conditions <- list()
-
-  if (!is.null(subject_rg)) {
-    conditions <- append(conditions, expr(.data$subject %in% {{ subject_rg }}))
-  }
-  if (!is.null(sensor_rg)) {
-    conditions <- append(conditions, expr(.data$sensor %in% {{ sensor_rg }}))
-  }
-
-  if (!is.null(time_rg)) {
-    conditions <- append(conditions, expr(.data$time %in% {{ time_rg }}))
-  }
-
-  if (!is.null(epoch_rg)) {
-    conditions <- append(conditions, expr(.data$epoch %in% {{ epoch_rg }}))
-  }
-
-  data |>
-    dplyr::filter(!!!conditions)
-
-}
-
