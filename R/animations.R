@@ -6,7 +6,7 @@
 #' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values.
 #' @param t_lim Limits of time points (i.e., the length of the timeline displayed below the animation).
 #' @param FS The sampling frequency. Default value is 250 Hz.
-#' @param mesh A \code{"mesh"} object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
+#' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
 #' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.
 #' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.
@@ -17,6 +17,8 @@
 #' @param ... Additional parameters for animation according to [gganimate::animate].
 #'
 #' @details
+#' For more details about required mesh structure see \code{\link{point_mesh}} function. If the input \code{mesh} structure does not match this format, an error or incorrect function behavior may occur.
+#'
 #' The time part of input data is assumed to be in numbers of time points, conversion to ms takes place inside the function for drawing the timeline labels.
 #' Due to the flexibility of the function (e.g. to mark and animate only a short section from the entire time course or to compare different data in the same time interval), it allows the user to enter and plot an arbitrary timeline values. If some values of the time are outside the \code{t_lim} range, the function writes a warning message - in that case the animation is still rendered, but the timeline will not match reality.
 #'
@@ -87,18 +89,8 @@ animate_topo <- function(data, amplitude, t_lim, FS = 250, mesh, coords = NULL, 
     mesh <- point_mesh(dim = 2, template = { template })
   }
 
-  if ("D2" %in% names(mesh)) { # control mesh structure
+  if (control_D2(mesh)){
     mesh_mat <- mesh$D2
-  } else if (req_cols(mesh, c("x", "y"))) {
-    mesh_mat <- mesh[, c("x", "y")]
-  } else {
-    if (is.null(dim(mesh))) {
-      stop("At least two columns are required in `mesh` input parameter.")
-    } else if (ncol(mesh) < 2) {
-      stop("At least two columns are required in `mesh` input parameter.")
-    }
-
-    mesh_mat <- data.frame("x" = mesh[,1], "y" = mesh[,2])
   }
 
   newdata <- prepare_anim_structure(data, amp_name = amp_name, coords, mesh_mat)
@@ -238,12 +230,12 @@ prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
 #'
 #' @param data An input data frame or tibble with at least this required columns: \code{time} - the number of time point, \code{sensor} - the sensor label and the column with the EEG amplitude to plot specified in the argument \code{amplitude}.
 #' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values.
-#' @param mesh An object of class \code{"mesh"} used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. Can also be a data frame or a matrix with x, y and z coordinates of a point mesh. See \code{\link{scalp_plot}} for details about the structure.
-#' @param tri A matrix with indices of the triangles. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the input mesh object (or a list).
+#' @param mesh An object of class \code{"mesh"} (or a named list with the same structure) used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. See \code{\link{scalp_plot}} for details about the structure.
+#' @param tri A matrix with indices of the triangles. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the mesh.
 #' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{z} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.
 #' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.
-#' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
+#' @param col_scale Optionally, a colour scale to be utilised for plotdata:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAkCAYAAAD7PHgWAAABBklEQVR4Xu2XMQrCQBBFBQvR6wgJHsEDpHVjBDvvoBhbI3bWCkZbFUyhFrYiEat0WgmC6AVkdQqbIVmWZAOi82C64b+/bDWZDEEQP4phTLMaa9d003bTGMgu1psF7JVGNzuWPdzs18GDz443rgrIcndXbvW8g1axGfZKo7P2eBXc+WB74a3FGXtiA1kwzfnpqTF7hL3SwDfAaz+BqvjkwYADe6WhglQwJlQwKVQwKakVTGOoYNL5z4JxwBlUMEwqAu9SwTCpCLxLBcOkIvCusoKT9/WFQ6OkIvCukoJwt5rO0sehUVIReBem6ng+OLBXmnKjn4PbGM5PeKnqgXIlo5vHXoL4Nl4ZYqbbEGA7+wAAAABJRU5ErkJggg==ting. If not defined, it is computed from \code{col_range}.
 #' @param sec The time interval used between individual animation frames, in seconds (default: 0.3).
 #' @param frames_dir Directory where the individual frames will be saved. If NULL, the video is only displayed in viewer and the frames are not saved.
 #' @param output_path Optional path to the output mp4 video file (".mp4" extension is required for correct rendering). If NULL, no video is created.
@@ -252,7 +244,7 @@ prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
 #' @details
 #' Setting the parameter `tri` requires defining a `mesh` parameter.
 #' The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
-#' If the input \code{mesh} is a data frame or a matrix with only 3D coordinates of a point mesh, the use of previously created triangulation (through \code{tri} argument) is necessary.
+#' If the input \code{mesh} contains only 3D coordinates of a point mesh in \code{D3} element, the use of previously created triangulation (through \code{tri} argument) is necessary.
 #'
 #' Note: For exporting the video, setting `frames_dir` together with `output_path` is required.
 #'
@@ -277,7 +269,7 @@ prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
 #' # Plot animation with default mesh and triangulation:
 #' animate_scalp(s1e05, amplitude = "signal")
 #' }
-animate_scalp <- function(data, amplitude, mesh, tri = NULL, coords = NULL, template = NULL,
+animate_scalp <- function(data, amplitude, mesh, tri, coords = NULL, template = NULL,
                           col_range = NULL, col_scale = NULL,
                           sec = 0.3, frames_dir = NULL, output_path = NULL, framerate = 3) {
 
@@ -310,22 +302,21 @@ animate_scalp <- function(data, amplitude, mesh, tri = NULL, coords = NULL, temp
 
 
   if (missing(mesh)) {
-    if (!is.null(tri)) {
+    if (!missing(tri)) {
       stop("The argument 'mesh' must be provided when argument 'tri' is specified.")
     }
      mesh <- point_mesh(dim = c(2,3), template = { template })
   }
 
-  control_mesh(mesh, tri = { tri }) # control the input mesh structure
-
-  if ("D3" %in% names(mesh)) {
+  if (control_D3(mesh)) {
     mesh3 <- mesh$D3
-  } else {
-    mesh3 <- mesh
   }
 
-  if (is.null(tri)) {
-    tri <- make_triangulation(mesh$D2)
+  if (missing(tri)) {
+    if (control_D2(mesh)) {
+      mesh2 <- mesh$D2
+    }
+    tri <- make_triangulation(mesh2)
   }
 
   newdata <- prepare_anim_structure(data, amp_name = amp_name, coords, mesh3)

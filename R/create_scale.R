@@ -79,27 +79,3 @@ ColorsPos <- function(n, alpha = 1) {
 
 
 
-cut_scale <- function(signal, col_scale) {
-
-  clr <- cut(signal, col_scale$breaks, include.lowest = TRUE)
-  colour <- col_scale$colors[clr]
-  return(colour)
-}
-
-
-cut_signal <- function(signal, mesh, coords, col_scale) {
-  #if (missing(coords)) {
-  #  coords <- HCGSN256$D2
-  #}
-
-  #if (ncol(mesh) > 2) {
-  #  mesh <- mesh[,1:2]
-  #}
-
-  y_Pcp <- IM(coords, signal, mesh)$Y_hat
-  ycp_IM <- y_Pcp[1:length(mesh[,1])]
-
-  y_cut <- cut(ycp_IM, breaks = col_scale$breaks, include.lowest = TRUE)
-  y_color <- col_scale$colors[y_cut]
-  return(y_color)
-}

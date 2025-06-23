@@ -102,17 +102,3 @@ pick_data <- function(data, subject_rg = NULL, sensor_rg = NULL,
 
 }
 
-
-
-make_rect_polygon <- function(mesh) {
-  x <- unique(mesh[,1])
-  y <- unique(mesh[,2])
-  nx <- length(x)
-  ny <- length(y)
-
-  xseq <- rep(x, ny)
-  yseq <- rep(y, each = nx)
-  rectangle <- cbind(xseq, yseq)
-
-  return(rectangle)
-}

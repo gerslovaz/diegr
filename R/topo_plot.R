@@ -7,7 +7,7 @@
 #'
 #' @param data A data frame, tibble or a database table with input data to plot with at least two columns: \code{sensor} with sensor labels and the column with the EEG amplitude specified in the argument \code{amplitude}.
 #' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values.
-#' @param mesh A \code{"mesh"} object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
+#' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
 #' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the HCGSN256 template is used.
 #' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.
@@ -15,10 +15,10 @@
 #' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.
 #' @param legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.
 #' @param names A logical value indicating whether the sensor names should also be plotted (default value is \code{FALSE}).
-#' @param names_vec Optionally, a vector with sensor names. The argument is required when using own \code{coords} and setting \code{names = TRUE}.
-
 #'
 #' @details
+#' For more details about required mesh structure see \code{\link{point_mesh}} function. If the input \code{mesh} structure does not match this format, an error or incorrect function behavior may occur.
+#'
 #' Be careful when choosing the argument \code{col_range}. If the amplitude in input data contains values outside the chosen range, this will cause "holes" in the resulting plot.
 #' To compare results for different subjects or conditions, set the same values of \code{col_range} and \code{col_scale} arguments in all cases.
 #' The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
@@ -59,7 +59,7 @@
 #'
 topo_plot <- function(data, amplitude, mesh, coords = NULL, template = NULL,
                       col_range = NULL, col_scale = NULL, contour = FALSE, legend = TRUE,
-                      names = FALSE, names_vec = NULL) {
+                      names = FALSE) {
 
   amp_value <- {{ amplitude }}
   amp_name <- rlang::as_string(amp_value)
@@ -89,26 +89,15 @@ topo_plot <- function(data, amplitude, mesh, coords = NULL, template = NULL,
 
   if (!is.null(template)) {
     coords <- switch(template,
-                          "HCGSN256" = diegr::HCGSN256$D2)
-    if (is.null(coords)) {
-      stop("Unknown template.")
-    }
+                     "HCGSN256" = diegr::HCGSN256$D2,
+                     stop("Unknown template.")
+    )
   }
 
   if (is.null(template) && is.null(coords)) {
+    # use HCGSN256 template
     coords <- diegr::HCGSN256$D2
   }
-
-
-  #if (names == TRUE && is.null(names_vec)) {
-  #  if (!is.null(coords)) {
-  #    stop("With using own coordinates please define the 'names_vec' or set 'names' to FALSE.")
-  #  } else {names_vec <- coords$sensor}
-  #   }
-  #if (is.null(coords)) {
-  #  coords <- diegr::HCGSN256$D2
-  #}
-
 
   required_cols <- c("x", "y", "sensor")
   missing_cols <- setdiff(required_cols, colnames(coords))
@@ -118,22 +107,12 @@ topo_plot <- function(data, amplitude, mesh, coords = NULL, template = NULL,
                paste(missing_cols, collapse = ", ")))
   }
 
-  if (names == TRUE && is.null(names_vec)) {
-    names_vec <- coords$sensor
-  }
-
-  #if (length(coords[["x"]]) != length(signal)) { ## tohle asi pri novem pristupu match pres sensor nebude treba
-  #  stop("Arguments 'signal' and 'coords' must be the same length.")
-  #}
-
   if (missing(mesh)) {
     mesh <- point_mesh(dim = 2, template = "HCGSN256")
   }
 
-  if (inherits(mesh, "mesh")) {
+  if (control_D2(mesh)){
     mesh_mat <- mesh$D2
-  } else {
-    mesh_mat <- mesh[,1:2]
   }
 
   M <- max(max(mesh_mat[,2], na.rm = TRUE), max(coords[["y"]]))
@@ -190,7 +169,7 @@ topo_plot <- function(data, amplitude, mesh, coords = NULL, template = NULL,
     geom_point(data = coords, aes(x = .data$x, y = .data$y), color = "black", cex = 0.7)
 
   if (names == TRUE) {
-    g <- g + geom_text(data = coords_df, aes(label = names_vec), size = 2, vjust = -0.9)
+    g <- g + geom_text(data = coords_df, aes(label = coords$sensor), size = 2, vjust = -0.9)
   }
 
   g +
@@ -199,100 +178,3 @@ topo_plot <- function(data, amplitude, mesh, coords = NULL, template = NULL,
 
 }
 
-
-IM <- function(X, Y, Xcp = X) {
-  ## interpolating using spline
-  if (!is.matrix(X)) {
-    X <- as.matrix(X)
-  }
-  if (!is.matrix(Xcp)) {
-    Xcp <- as.matrix(Xcp)
-  }
-  if (!is.matrix(Y)) {
-    Y <- as.matrix(Y)
-  }
-
-  d1 <- ncol(X)
-  d2 <- ncol(Y)
-
-  X_P <- XP_IM(X)
-  Y_P <- rbind(Y, matrix(0, d1 + 1, d2))
-  beta_hat <- solve(X_P) %*% Y_P
-
-  if (identical(X, Xcp)) {
-    y_Pcp <- X_P %*% beta_hat
-  } else {
-    X_Pcp <- XP_IM(X, Xcp)
-    y_Pcp <- X_Pcp %*% beta_hat
-  }
-
-  return(list(Y_hat = y_Pcp, beta_hat = beta_hat))
-}
-
-
-XP_PRM <- function(X, lambda) {
-  if (!is.matrix(X)) {
-    X <- as.matrix(X)
-  }
-
-  k <-  dim(X)[1]
-  dv <- dim(X)[2]
-  kk <- k + dv + 1
-
-  S <- spline_matrix(X)
-  S_P <- matrix(0, kk, kk)
-  S_P[(dv + 2):kk, (dv + 2):kk] <- S
-
-  decomp <- eigen(S, symmetric = T)
-  U <- decomp$vectors
-  eigval <- decomp$values
-  eigval[eigval < 0] <- 0
-
-  R <- matrix(0, kk, kk)
-  R[(dv + 2):kk, (dv + 2):kk] <- U %*% diag(sqrt(eigval)) %*% t(U)
-
-  X_P <- matrix(0, nrow = k + kk, ncol = kk)
-  X_P[1:k, ] <- cbind(rep(1, k), X, S)
-  X_P[(k + 1):(k + kk),] <- sqrt(lambda) * R
-  return(X_P)
-}
-
-PRM <- function(X, Y, lambda) {
-
-  if (!is.matrix(X)) {
-    X <- as.matrix(X)
-  }
-  if (!is.matrix(Y)) {
-    Y <- as.matrix(Y)
-  }
-
-  k <-  dim(X)[1]
-  dv <- dim(X)[2]
-  do <- dim(as.matrix(Y))[2]
-
-  XP <- XP_PRM(X, lambda)
-  YP <- matrix(0, nrow = 2 * k + dv + 1, ncol = do)
-  YP[1:k,] <- Y
-
-  model <- lm(YP ~ XP - 1)
-  hatY <- matrix(model$fitted.values, nrow = 2*k + dv + 1, ncol = do)
-  hatY <- hatY[1:k,]
-  Beta <- model$coefficients
-  DiagHat <- influence(model)$hat[1:k]
-  return(list(Y_hat = hatY, beta_hat = Beta, diag_hat = DiagHat))
-}
-
-
-GCV_score <- function(X, Y, lambda){
-  model <- PRM(X, Y, lambda)
-  k <- dim(as.matrix(X))[1]
-  GCV <- k * sum((model$Y_hat - Y)^2) / (sum(rep(1,k) - model$diag_hat))^2
-  return(GCV)
-}
-
-DCV_score <- function(X, Y, lambda){
-  k <- dim(as.matrix(X))[1]
-  model <- PRM(X, Y, lambda)
-  DCV <- k * sum((model$Y_hat - Y)^2) / (k - 1.5 * sum(model$diag_hat))^2
-  return(DCV)
-}

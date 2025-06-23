@@ -35,8 +35,11 @@
 #' M <- point_mesh(n = 4000, template = "HCGSN256")
 #' plot_point_mesh(M$D2)
 #'
+#' \dontrun{
+#' ## Note: the example opens a rgl 3D viewer
 #' # Plotting 3D polygon point mesh with default settings
 #' plot_point_mesh(M$D3)
+#' }
 #'
 #' # Plotting 2D circle point mesh with sensors as orange points
 #' par(mar = c(0,0,0,0))

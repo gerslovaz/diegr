@@ -21,9 +21,9 @@ scalp_plot(
 
 \item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values.}
 
-\item{mesh}{An object of class \code{"mesh"} used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. Can also be a data frame or a matrix with x, y and z coordinates of a point mesh. See details for more information about the structure.}
+\item{mesh}{An object of class \code{"mesh"} (or a named list with the same structure) used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. See details for more information about the structure.}
 
-\item{tri}{A matrix with indices of the triangles. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the input mesh object (or a list).}
+\item{tri}{A matrix with indices of the triangles. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the mesh.}
 
 \item{coords}{Sensor coordinates as a tibble or data frame with named \code{x}, \code{y}, \code{z} and \cite{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the HCGSN256 template is used.}
 
@@ -43,7 +43,7 @@ Plot a scalp polygon map of the EEG signal amplitude using topographic colour sc
 }
 \details{
 The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
-If the input \code{mesh} is a data frame or a matrix with only 3D coordinates of a point mesh, the use of previously created triangulation (through \code{tri} argument) is necessary.
+If the input \code{mesh} contains only 3D coordinates of a point mesh in \code{D3} element, the use of previously created triangulation (through \code{tri} argument) is necessary.
 To compare results between 2D topographical plot and 3D scalp plot use the same mesh in both cases.
 
 Be careful when choosing the argument \code{col_range}. If the amplitude in input data contains values outside the chosen range, this will cause "holes" in the resulting plot.
@@ -51,6 +51,8 @@ To compare results for different subjects or conditions, set the same values of 
 The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
 }
 \examples{
+\dontrun{
+## Note: The example opens a rgl 3D viewer.
 # Plot average scalp map of signal for subject 2 from the time point 10 (the time of the stimulus)
 # the outliers (epoch 14 and 15) are extracted before computing
 
@@ -65,4 +67,5 @@ data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, tim
 
 # b) plotting the scalp polygon map
 scalp_plot(data_mean, amplitude = "average", col_range = c(-30, 15))
+}
 }

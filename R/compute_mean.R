@@ -63,20 +63,6 @@ compute_mean <- function(data, amplitude = "signal_base", subject = NULL, channe
 
   newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ channel }}, time_rg = {{ time }}) # subset data
 
-  #if (!raw && !"signal_base" %in% colnames(newdata)) {
-  #  stop("There is no column 'signal_base' in corrected input data.")
-  #}
-
-  # if (raw) {
-  #
-  #   if (!is.null(base_int)) { # baseline correction
-  #     newdata <- baseline_correction(newdata, base_int = { base_int }, type = "absolute")
-  #     newdata <- pick_data(newdata, time_rg = {{ time }})
-  #   } else {
-  #     newdata <- pick_data(newdata, time_rg = {{ time }})
-  #   }
-  #
-  # }
 
   if (type == "point") { # pointwise average
     output_df <- pointwise_mean(newdata, amp_name = amp_name, group = { group }, level = { level })
@@ -92,19 +78,7 @@ compute_mean <- function(data, amplitude = "signal_base", subject = NULL, channe
 }
 
 
-#######################
 
-
-exclude_epoch <- function(data, ex_epoch){
-  # exclude chosen epoch(s)
-  newdata <- data |>
-    dplyr::filter(!.data$epoch %in% {{ ex_epoch }})
-
-  return(newdata)
-}
-
-
-########### TO-DO: otestovat to pro group = space
 
 
 ########## POZOR NA GRUPOVANI - u sensoru mam asi na vystupu potom lexikograficke serazeni, coz je ale neco, co nechci
@@ -144,8 +118,6 @@ exclude_epoch <- function(data, ex_epoch){
 pointwise_mean <- function(data, amp_name, group = c("time", "space"),
                            level = c("epoch", "sensor", "subject")) {
   # compute pointwise mean across different levels
-
-  #signal_value <- if (raw) sym("signal") else sym("signal_base") # signal vs. signal_base
 
   level <- match.arg(level)
 
@@ -196,7 +168,6 @@ jackknife_mean <- function(data, amp_name, group = c("time", "space"),
                                    level = c("epoch", "sensor", "subject")) {
   # compute jackknife mean across different levels
 
-  #signal_value <- if (raw) sym("signal") else sym("signal_base")
   level <- match.arg(level)
 
   if (group == "time") {

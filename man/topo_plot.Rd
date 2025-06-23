@@ -14,8 +14,7 @@ topo_plot(
   col_scale = NULL,
   contour = FALSE,
   legend = TRUE,
-  names = FALSE,
-  names_vec = NULL
+  names = FALSE
 )
 }
 \arguments{
@@ -23,7 +22,7 @@ topo_plot(
 
 \item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values.}
 
-\item{mesh}{A \code{"mesh"} object, data frame or matrix with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.}
+\item{mesh}{A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.}
 
 \item{coords}{Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the HCGSN256 template is used.}
 
@@ -38,8 +37,6 @@ topo_plot(
 \item{legend}{Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.}
 
 \item{names}{A logical value indicating whether the sensor names should also be plotted (default value is \code{FALSE}).}
-
-\item{names_vec}{Optionally, a vector with sensor names. The argument is required when using own \code{coords} and setting \code{names = TRUE}.}
 }
 \value{
 A plot.
@@ -49,6 +46,8 @@ Plot a topographic circle or polygon map of the EEG signal amplitude using topog
 The output in the form of a ggplot object allows to easily edit the result image properties.
 }
 \details{
+For more details about required mesh structure see \code{\link{point_mesh}} function. If the input \code{mesh} structure does not match this format, an error or incorrect function behavior may occur.
+
 Be careful when choosing the argument \code{col_range}. If the amplitude in input data contains values outside the chosen range, this will cause "holes" in the resulting plot.
 To compare results for different subjects or conditions, set the same values of \code{col_range} and \code{col_scale} arguments in all cases.
 The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
