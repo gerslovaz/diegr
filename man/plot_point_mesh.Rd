@@ -33,7 +33,7 @@ plot_point_mesh(
 \item{own_coordinates}{A data frame or tibble with coordinates of the sensor locations. If the value is \code{NULL} and \code{sensors} is set to \code{TRUE}, the HCGSN256 template is used.}
 }
 \value{
-A plot.
+A \code{ggplot} or \code{rgl} object with mesh coordinates plot.
 }
 \description{
 Function for plotting a mesh of points (not only) created by \code{\link{point_mesh}} function. The output is two dimensional \code{ggplot} of point mesh or three dimensional \code{rgl} plot depending on the input dimension.
@@ -51,7 +51,7 @@ When both \code{names_vec} and \code{own_coordinates} are provided, it is essent
 }
 \examples{
 # 2D polygon point mesh with plotted sensors and default settings
-par(mar = c(0,0,0,0))
+# Note: for nice plot we recommend set par(mar = c(0,0,0,0))
 M <- point_mesh(n = 4000, template = "HCGSN256")
 plot_point_mesh(M$D2)
 
@@ -62,14 +62,12 @@ plot_point_mesh(M$D3)
 }
 
 # Plotting 2D circle point mesh with sensors as orange points
-par(mar = c(0,0,0,0))
 M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256", type = "circle")
 plot_point_mesh(M$D2, col_sensors = "orange")
 
 # Plotting the same mesh with marking only midline electrodes
 midline <- HCGSN256$D2[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204),]
 names_vec <- HCGSN256$sensor[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204)]
-par(mar = c(0,0,0,0))
 plot_point_mesh(M$D2, names = TRUE, names_vec = names_vec, own_coordinates = midline)
 
 }

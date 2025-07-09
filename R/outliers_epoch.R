@@ -51,11 +51,8 @@ outliers_epoch <- function(data, amplitude = "signal", subject = NULL, sensor = 
     stop(paste0("There is no column '", amp_name, "' in the input data."))
   }
 
-  #if (is.null(time)) {
-  #  newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ sensor }})
-  #} else {
-    newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ sensor }}, time_rg = {{ time }})
-  #}
+  newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ sensor }}, time_rg = {{ time }})
+
    newdata <- newdata |>
      dplyr::select("subject", "time", "epoch", "sensor", amp_name)
    newdata <- dplyr::collect(newdata)

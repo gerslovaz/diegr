@@ -18,7 +18,7 @@ boxplot_subject(data, amplitude = "signal", subject = NULL, channel, time_lim)
 \item{time_lim}{A character vector with time range to plot.}
 }
 \value{
-A plotly object.
+A \code{plotly} object with boxplots of EEG amplitude for subjects.
 }
 \description{
 Function for plotting interactive boxplots of EEG amplitude for individual subjects for selected channel within the chosen time interval. The interactive plotly output enables to easily determine the subjects with outlier amplitude and also allows to easily edit the image layout.

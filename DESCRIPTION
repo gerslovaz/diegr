@@ -23,11 +23,13 @@ Imports:
     sp,
     scales,
     stats,
-    purrr
+    purrr,
+    tidyr
 LazyData: true
 Suggests: 
     av,
     gifski,
+    magick,
     knitr,
     rmarkdown
 VignetteBuilder: knitr

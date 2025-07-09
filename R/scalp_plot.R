@@ -11,7 +11,7 @@
 #' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of the input signal is used.
 #' @param col_scale Optionally, a colour scale to use for plotting. If not defined, it is computed from \code{col_range}.
-#' @param view A character denoting the view of the plot (according to neurological terminology). Possible values are: \code{"superior", "anterior", "posterior", "left", "right"}. If missing, the default view according to user settings is displayed.
+#' @param view A character denoting the view of the plot (according to neurological terminology). Possible values are: \code{"superior", "anterior", "posterior", "left", "right"}. If missing, the default view according to user settings is displayed. Note: Input coordinates corresponding to the positions in the HCGSN template are required to obtain an appropriate view.
 #'
 #' @details
 #' The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
@@ -23,7 +23,7 @@
 #' The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
 
 #'
-#' @return A rgl plot of scalp EEG signal.
+#' @return A `rgl` plot of scalp EEG signal.
 #' @export
 #'
 #' @import rgl

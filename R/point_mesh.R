@@ -185,16 +185,17 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordina
 #'
 #' When both \code{names_vec} and \code{own_coordinates} are provided, it is essential that the length of \code{names_vec} matches the number of rows in \code{own_coordinates}, otherwise the names are not plotted (despite the setting \code{names = TRUE}).
 #'
-#' @return A plot.
+#' @return A `ggplot` or `rgl` object with mesh coordinates plot.
 #'
 #' @import rgl
+#' @import ggplot2
 #' @importFrom rlang .data
 #'
 #' @export
 #'
 #' @examples
 #' # 2D polygon point mesh with plotted sensors and default settings
-#' par(mar = c(0,0,0,0))
+#' # Note: for nice plot we recommend set par(mar = c(0,0,0,0))
 #' M <- point_mesh(n = 4000, template = "HCGSN256")
 #' plot_point_mesh(M$D2)
 #'
@@ -205,14 +206,12 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordina
 #' }
 #'
 #' # Plotting 2D circle point mesh with sensors as orange points
-#' par(mar = c(0,0,0,0))
 #' M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256", type = "circle")
 #' plot_point_mesh(M$D2, col_sensors = "orange")
 #'
 #' # Plotting the same mesh with marking only midline electrodes
 #' midline <- HCGSN256$D2[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204),]
 #' names_vec <- HCGSN256$sensor[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204)]
-#' par(mar = c(0,0,0,0))
 #' plot_point_mesh(M$D2, names = TRUE, names_vec = names_vec, own_coordinates = midline)
 #'
 plot_point_mesh <- function(mesh, sensors = TRUE, names = FALSE, names_vec = NULL,

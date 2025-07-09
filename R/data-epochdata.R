@@ -25,8 +25,6 @@
 #'
 #' @source Central European Institute of Technology, Masaryk University, Brno, Czech Republic.
 #'
-#' @import ggplot2
-#' @import dplyr
 #'
 #' @examples
 #' # Data preview

@@ -72,3 +72,6 @@ s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time \%in\% c(10
 animate_scalp(s1e05, amplitude = "signal")
 }
 }
+\seealso{
+\code{\link{scalp_plot}}
+}

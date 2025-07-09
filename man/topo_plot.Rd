@@ -39,7 +39,7 @@ topo_plot(
 \item{names}{A logical value indicating whether the sensor names should also be plotted (default value is \code{FALSE}).}
 }
 \value{
-A plot.
+A \code{ggplot} object with topographic map of an EEG signal.
 }
 \description{
 Plot a topographic circle or polygon map of the EEG signal amplitude using topographic colour scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^2 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations.
@@ -64,10 +64,10 @@ dplyr::filter(subject == 2 & time \%in\% 1:10 & epoch \%in\% 1:13)
 data_base <- baseline_correction(edata, base_int = 1:10)
 # a3) average computing
 data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, time = 10,
- type = "point")
+ type = "jack", group = "space")
 
 
-# b) plotting the topographic circle map with contours and legend
+# b) plotting the topographic map with contours and legend
 # interval (-30,15) is selected in consideration of the signal progress
 topo_plot(data = data_mean, amplitude = "average", template = "HCGSN256",
 col_range = c(-30, 15), contour = TRUE)
@@ -76,4 +76,7 @@ col_range = c(-30, 15), contour = TRUE)
 topo_plot(data = data_mean, amplitude = "average", template = "HCGSN256",
  col_range = c(-30, 15), names = TRUE)
 
+}
+\seealso{
+\code{\link{animate_topo}}
 }

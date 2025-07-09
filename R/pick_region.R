@@ -38,8 +38,7 @@ pick_region <- function(coords = NULL, hemisphere = c("left", "right", "midline"
   }
 
   if (is.null(coords)) {
-    coords <- diegr::HCGSN256$D2#cbind(diegr::HCGSN256$D2, diegr::HCGSN256$sensor)
-    #colnames(coords) <- c("x", "y", "sensor")
+    coords <- diegr::HCGSN256$D2
    }
 
   if (is.null(ROI)) {

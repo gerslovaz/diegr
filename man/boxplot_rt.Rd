@@ -12,7 +12,7 @@ boxplot_rt(data, subject = NULL)
 \item{subject}{A character vector with subjects to plot. If missing, boxplots are drawn for all avaliable subjects in \code{data}.}
 }
 \value{
-A plotly object.
+A \code{plotly} object with boxplots of response times.
 }
 \description{
 Function for plotting interactive boxplots of response time in individual epochs for selected subjects. The interactive plotly output enables to easily determine the epoch number from which outliers come and also allows to easily edit the image layout.

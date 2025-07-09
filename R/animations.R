@@ -6,6 +6,7 @@
 #' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values.
 #' @param t_lim Limits of time points (i.e., the length of the timeline displayed below the animation).
 #' @param FS The sampling frequency. Default value is 250 Hz.
+#' @param t0 Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).
 #' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
 #' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.
 #' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
@@ -28,6 +29,8 @@
 #'
 #' @export
 #'
+#' @seealso \code{\link{topo_plot}}
+#'
 #' @import ggplot2
 #' @import dplyr
 #' @import gganimate
@@ -41,11 +44,13 @@
 #' # Run only if you want to generate the full animation.
 #' # Prepare a data structure:
 #' s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time %in% c(10:20))
-#' # Plot animation:
-#' animate_topo(s1e05, amplitude = "signal", t_lim = c(0,50))
+#' # Plot animation
+#' # t0 = 10 indicates the time point of stimulus in epochdata,
+#' # t_lim is the whole range of epochdata, we animate only a short period
+#' animate_topo(s1e05, amplitude = "signal", t_lim = c(1,50), t0 = 10)
 #' }
 #'
-animate_topo <- function(data, amplitude, t_lim, FS = 250, mesh, coords = NULL, template = NULL,
+animate_topo <- function(data, amplitude, t_lim, FS = 250, t0 = 1, mesh, coords = NULL, template = NULL,
                          col_range = NULL, col_scale = NULL,
                          legend = TRUE, contour = FALSE,
                          output_path = NULL, ...){
@@ -107,7 +112,7 @@ animate_topo <- function(data, amplitude, t_lim, FS = 250, mesh, coords = NULL, 
 
   k0 <- 1000 / FS
   k <- range(t_lim)[2] - range(t_lim)[1]
-  time_positions <- seq(x_range[1], x_range[2], length.out = k)
+  time_positions <- seq(x_range[1], x_range[2], length.out = k + 1)
   time_range <- sort(unique(newdata$time))
   timeline <- tibble(time = time_range, x = time_positions[time_range], y = y_l)
 
@@ -147,11 +152,11 @@ animate_topo <- function(data, amplitude, t_lim, FS = 250, mesh, coords = NULL, 
     geom_point(data = coords, aes(x = .data$x, y = .data$y), color = "black", cex = 0.7) +
 
     annotate("segment", x = x_range[1], y = y_l, xend = x_range[2], yend = y_l, col = "black")  + # time line
-    annotate(geom = "text", x = x_range[1], y = y_l + 0.05 * abs(M), label = paste0(range(t_lim)[1] * k0)) +
-    annotate(geom = "text", x = x_range[2], y = y_l + 0.05 * abs(M), label = paste0(range(t_lim)[2] * k0)) +
+    annotate(geom = "text", x = x_range[1], y = y_l + 0.05 * abs(M), label = paste0((range(t_lim)[1] - t0) * k0)) +
+    annotate(geom = "text", x = x_range[2], y = y_l + 0.05 * abs(M), label = paste0((range(t_lim)[2] - t0) * k0, " ms")) +
     geom_point(data = timeline, aes(x = .data$x, y = .data$y, group = .data$time),
                color = "red", size = 3, inherit.aes = FALSE) + # red moving point
-    geom_text(data = timeline, aes(x = .data$x, y = .data$y, label = paste0("t = ", .data$time * k0, " ms"), group = .data$time),
+    geom_text(data = timeline, aes(x = .data$x, y = .data$y, label = paste0("t = ", (.data$time - t0) * k0, " ms"), group = .data$time),
               vjust = 1.5, color = "red", inherit.aes = FALSE)  # label for the point
 
 
@@ -253,6 +258,8 @@ prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
 #' - If `frames_dir` is specified, individual animation frames (PNG) are saved to that directory.
 #' - If also `output_path` is specified, a video (MP4) is created and saved using the `av` package.
 #' - Otherwise, the animation is displayed in an interactive rgl window.
+#'
+#' @seealso \code{\link{scalp_plot}}
 #'
 #' @export
 #'
@@ -397,4 +404,273 @@ export_video <- function(frames_dir, plot_function, time_points,
     }
   }
 
+
+
+prepare_anim_structure_CI <- function(data, coords, mesh_mat) {
+  ## create structure for animate_topo from database
+  ## need to change also for 3D case
+
+  if (inherits(data, "tbl_sql")) {
+    data <- dplyr::collect(data)
+  }
+
+
+  if (all(c("x", "y", "z") %in% names(coords))) {
+    coords_df <- data.frame(x = coords[["x"]], y = coords[["y"]], z = coords[["z"]])
+  } else {
+    coords_df <- data.frame(x = coords[["x"]], y = coords[["y"]])
+  }
+
+  # add coordinates of sensors to the tibble with time and signal data
+  tib_signal <- data |>
+    left_join(coords, by = "sensor") #coords_sen
+
+
+  # splitting the tibble and computing IM model on splitted tibble
+  tib_split <- split(tib_signal, tib_signal$time)
+
+  tib_IM <- purrr::map_dfr(names(tib_split), function(t) {
+    df_t <- tib_split[[t]]
+    interpolated_values <- IM(coords_df, df_t[["average"]], mesh_mat)$Y_hat
+    y_hat_low <- IM(coords_df, df_t[["ci_low"]], mesh_mat)$Y_hat
+    y_hat_up <- IM(coords_df, df_t[["ci_up"]], mesh_mat)$Y_hat
+
+    interp_tib <- tibble(
+      time = as.numeric(t),
+      mesh_coord = mesh_mat,
+      y_avg = interpolated_values[1:dim(mesh_mat)[1]],
+      y_low = y_hat_low[1:dim(mesh_mat)[1]],
+      y_up = y_hat_up[1:dim(mesh_mat)[1]]
+    )
+
+  })
+
+  tib_IM <- tib_IM |>
+    tidyr::pivot_longer(
+          cols = c("y_low", "y_avg", "y_up"),
+          names_to = "stats",
+          values_to = "stats_value")
+  tib_IM$stats <- factor(tib_IM$stats, levels = c("y_low", "y_avg", "y_up"),
+                         labels = c("CI, lower bound", "Average", "CI, upper bound"))
+
+  return(tib_IM)
+}
+
+#' Topographic map animation of the average signal with confidence interval bounds in time
+#'
+#' @description
+#' An animation of the average signal time course as a topographic map along with the lower and upper bounds of the confidence interval, which are plotted as separate topographic maps alongside the average map.
+#'
+#'
+#' @param data A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: \code{sensor} with sensor labels and \code{average, ci_low, ci_up} with values of average signal and lower and upper CI bounds.
+#' @param t_lim Limits of time points (i.e., the length of the timeline displayed below the animation).
+#' @param FS The sampling frequency. Default value is 250 Hz.
+#' @param t0 Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).
+#' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
+#' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.
+#' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
+#' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.
+#' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
+#' @param legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.
+#' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.
+#' @param output_path File path where the animation will be saved using `gifski` renderer (optional). If not defined, the animation is plotted in the RStudio Viewer.
+#' @param ... Additional parameters for animation according to [gganimate::animate].
+#'
+#' @returns
+#' If `output_path` is `NULL`, the function prints the animation to the RStudio Viewer.
+#' If `output_path` is specified, the animation is saved to the given file path and not displayed.
+#'
+#' @seealso \code{\link{animate_topo}}
+#'
+#' @export
+#'
+#' @import ggplot2
+#' @import dplyr
+#' @import gganimate
+#' @importFrom grDevices hsv
+#' @importFrom scales rescale
+#' @importFrom rlang .data
+#' @examples
+#' \dontrun{
+#' # This example may take a few seconds to render.
+#' # Run only if you want to generate the full animation.
+#'
+#' # a) prepare data: compute the mean from baseline corrected signal for subject 2,
+#' # first 10 points and only 13 epochs (epochs 14 and 15 are outliers)
+#' edata <- epochdata |>
+#' dplyr::filter(subject == 2 & time %in% 1:10 & epoch %in% 1:13)
+#' data_base <- baseline_correction(edata, base_int = 1:10) # baseline correction
+#' data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2,
+#'  type = "jack", group = "space") # compute mean
+#' # b) render the animation
+#' # (t0 = 10 because the time of the stimulus in epochdata is in time point 10)
+#' animate_topo_mean(data_mean, t_lim = c(1,50), t0 = 10)
+#'
+#' }
+
+animate_topo_mean <- function(data, t_lim, FS = 250, t0 = 1, mesh, coords = NULL, template = NULL,
+                         col_range = NULL, col_scale = NULL,
+                         legend = TRUE, contour = FALSE,
+                         output_path = NULL, ...) {
+
+  if (!requireNamespace("magick", quietly = TRUE)) {
+    stop("To render the animation, the 'magick' package is required.")
+  }
+
+    if (!(is.logical(contour))) {
+    stop("Argument 'contour' has to be logical.")
+  }
+
+  if (!(is.logical(legend))) {
+    stop("Argument 'legend' has to be logical.")
+  }
+
+  if (!is.null(template)) {
+    coords <- switch(template,
+                     "HCGSN256" = diegr::HCGSN256$D2,
+                     stop("Unknown template.")
+    )
+  }
+
+  if (is.null(template) && is.null(coords)) {
+    # use HCGSN256 template
+    coords <- diegr::HCGSN256$D2
+  }
+
+  required_cols <- c("x", "y", "sensor")
+  missing_cols <- setdiff(required_cols, colnames(coords))
+
+  if (length(missing_cols) > 0) {
+    stop(paste("The following required columns in 'coords' are missing:",
+               paste(missing_cols, collapse = ", ")))
+  }
+
+  if (missing(mesh)) {
+    mesh <- point_mesh(dim = 2, template = { template })
+  }
+
+  if (control_D2(mesh)) {
+    mesh_mat <- mesh$D2
+  }
+
+  newdata <- prepare_anim_structure_CI(data, coords, mesh_mat)
+
+  M <- max(mesh_mat[,2], na.rm = TRUE)
+  Mm <- min(mesh_mat[,2], na.rm = TRUE)
+  y_l <- Mm - 0.1 * abs(Mm)
+  x_range <- range(mesh_mat[,1])
+  x0 <- mean(mesh_mat[,1], na.rm = TRUE)
+
+  if (any(newdata$time <  range(t_lim)[1] | newdata$time > range(t_lim)[2])) {
+    warning("Some values of 'time' are outside the 't_lim' range.")
+  }
+
+  k0 <- 1000 / FS
+  t_range <- range(t_lim)
+  k <- range(t_lim)[2] - range(t_lim)[1]
+  x_marg <- 0.03 * k
+  time_positions <- seq(t_range[1], t_range[2], length.out = k + 1)
+  time_range <- sort(unique(newdata$time))
+  timeline <- tibble(time = time_range, x = time_positions[time_range], y = 0)
+
+
+  if (is.null(col_scale)) {
+
+    if (is.null(col_range)) {
+      if (all(is.na(newdata$stats_value))) {
+        stop("No valid values in stats_value to create color scale.")
+      }
+      col_range <- c(1.1 * range(newdata$stats_value))
+    }
+
+    col_scale <- create_scale(col_range)
+  }
+
+  g <- ggplot(newdata, aes(x = .data$mesh_coord$x, y = .data$mesh_coord$y)) +
+    geom_raster(aes(fill = .data$stats_value)) +
+    scale_fill_gradientn(
+      colors = col_scale$colors,
+      breaks = col_scale$breaks,
+      limits = range(col_scale$breaks),
+      labels = round(col_scale$breaks, 2),
+      values = scales::rescale(col_scale$breaks)
+    ) +
+    facet_wrap(~ stats, ncol = 3) +
+    coord_fixed(ratio = 1) +
+    theme_minimal() +
+    theme(
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      axis.text = element_blank(),
+      axis.title = element_blank(),
+      legend.position = "none"
+    )
+
+  if (legend == TRUE) {
+    g <- g  +
+      labs(fill = expression(paste("Amplitude (", mu, "V)"))) +
+      guides(fill = guide_colorbar(barwidth = 20, barheight = 0.7)) +
+      theme(
+        legend.position = "bottom",
+        legend.text = element_text(size = 5),
+        legend.title = element_text(size = 8)
+      )
+  }
+
+  if (contour == TRUE) {
+    g <- g + geom_contour(aes(z = .data$stats_value), color = "gray", breaks = col_scale$breaks)
+  }
+
+
+  g <- g + gganimate::transition_manual(.data$time)
+
+
+  timeline_plot_base <- ggplot(timeline, aes(x = .data$x, y = .data$y)) +
+    geom_hline(yintercept = 0) +
+    theme_minimal() +
+    theme(
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      axis.text = element_blank(),
+      axis.title = element_blank()
+    ) +
+    xlim(t_range[1] - x_marg , t_range[2] + x_marg) +
+    ylim(-0.25,0.25) +
+    annotate(geom = "point", x = t_range[1], y = 0, col = "black", pch = 3) +
+    annotate(geom = "text", x = t_range[1], y = 0.2, label = paste0((min(t_lim) - t0) * k0)) +
+    annotate(geom = "point", x = t_range[2], y = 0, col = "black", pch = 3) +
+    annotate(geom = "text", x = t_range[2], y = 0.2, label = paste0((max(t_lim) - t0) * k0 , " ms")) +
+    geom_point(data = timeline, aes(x = .data$x, y = .data$y, group = .data$time),
+               color = "red", size = 3, inherit.aes = FALSE) +
+    geom_text(data = timeline, aes(x = .data$x, y = .data$y, label = paste0("t = ", (.data$time - t0) * k0, " ms"), group = .data$time),
+              vjust = 1.5, color = "red", inherit.aes = FALSE) +  # label for the point
+  gganimate::transition_manual(.data$time)
+
+
+  c_gif <- gganimate::animate(g, width = 480, height = 300)
+  d_gif <- gganimate::animate(timeline_plot_base, width = 480, height = 60)
+
+  c_gif <- magick::image_read(c_gif)
+  d_gif <- magick::image_read(d_gif)
+
+  i = 1
+  new_gif <- magick::image_append(c(c_gif[i], d_gif[i]), stack = TRUE)
+
+  for (i in 2:length(time_range)) {
+    combined <- magick::image_append(c(c_gif[i], d_gif[i]), stack = TRUE)
+    new_gif <- c(new_gif, combined)
+  }
+
+  if (!is.null(output_path)) {
+    if (!requireNamespace("gifski", quietly = TRUE)) {
+      stop("To export animation, the 'gifski' package is required.")
+    }
+
+    magick::image_write(new_gif, format = "gif", path = output_path)
+    message("Animation saved into: ", output_path)
+  } else {
+    print(new_gif)
+  }
+
+}
 

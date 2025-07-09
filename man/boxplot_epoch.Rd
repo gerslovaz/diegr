@@ -18,10 +18,10 @@ boxplot_epoch(data, amplitude = "signal", subject, channel, time_lim)
 \item{time_lim}{A character vector with time range to plot.}
 }
 \value{
-A plotly object.
+A \code{plotly} object with boxplots of EEG amplitude for individual epochs.
 }
 \description{
-Function for plotting interactive boxplots of EEG amplitude in individual epochs for selected subject and channel within the chosen time interval. The interactive plotly output enables to easily determine the epoch number from which outliers come and also allows to easily edit the image layout.
+Function for plotting interactive boxplots of EEG amplitude in individual epochs for selected subject and channel within the chosen time interval. The interactive \code{plotly} output enables to easily determine the epoch number from which outliers come and also allows to easily edit the image layout.
 }
 \details{
 The input data frame or database table must contain at least following columns:

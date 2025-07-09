@@ -23,8 +23,10 @@
 #' To compare results for different subjects or conditions, set the same values of \code{col_range} and \code{col_scale} arguments in all cases.
 #' The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
 #'
-#' @return A plot.
+#' @return A `ggplot` object with topographic map of an EEG signal.
 #' @export
+#'
+#' @seealso \code{\link{animate_topo}}
 #'
 #' @import ggplot2
 #' @import dplyr
@@ -45,10 +47,10 @@
 #' data_base <- baseline_correction(edata, base_int = 1:10)
 #' # a3) average computing
 #' data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, time = 10,
-#'  type = "point")
+#'  type = "jack", group = "space")
 #'
 #'
-#' # b) plotting the topographic circle map with contours and legend
+#' # b) plotting the topographic map with contours and legend
 #' # interval (-30,15) is selected in consideration of the signal progress
 #' topo_plot(data = data_mean, amplitude = "average", template = "HCGSN256",
 #' col_range = c(-30, 15), contour = TRUE)

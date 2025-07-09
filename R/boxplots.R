@@ -1,7 +1,7 @@
 #' Plot interactive boxplots of epochs
 #'
 #' @description
-#' Function for plotting interactive boxplots of EEG amplitude in individual epochs for selected subject and channel within the chosen time interval. The interactive plotly output enables to easily determine the epoch number from which outliers come and also allows to easily edit the image layout.
+#' Function for plotting interactive boxplots of EEG amplitude in individual epochs for selected subject and channel within the chosen time interval. The interactive `plotly` output enables to easily determine the epoch number from which outliers come and also allows to easily edit the image layout.
 #'
 #' @param data A data frame or a database table with EEG dataset. Required columns: subject, sensor, epoch, time and the column with EEG amplitude named as in \code{amplitude} parameter.
 #' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal"}.
@@ -18,7 +18,7 @@
 #' and a column with measured EEG signal values (or their averages) called as in \code{amplitude}.
 #'
 #'
-#' @return A plotly object.
+#' @return A `plotly` object with boxplots of EEG amplitude for individual epochs.
 #'
 #' @import dplyr
 #' @importFrom rlang .data
@@ -89,7 +89,7 @@ boxplot_epoch <- function(data,
 #' and a column with measured EEG signal values (or their averages) called as in \code{amplitude}.
 #'
 #'
-#' @return A plotly object.
+#' @return A `plotly` object with boxplots of EEG amplitude for subjects.
 #'
 #' @import dplyr
 #' @importFrom rlang .data
@@ -152,7 +152,7 @@ boxplot_subject <- function(data,
 #' @param data A data frame or a database table with response times dataset. Required columns: subject, epoch, RT (value of response time in ms).
 #' @param subject A character vector with subjects to plot. If missing, boxplots are drawn for all avaliable subjects in \code{data}.
 #'
-#' @return A plotly object.
+#' @return A `plotly` object with boxplots of response times.
 #'
 #' @import dplyr
 #' @importFrom rlang .data

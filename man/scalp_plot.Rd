@@ -33,10 +33,10 @@ scalp_plot(
 
 \item{col_scale}{Optionally, a colour scale to use for plotting. If not defined, it is computed from \code{col_range}.}
 
-\item{view}{A character denoting the view of the plot (according to neurological terminology). Possible values are: \code{"superior", "anterior", "posterior", "left", "right"}. If missing, the default view according to user settings is displayed.}
+\item{view}{A character denoting the view of the plot (according to neurological terminology). Possible values are: \code{"superior", "anterior", "posterior", "left", "right"}. If missing, the default view according to user settings is displayed. Note: Input coordinates corresponding to the positions in the HCGSN template are required to obtain an appropriate view.}
 }
 \value{
-A rgl plot of scalp EEG signal.
+A \code{rgl} plot of scalp EEG signal.
 }
 \description{
 Plot a scalp polygon map of the EEG signal amplitude using topographic colour scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^3 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations. The \code{\link[rgl]{shape3d}} function is used for plotting.

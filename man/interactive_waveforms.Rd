@@ -13,7 +13,8 @@ interactive_waveforms(
   t0 = NULL,
   col_palette,
   level = c("epoch", "sensor", "subject"),
-  avg = TRUE
+  avg = TRUE,
+  CI = FALSE
 )
 }
 \arguments{
@@ -34,12 +35,14 @@ interactive_waveforms(
 \item{level}{A character specifying the level of the time curves. The possible values are \code{"epoch"}, \code{"sensor"} and \code{"subject"}. See details for more information.}
 
 \item{avg}{A logical value indicating, if the average black curve should be plotted. Default is \code{TRUE}.}
+
+\item{CI}{A logical value indicating, if the confidence ribbon should be plotted. Default is \code{FALSE}. See Details for more information.}
 }
 \value{
-A plotly graph.
+A \code{plotly} object showing an interactive time series of the signal according to the chosen level.
 }
 \description{
-Function for plotting time series of EEG signal colour-coded by epoch, channel or subject (according to chosen level) in interactive plotly graph. The output in plotly format enables to easily edit the image layout.
+Function for plotting time series of EEG signal colour-coded by epoch, channel or subject (according to chosen level) in interactive \code{plotly} graph. When using the function for plotting the average, there is an option to add a confidence band using the \code{CI} argument. The output in \link[plotly]{plotly} format enables to easily edit the image layout.
 }
 \details{
 The input data frame or database table must contain at least some of the following columns (according to the \code{level} parameter - for \code{"sensor"} level no epoch column is needed etc.):
@@ -49,17 +52,20 @@ time - a column with time point numbers,
 epoch - a column with epoch numbers,
 signal (or other name specified in \code{amplitude} parameter) - a column with measured EEG signal values.
 Note: The higher level assumes the average signal for the given level in input data, for example \code{sensor} level assumes a mean sensor signal in the \code{amplitude} column. The input data for individual epochs together with sensor level setting will result in a mess output.
+
+Plotting confidence ribbon:
+To plot the confidence bands around the average lines (\code{CI = TRUE}), the input data must include the \code{ci_up} and \code{ci_low} columns (as in the output tibble from \link{compute_mean} function).
 }
 \examples{
 # 1) Plot epoch waveforms with average curve for subject 1 and electrode "E65"
 # with 250 sampling frequency rate (default) and 10 as zero time point
 interactive_waveforms(epochdata, amplitude = "signal", subject = 1, channel = "E65",
 t0 = 10, level = "epoch")
-# 2) Plot sensor level waveforms for subject 1 and electrodes "E65" and "E182"
+# 2) Plot sensor level waveforms with confidence bands for subject 1 and electrodes "E65" and "E182"
 # a) preparing data
 sendata <- compute_mean(epochdata, amplitude = "signal", subject = 1, channel = c("E65", "E182"),
  group = "time", level = "epoch")
 # b) plot the waveforms without the average
 interactive_waveforms(sendata, amplitude = "average", subject = 1, t0 = 10,
-level = "sensor", avg = FALSE)
+level = "sensor", avg = FALSE, CI = TRUE)
 }

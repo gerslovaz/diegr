@@ -13,7 +13,9 @@ compute_mean(
   level = "epoch",
   ex_epoch = NULL,
   time = NULL,
-  type = "point"
+  type = "point",
+  R = 1000,
+  alpha = 0.95
 )
 }
 \arguments{
@@ -34,12 +36,21 @@ compute_mean(
 \item{time}{A numeric vector specifying the time points used for computing the average signal. If NULL, the whole time interval is included.}
 
 \item{type}{A character specifying the method of calculating the average, \code{"point"} for pointwise arithmetic average (default) and \code{"jack"} for jackknife leave-one-out average.}
+
+\item{R}{The number of replications used in bootstrap interval calculation. Required only for computing pointwise mean. Default value is 1000.}
+
+\item{alpha}{A number indicating confidence interval level. The default value is 0.95 for 95\% confidence intervals.}
 }
 \value{
-A tibble with result average according to the chosen \code{level} and \code{group} arguments.
+A tibble with result average and CI bounds according to the chosen \code{level}, \code{group} and \code{alpha} arguments. The statistics are saved in columns
+\itemize{
+\item \code{average} for computed average amplitude value,
+\item \code{ci_low} for lower bound of the confidence interval and
+\item \code{ci_up} for upper bound of the confidence interval.
+}
 }
 \description{
-Function calculates a pointwise or a jackknife (leave-one-out) average signal for chosen subject (or more subjects) in temporal or spatial domain. The function computes an average at subject, sensor/time point or epoch level (according to the \code{level} parameter).
+Function calculates a pointwise or a jackknife (leave-one-out) average signal for chosen subject (or more subjects) in temporal or spatial domain together with bootstrap or jackknife pointwise confidence interval (CI) bounds. The function computes an average at subject, sensor/time point or epoch level (according to the \code{level} parameter).
 }
 \details{
 The \code{level} parameter enables to choose the level at which the average is calculated:
@@ -49,25 +60,33 @@ The \code{level} parameter enables to choose the level at which the average is c
 \item \code{"subject"} means averaging on subject level, the result is the average curve or area from all included subjects.
 The function assumes input adapted to the desired level of averaging (i.e. for epoch level the epoch column must be present etc.).
 }
+
+Computing confidence intervals:
+For each average value, the upper and lower bounds of the point confidence interval are also available. In the case of pointwise mean, the bounds are computed using bootstrapping with \code{R} replicates. For jackknife mean are the bounds computed using jackknife standard deviation and approximation by the Student distribution.
+Note: Computing pointwise bootstrap CI bounds can be slow for large amounts of data.
 }
 \examples{
 # Average (pointwise) raw signal for subject 1 and electrode E1
 # without outlier epoch 14
-avg <- compute_mean(epochdata, amplitude = "signal", subject = 1, channel = "E1", level = "epoch",
- ex_epoch = 14)
-str(avg)
-# plot the result
-plot(avg$average, type = "l")
+avg_data <- compute_mean(epochdata, amplitude = "signal", subject = 1, channel = "E1",
+level = "epoch", ex_epoch = 14)
+str(avg_data)
+\dontrun{
+# plot the result using interactive plot with pointwise CI
+interactive_waveforms(data = avg_data, amplitude = "average", subject = 1, t0 = 10,
+level = "sensor", avg = FALSE, CI = TRUE)
+}
 
-# Average signal for subject 1 in all electrodes in time point 11 with baseline correction
+
+# Jackknife average signal for subject 1 in all electrodes in time point 11 with baseline correction
 # on interval 1:10 (again without outlier epoch 14)
 # a) prepare corrected data
 data01 <- epochdata |> dplyr::filter(.data$subject == 1)
 basedata <- baseline_correction(data01, base_int = 1:10, type = "absolute")
 # b) compute the average in time point 11
-avg <- compute_mean(basedata, amplitude = "signal_base", time = 11, level = "epoch",
- group = "space", ex_epoch = 14)
-str(avg)
+avg_data <- compute_mean(basedata, amplitude = "signal_base", time = 11, level = "epoch",
+ group = "space", type = "jack", ex_epoch = 14)
+str(avg_data)
 # c) plot the result with topo_plot()
-topo_plot(data = avg, amplitude = "average")
+topo_plot(data = avg_data, amplitude = "average")
 }
