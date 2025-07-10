@@ -20,11 +20,13 @@ The package `diegr` includes:
 - interactive epoch waveforms
 - topographic maps (2D projection)
 - head plots in 3D
+- functions for computing baseline correction, pointwise and jackknife
+  mean
+- functions for plotting the mean with pointwise confidence interval
+- animations of time course of the raw signal or the average in 2D and
+  3D
 
 ## Installation
-
-You can install the development version of `diegr` from
-[GitHub](https://github.com/) with:
 
 ``` r
 install.packages("diegr")
@@ -99,6 +101,25 @@ topo_plot(data_short, amplitude = "signal", mesh = M1)
 ```
 
 <img src="man/figures/README-topoplot-1.png" width="100%" />
+
+## Computing and displaying the average
+
+Compute the average signal for subject 2 from the channel E65 (exclude
+the oulier epochs 14 and 15) and then display it along with CI bounds
+
+``` r
+# extract required data
+edata <- epochdata |>
+dplyr::filter(subject == 2 & sensor == "E65" & epoch %in% 1:13)
+# baseline correction
+data_base <- baseline_correction(edata, base_int = 1:10)
+# compute average
+data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, channel = "E65", type = "point")
+# plot the average line with CI in blue colors
+plot_time_mean(data = data_mean, t0 = 10, color = "blue", fill = "lightblue")
+```
+
+<img src="man/figures/README-timemean-1.png" width="100%" />
 
 For more examples and basic informations about using the package see
 [the diegr vignette](doc/diegr.html).
