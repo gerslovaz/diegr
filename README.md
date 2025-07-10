@@ -114,7 +114,8 @@ dplyr::filter(subject == 2 & sensor == "E65" & epoch %in% 1:13)
 # baseline correction
 data_base <- baseline_correction(edata, base_int = 1:10)
 # compute average
-data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, channel = "E65", type = "point")
+data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2,
+                          channel = "E65", type = "point")
 # plot the average line with CI in blue colors
 plot_time_mean(data = data_mean, t0 = 10, color = "blue", fill = "lightblue")
 ```
