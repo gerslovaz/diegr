@@ -4,6 +4,7 @@
 # diegr
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 ## Overview
@@ -26,8 +27,8 @@ You can install the development version of `diegr` from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("gerslovaz/diegr")
+install.packages("diegr")
+# devtools::install_github("gerslovaz/diegr") development version will be available later
 ```
 
 ## Data
@@ -44,7 +45,9 @@ columns with the following names:
 - `epoch` - epoch numbers
 - `time` - numbers of time points (as sampling points, not in ms),
 - `sensor` - sensor labels,
-- `signal` - the EEG signal amplitude in microvolts.
+- `signal` - the EEG signal amplitude in microvolts (in some functions
+  it is possible to set the name of the column containing the amplitude
+  arbitrarily).
 
 The package contains some included training datasets:
 
@@ -58,8 +61,8 @@ The package contains some included training datasets:
   motor task.
 
 For more information about the structure of built-in data and conversion
-from Matlab hdf5 files to database tables using R see … here will be the
-link on vignette …
+from Matlab hdf5 files to database tables using R see [the diegr
+vignette](doc/diegr.html).
 
 ## Examples of graphic functions
 
@@ -79,9 +82,8 @@ boxplot_epoch(epochdata, subject = 1, channel = "E3", time_lim = c(260:270))
 
 <img src="./man/figures/README-boxplot.png" width="100%" />
 
-Note: The README format does not allow the inclusion of plotly
+Note: The README format does not allow the inclusion of `plotly`
 interactive elements, only the static preview of the result is shown.
-(here add a link on Github Pages for complete graph)
 
 #### Topographic map
 
@@ -90,21 +92,25 @@ data("HCGSN256")
 # creating a mesh
 M1 <- point_mesh(dim = 2, n = 30000, type = "polygon")
 # filtering a subset of data to display 
-signal <- epochdata |>
+data_short <- epochdata |>
   dplyr::filter(subject == 1 & epoch == 10 & time == 15) 
-signal <- signal$signal
 # function for displaying a topographic map of the chosen signal on the created mesh M1
-topo_plot(signal, M1$D2)
+topo_plot(data_short, amplitude = "signal", mesh = M1)
 ```
 
 <img src="man/figures/README-topoplot-1.png" width="100%" />
 
-For more examples and basic informations about using the package see the
-diegr vignette.
+For more examples and basic informations about using the package see
+[the diegr vignette](doc/diegr.html).
 
 <!-- You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. -->
+
 <!-- You can also embed plots, for example: -->
+
 <!-- ```{r pressure, echo = FALSE} -->
+
 <!-- plot(pressure) -->
+
 <!-- ``` -->
+
 <!-- In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN. -->
