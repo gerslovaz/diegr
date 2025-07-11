@@ -53,8 +53,8 @@ outliers_epoch <- function(data, amplitude = "signal", subject = NULL, sensor = 
 
   newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ sensor }}, time_rg = {{ time }})
 
-   newdata <- newdata |>
-     dplyr::select("subject", "time", "epoch", "sensor", amp_name)
+   #newdata <- newdata |>
+  #   dplyr::select("subject", "time", "epoch", "sensor", amp_name)
    newdata <- dplyr::collect(newdata)
    newdata$epoch <- factor(newdata$epoch)
 
@@ -62,8 +62,8 @@ outliers_epoch <- function(data, amplitude = "signal", subject = NULL, sensor = 
     outdata <- newdata |>
       dplyr::group_by(.data$time) |>
       dplyr::mutate(outliers = .data[[amp_name]] %in% boxplot.stats(.data[[amp_name]])$out) |>
-      dplyr::filter(.data$outliers == TRUE) |>
-      dplyr::select("time", "epoch", "sensor", amp_name)
+      dplyr::filter(.data$outliers == TRUE) #|>
+      #dplyr::select("time", "epoch", "sensor", amp_name)
   }
 
   if (method == "percentile") {
@@ -77,16 +77,16 @@ outliers_epoch <- function(data, amplitude = "signal", subject = NULL, sensor = 
     outdata <- newdata |>
       dplyr::group_by(.data$time) |>
       dplyr::mutate(outliers = .data[[amp_name]] < quantile(.data[[amp_name]], 1 - p) | .data[[amp_name]] > quantile(.data[[amp_name]], p)) |>
-      dplyr::filter(.data$outliers == TRUE) |>
-      dplyr::select("time", "epoch", "sensor", amp_name)
+      dplyr::filter(.data$outliers == TRUE) #|>
+      #dplyr::select("time", "epoch", "sensor", amp_name)
   }
 
   if (method == "hampel") {
     outdata <- newdata |>
       dplyr::group_by(.data$time) |>
       dplyr::mutate(outliers = .data[[amp_name]] < median(.data[[amp_name]]) - 3 * mad(.data[[amp_name]], constant = 1) | .data[[amp_name]] > median(.data[[amp_name]]) + 3 * mad(.data[[amp_name]], constant = 1)) |>
-      dplyr::filter(.data$outliers == TRUE) |>
-      dplyr::select("time", "epoch", "sensor", amp_name)
+      dplyr::filter(.data$outliers == TRUE) #|>
+      #dplyr::select("time", "epoch", "sensor", amp_name)
   }
 
   epoch_vec <- outdata$epoch

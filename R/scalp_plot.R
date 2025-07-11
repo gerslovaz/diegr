@@ -49,7 +49,7 @@
 #' scalp_plot(data_mean, amplitude = "average", col_range = c(-30, 15))
 #' }
 
-scalp_plot <- function(data, amplitude, mesh, tri,
+scalp_plot <- function(data, amplitude, mesh, tri = NULL,
                       coords = NULL, template = NULL,
                       col_range = NULL, col_scale = NULL,
                       view = "posterior") {
@@ -91,7 +91,7 @@ scalp_plot <- function(data, amplitude, mesh, tri,
     mesh3 <- mesh$D3
   }
 
-  if (missing(tri)) {
+  if (is.null(tri)) {
     if (control_D2(mesh)) {
       mesh2 <- mesh$D2
     }

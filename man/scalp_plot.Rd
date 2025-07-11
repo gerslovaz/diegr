@@ -8,7 +8,7 @@ scalp_plot(
   data,
   amplitude,
   mesh,
-  tri,
+  tri = NULL,
   coords = NULL,
   template = NULL,
   col_range = NULL,

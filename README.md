@@ -63,8 +63,8 @@ The package contains some included training datasets:
   motor task.
 
 For more information about the structure of built-in data and conversion
-from Matlab hdf5 files to database tables using R see [the diegr
-vignette](doc/diegr.html).
+from Matlab hdf5 files to database tables using R see the package
+vignette `vignette("diegr", package = "diegr")`.
 
 ## Examples of graphic functions
 
@@ -122,8 +122,8 @@ plot_time_mean(data = data_mean, t0 = 10, color = "blue", fill = "lightblue")
 
 <img src="man/figures/README-timemean-1.png" width="100%" />
 
-For more examples and basic informations about using the package see
-[the diegr vignette](doc/diegr.html).
+For detailed examples and explanations, please see the package vignette:
+`vignette("diegr", package = "diegr")`.
 
 <!-- You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. -->
 

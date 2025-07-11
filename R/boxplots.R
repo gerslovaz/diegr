@@ -53,8 +53,8 @@ boxplot_epoch <- function(data,
 
 
   db_sub <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ channel }}, time_rg = {{ time_lim }})
-  db_sub <- db_sub |>
-    dplyr::select("time", "epoch", amp_name)
+  #db_sub <- db_sub |>
+  #  dplyr::select("time", "epoch", amp_name)
   db_df <- collect(db_sub)
 
   label <- rlang::englue("Subject { subject }, channel { channel }")
@@ -125,8 +125,8 @@ boxplot_subject <- function(data,
   }
 
   db_sub <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ channel }}, time_rg = {{ time_lim }})
-  db_sub <- db_sub |>
-    dplyr::select("time", "subject", amp_name)
+  #db_sub <- db_sub |>
+  #  dplyr::select("time", "subject", amp_name)
   db_df <- collect(db_sub)
 
   label <- rlang::englue("Channel { channel }")
