@@ -4,30 +4,48 @@
 \alias{baseline_correction}
 \title{Baseline correction}
 \usage{
-baseline_correction(data, base_int, type = "absolute")
+baseline_correction(data, baseline_range, type = "absolute")
 }
 \arguments{
 \item{data}{A data frame, tibble or a database table with input data, required columns: subject, sensor, time, signal, epoch.}
 
-\item{base_int}{Numeric character vector including time points to use as a baseline. It must include all required values, so for baseline between time points 125 and 250 write \code{base_int = 125:250}.}
+\item{baseline_range}{A numeric vector of time points used as the baseline (e.g., \code{baseline_range = 125:250}).}
 
-\item{type}{A character indicating the type of baseline correction. Only the value \code{"absolute"} is available at this moment.}
+\item{type}{A character indicating the type of baseline correction. Only the value \code{"absolute"} is allowed at this moment (other values will trigger an error).}
 }
 \value{
-A data frame/tibble with added two columns:
-\item{signal_base}{signal corrected on chosen baseline}
-\item{baseline}{a value of baseline for the given epoch}
+A data frame/tibble with added columns:
+\item{signal_base}{Signal corrected by subtracting the baseline for each epoch.}
+\item{baseline}{A baseline value used for correction.}
 }
 \description{
 Function for computing amplitude corrected to the selected baseline.
+}
+\details{
+If the values from \code{baseline_range} vector are out of the range of the \code{time} column, the baseline calculation proceeds as follows:
+\enumerate{
+\item If a part of the \code{baseline_range} vector is in the \code{time} column and part is outside its range, the baseline correction is computed only from the part inside a \code{time} range.
+\item If the whole \code{baseline_range} vector is out of the \code{time} range, the \code{baseline} and also the \code{signal_base} values of the output are \code{NA}'s.
+In both cases the function returns a warning message along with the output data frame or tibble.
+}
 }
 \examples{
 # Computing baseline correction on first 10 points, sensor "E1"
 # a) Prepare data and compute
 data01 <- epochdata |> dplyr::filter(.data$subject == 1 & .data$sensor == "E1")
-basedata <- baseline_correction(data01, base_int = 1:10, type = "absolute")
+basedata <- baseline_correction(data01, baseline_range = 1:10, type = "absolute")
 
 # b) Plot raw (black line) and corrected (red line) signal for epoch 1
-plot(basedata$signal[1:50], type = "l", ylim = c(-20, 30), xlab = "time point", ylab = "amplitude")
-lines(basedata$signal_base[1:50], col = "red")
+epoch1 <- basedata |> dplyr::filter(.data$epoch == 1)
+plot(epoch1$signal, type = "l", ylim = c(-20, 30), main = "Raw (black) vs Corrected (red) Signal",
+xlab = "time point", ylab = "amplitude")
+lines(epoch1$signal_base, col = "red")
+
+\dontrun{
+# Set baseline_range outside of time range
+# results in NA's in baseline and signal_base columns
+# also returns a warning message
+basedata <- baseline_correction(data01, baseline_range = 70:80, type = "absolute")
+head(basedata)
+}
 }

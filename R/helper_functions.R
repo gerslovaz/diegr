@@ -229,9 +229,26 @@ DCV_score <- function(X, Y, lambda){
 }
 
 
+#' Subsets data based on specified criteria
+#'
+#' @description
+#' This function filters a dataset based on a series of optional
+#' conditions related to subject, sensor, time, and epoch.
+#'
+#' @param data A data frame, tibble or database table with input data. It should have at least columns named 'subject', 'sensor', 'time', and 'epoch'.
+#' @param subject_rg A vector specifying the subjects to include. If `NULL` (the default), no filtering is applied based on subject.
+#' @param sensor_rg A vector specifying the sensors to include. If `NULL` (the default), no filtering is applied based on sensor.
+#' @param time_rg A vector specifying the time points to include. If `NULL` (the default), no filtering is applied based on time.
+#' @param epoch_rg A vector specifying the epochs to include. If `NULL` (the default), no filtering is applied based on epoch.
+#'
+#' @return A subset of original data according to chosen parameters.
+#'
+#' @importFrom dplyr filter
+#' @importFrom rlang .data
+#'
+#' @noRd
 pick_data <- function(data, subject_rg = NULL, sensor_rg = NULL,
                       time_rg = NULL, epoch_rg = NULL) {
-  ## function for creating subset of data according chosen parameters
 
   conditions <- list()
 
@@ -255,4 +272,14 @@ pick_data <- function(data, subject_rg = NULL, sensor_rg = NULL,
 
 }
 
+#make_latex_title <- function(use_latex, yaxis_title_latex, yaxis_title_nolatex) {
+#  if (use_latex) {
+#    yaxis_title <- yaxis_title_latex
+#    mathjax_config <- 'cdn'
+#  } else {
+#    yaxis_title <- yaxis_title_nolatex
+#    mathjax_config <- NULL
+#  }
+
+#}
 

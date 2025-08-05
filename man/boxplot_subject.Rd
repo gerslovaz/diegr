@@ -4,18 +4,27 @@
 \alias{boxplot_subject}
 \title{Plot interactive boxplots of subjects}
 \usage{
-boxplot_subject(data, amplitude = "signal", subject = NULL, channel, time_lim)
+boxplot_subject(
+  data,
+  amplitude = "signal",
+  subject = NULL,
+  channel,
+  time_lim,
+  use_latex = TRUE
+)
 }
 \arguments{
 \item{data}{A data frame or a database table with EEG dataset. Required columns: subject, sensor, time and the column with EEG amplitude named as in \code{amplitude} parameter.}
 
 \item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal"}.}
 
-\item{subject}{A vector with IDs of subjects to plot.}
+\item{subject}{A vector with IDs of subjects to plot. If missing, boxplots are drawn for all avaliable subjects in \code{data}.}
 
 \item{channel}{An integer or character ID of channel to plot.}
 
-\item{time_lim}{A character vector with time range to plot.}
+\item{time_lim}{A numeric vector with time range to plot.}
+
+\item{use_latex}{A logical value indicating whether to use LaTeX formatting for the y-axis title. The default is \code{TRUE}.}
 }
 \value{
 A \code{plotly} object with boxplots of EEG amplitude for subjects.
@@ -31,10 +40,11 @@ time - a column with time point numbers,
 and a column with measured EEG signal values (or their averages) called as in \code{amplitude}.
 }
 \examples{
-# Interactive boxplots of signal from channel E34 for both subjects
-# in chosen time points
+# Interactive boxplots of signal from channel E34 in epoch 1
+# for both subjects in chosen time points
 ## Note: it has no statistical sense to make boxplot from only 2 observations, but
 ## larger example dataset is not possible due to size limit of the package
-boxplot_subject(epochdata, amplitude = "signal", channel = "E34", time_lim = c(10:20))
+epoch1 <- epochdata|> dplyr::filter(epoch == 1)
+boxplot_subject(epoch1, amplitude = "signal", channel = "E34", time_lim = c(10:20))
 
 }

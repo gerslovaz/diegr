@@ -13,42 +13,48 @@ scalp_plot(
   template = NULL,
   col_range = NULL,
   col_scale = NULL,
-  view = "posterior"
+  view
 )
 }
 \arguments{
 \item{data}{A data frame, tibble or a database table with input data to plot with at least two columns: \code{sensor} with sensor labels and the column with the EEG amplitude specified in the argument \code{amplitude}.}
 
-\item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values.}
+\item{amplitude}{A character specifying the name of the column from input data with EEG amplitude values.}
 
 \item{mesh}{An object of class \code{"mesh"} (or a named list with the same structure) used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. See details for more information about the structure.}
 
-\item{tri}{A matrix with indices of the triangles. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the mesh.}
+\item{tri}{A three column matrix with indices of the vertices of the triangles. Each row represents one triangle, defined by three vertex indices. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the mesh.}
 
-\item{coords}{Sensor coordinates as a tibble or data frame with named \code{x}, \code{y}, \code{z} and \cite{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the HCGSN256 template is used.}
+\item{coords}{Sensor coordinates as a tibble or data frame with named \code{x}, \code{y}, \code{z} and \code{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the HCGSN256 template is used.}
 
 \item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.}
 
-\item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of the input signal is used.}
+\item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal expanded by a padding value equal to 5\% is used.}
 
 \item{col_scale}{Optionally, a colour scale to use for plotting. If not defined, it is computed from \code{col_range}.}
 
-\item{view}{A character denoting the view of the plot (according to neurological terminology). Possible values are: \code{"superior", "anterior", "posterior", "left", "right"}. If missing, the default view according to user settings is displayed. Note: Input coordinates corresponding to the positions in the HCGSN template are required to obtain an appropriate view.}
+\item{view}{A character for creating a temporary rotated scene (according to neurological terminology). Possible values are: \code{"superior", "anterior", "posterior", "left", "right"}. If missing, the default view according to user settings is displayed. Note: Input coordinates corresponding to the positions in the HCGSN template are required to obtain an appropriate view.}
 }
 \value{
-A \code{rgl} plot of scalp EEG signal.
+A 3D scalp map rendered via \code{rgl::shade3d()} in an interactive window.
 }
 \description{
 Plot a scalp polygon map of the EEG signal amplitude using topographic colour scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^3 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations. The \code{\link[rgl]{shape3d}} function is used for plotting.
 }
 \details{
-The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
+The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure:
+\code{D2}	data frame with \code{x} and \code{y} columns and \code{D3} data frame with \code{x}, \code{y} and \code{z} columns. See \code{\link{point_mesh}} for more information.
+In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
 If the input \code{mesh} contains only 3D coordinates of a point mesh in \code{D3} element, the use of previously created triangulation (through \code{tri} argument) is necessary.
 To compare results between 2D topographical plot and 3D scalp plot use the same mesh in both cases.
 
 Be careful when choosing the argument \code{col_range}. If the amplitude in input data contains values outside the chosen range, this will cause "holes" in the resulting plot.
 To compare results for different subjects or conditions, set the same values of \code{col_range} and \code{col_scale} arguments in all cases.
 The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
+
+Notes:
+For correct rendering of a plot, the function requires an openGL-capable device.
+Displaying the rotated scalp map using the \code{view} argument requires previous call \code{open3d()}.
 }
 \examples{
 \dontrun{
@@ -60,7 +66,7 @@ The default used scale is based on topographical colours with zero value always 
 edata <- epochdata |>
 dplyr::filter(subject == 2 & time \%in\% 1:10 & epoch \%in\% 1:13)
 # a2) baseline correction (needed for suitable topographic map)
-data_base <- baseline_correction(edata, base_int = 1:10)
+data_base <- baseline_correction(edata, baseline_range = 1:10)
 # a3) average computing
 data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, time = 10,
  type = "point", ex_epoch = c(14,15))
@@ -68,4 +74,7 @@ data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, tim
 # b) plotting the scalp polygon map
 scalp_plot(data_mean, amplitude = "average", col_range = c(-30, 15))
 }
+}
+\seealso{
+\code{\link{animate_scalp}}, \code{\link{point_mesh}}, \code{\link{make_triangulation}}, \code{\link{create_scale}}
 }

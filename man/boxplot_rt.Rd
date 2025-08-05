@@ -9,7 +9,7 @@ boxplot_rt(data, subject = NULL)
 \arguments{
 \item{data}{A data frame or a database table with response times dataset. Required columns: subject, epoch, RT (value of response time in ms).}
 
-\item{subject}{A character vector with subjects to plot. If missing, boxplots are drawn for all avaliable subjects in \code{data}.}
+\item{subject}{A vector with IDs of subjects to plot. If missing, boxplots are drawn for all available subjects in \code{data}.}
 }
 \value{
 A \code{plotly} object with boxplots of response times.

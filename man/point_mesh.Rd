@@ -5,7 +5,7 @@
 \title{Create regular mesh of points}
 \usage{
 point_mesh(
-  dim = c(2, 3),
+  dimension = c(2, 3),
   n = 10000,
   r,
   template = NULL,
@@ -14,20 +14,20 @@ point_mesh(
 )
 }
 \arguments{
-\item{dim}{A number (or a vector) indicating a dimension of the mesh: \code{2} for two dimensional, \code{3} for three dimensional mesh and \code{c(2,3)} for both of them in one output (default setting).}
+\item{dimension}{A number (or a vector) indicating a dimension of the mesh: \code{2} for two dimensional, \code{3} for three dimensional mesh and \code{c(2,3)} for both of them in one output (default setting).}
 
 \item{n}{Optionally, the required number of mesh points. Default setting is \code{n = 10 000}.}
 
-\item{r}{Optionally, desired radius of a circular mesh. If not defined, it is selected according to the sensor locations.}
+\item{r}{Optionally, desired radius of a circular mesh. If not defined, it is computed from the convex hull of sensor locations, based on maximum Euclidean distance from centroid.}
 
-\item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0.}
+\item{template}{A character denoting sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0.}
 
-\item{own_coordinates}{Optionally, a list with own sensor coordinates for mesh building, if no pre-defined template is to be used. See Details for more information.}
+\item{own_coordinates}{Optionally, a list with own sensor coordinates for mesh building. See Details for more information.}
 
 \item{type}{A character indicating the shape of the mesh with 2 possible values: \code{"circle"} for circular mesh, \code{"polygon"} for irregular polygon shape with boundaries defined by sensor locations (default).}
 }
 \value{
-Returns an object of class \code{"mesh"}. It is a list containing some (or all) of the following components:
+Returns a list of class \code{"mesh"} containing some (or all) of the following components:
 
 \item{D2}{A data frame with \code{x} and \code{y} coordinates of the created two dimensional point mesh.}
 \item{D3}{A data frame with \code{x}, \code{y} and \code{z} coordinates of the created three dimensional point mesh.}
@@ -39,6 +39,8 @@ Function creates an object of class \code{"mesh"}, which is a list of data frame
 For the equivalence between 2D and 3D mesh and the possibility to compare models in different dimensions, the thin-plate spline interpolation model \eqn{\mathbb{R}^2 \rightarrow \mathbb{R}^3} is used for creating 3D mesh.
 }
 \details{
+If neither \code{template} nor \code{own_coordinates} is specified, \code{"HCGSN256"} template is used to create the mesh.
+
 In the case of using Geodesic Sensor Net (\code{template = 'HCGSN256'}), the (0,0) point of the resulting 2D mesh corresponds to a reference electrode located at the vertex.
 
 The number \code{n} for controlling the mesh density is only an approximate value. The final number of mesh nodes depends on the exact shape of the polygon (created as a convex hull of the sensor locations), and is only close to, not exactly equal to, the number \code{n}.
@@ -48,14 +50,17 @@ The \code{own_coordinates} enables computing a mesh from user's own sensor locat
 \item \code{D2} a tibble or data frame with sensor coordinates in named \code{x} and \code{y} columns,
 \item \code{D3} a tibble or data frame with sensor coordinates in named \code{x}, \code{y} and \code{z} columns.
 }
-To build the appropriate meshes in both dimensions, it is necessary to have the input of 3D sensor locations and their corresponding projection onto a plane obtained in another way; the function itself does not perform this projection.
+To build the appropriate meshes in both dimensions, it is necessary to have the input of 3D sensor locations and their corresponding projection onto a plane; the function itself does not perform this projection.
+It is also necessary to keep the same sensor locations order in \code{D2} and \code{D3} part of the coordinates.
 }
 \examples{
 # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template
-M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256", type = "circle")
+M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256", type = "circle")
 
-# Computing polygon 3D mesh with starting number 2000 points for HCGSN256 template
-M <- point_mesh(dim = 3, n = 2000, template = "HCGSN256")
+# Computing polygon 3D mesh with starting number 2000 points and own coordinates
+## Note: the coordinates are the same as for HCGSN256 template, it is
+## just a mod example of using the own_coordinates parameter
+M <- point_mesh(dimension = 3, n = 2000, own_coordinates = HCGSN256)
 
 # Computing coordinates of a polygon mesh in 2D and 3D in one step (starting number 3000 points):
 M <- point_mesh(n = 3000, template = "HCGSN256")

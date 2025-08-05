@@ -13,14 +13,14 @@ topo_plot(
   col_range = NULL,
   col_scale = NULL,
   contour = FALSE,
-  legend = TRUE,
-  names = FALSE
+  show_legend = TRUE,
+  label_sensors = FALSE
 )
 }
 \arguments{
 \item{data}{A data frame, tibble or a database table with input data to plot with at least two columns: \code{sensor} with sensor labels and the column with the EEG amplitude specified in the argument \code{amplitude}.}
 
-\item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values.}
+\item{amplitude}{A character string naming the column with EEG amplitude values.}
 
 \item{mesh}{A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.}
 
@@ -28,18 +28,18 @@ topo_plot(
 
 \item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.}
 
-\item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.}
+\item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal expanded by a padding value equal to 5\% is used.}
 
 \item{col_scale}{Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.}
 
 \item{contour}{Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.}
 
-\item{legend}{Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.}
+\item{show_legend}{Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.}
 
-\item{names}{A logical value indicating whether the sensor names should also be plotted (default value is \code{FALSE}).}
+\item{label_sensors}{A logical value indicating whether the sensor labels should also be plotted (default value is \code{FALSE}).}
 }
 \value{
-A \code{ggplot} object with topographic map of an EEG signal.
+A \code{ggplot} object showing an interpolated topographic map of EEG amplitude.
 }
 \description{
 Plot a topographic circle or polygon map of the EEG signal amplitude using topographic colour scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^2 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations.
@@ -61,7 +61,7 @@ The default used scale is based on topographical colours with zero value always 
 edata <- epochdata |>
 dplyr::filter(subject == 2 & time \%in\% 1:10 & epoch \%in\% 1:13)
 # a2) baseline correction (needed for suitable topographic map)
-data_base <- baseline_correction(edata, base_int = 1:10)
+data_base <- baseline_correction(edata, baseline_range = 1:10)
 # a3) average computing
 data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, time = 10,
  type = "jack", group = "space")
@@ -72,11 +72,13 @@ data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, tim
 topo_plot(data = data_mean, amplitude = "average", template = "HCGSN256",
 col_range = c(-30, 15), contour = TRUE)
 
+\dontrun{
 # c) plotting the same map without contours but with sensor labels
 topo_plot(data = data_mean, amplitude = "average", template = "HCGSN256",
- col_range = c(-30, 15), names = TRUE)
+ col_range = c(-30, 15), label_sensors = TRUE)
+}
 
 }
 \seealso{
-\code{\link{animate_topo}}
+\code{\link{animate_topo}}, \code{\link{point_mesh}}, \code{\link{plot_topo_mean}}
 }

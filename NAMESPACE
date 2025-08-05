@@ -27,6 +27,7 @@ import(plotly, except = last_plot)
 
 import(rgl)
 import(sp)
+importFrom(dplyr,filter)
 importFrom(grDevices,boxplot.stats)
 importFrom(grDevices,chull)
 importFrom(grDevices,hsv)

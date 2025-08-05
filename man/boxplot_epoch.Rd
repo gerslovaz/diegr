@@ -4,7 +4,14 @@
 \alias{boxplot_epoch}
 \title{Plot interactive boxplots of epochs}
 \usage{
-boxplot_epoch(data, amplitude = "signal", subject, channel, time_lim)
+boxplot_epoch(
+  data,
+  amplitude = "signal",
+  subject,
+  channel,
+  time_lim,
+  use_latex = TRUE
+)
 }
 \arguments{
 \item{data}{A data frame or a database table with EEG dataset. Required columns: subject, sensor, epoch, time and the column with EEG amplitude named as in \code{amplitude} parameter.}
@@ -15,7 +22,9 @@ boxplot_epoch(data, amplitude = "signal", subject, channel, time_lim)
 
 \item{channel}{An integer or character ID of channel to plot.}
 
-\item{time_lim}{A character vector with time range to plot.}
+\item{time_lim}{A numeric vector with time range to plot.}
+
+\item{use_latex}{A logical value indicating whether to use LaTeX formatting for the y-axis title. The default is \code{TRUE}.}
 }
 \value{
 A \code{plotly} object with boxplots of EEG amplitude for individual epochs.
@@ -34,6 +43,7 @@ and a column with measured EEG signal values (or their averages) called as in \c
 \examples{
 # Interactive boxplots of signal from channel E34 for subject 1 (health control)
 # in chosen time points
-boxplot_epoch(epochdata, amplitude = "signal", subject = 1, channel = "E34", time_lim = c(10:20))
+boxplot_epoch(epochdata, amplitude = "signal", subject = 1, channel = "E34",
+ time_lim = c(10:20))
 
 }

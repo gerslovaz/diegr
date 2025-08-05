@@ -3,7 +3,7 @@ edata <- epochdata |>
 
 test_that("baseline_correction output has correct structure and columns", {
 
-  result <- baseline_correction(edata, base_int = 1:10)
+  result <- baseline_correction(edata, baseline_range = 1:10)
 
   expect_s3_class(result, "data.frame")
 
@@ -13,9 +13,10 @@ test_that("baseline_correction output has correct structure and columns", {
   expect_false(is.grouped_df(result))
 })
 
-test_that("behavior for base_int not present in time column", {
+test_that("behavior for baseline_range not present in time column", {
 
-  result <- baseline_correction(edata, base_int = 100:105)
+  expect_warning(baseline_correction(edata, baseline_range = 100:105))
+  result <- suppressWarnings(baseline_correction(edata, baseline_range = 100:105))
   expect_true(all(is.na(result$baseline)))
   expect_true(all(is.na(result$signal_base)))
 })
@@ -24,7 +25,7 @@ test_that("behavior for base_int not present in time column", {
 test_that("correct baseline calculation per groups", {
   edata2 <- epochdata |>
     dplyr::filter(sensor %in% c("E65", "E1"))
-  result <- baseline_correction(edata2, base_int = 1:5)
+  result <- baseline_correction(edata2, baseline_range = 1:5)
 
   manual_base_S1E1 <- edata2 |>
     dplyr::filter(subject == 1, sensor == "E1", epoch == 1, time %in% 1:5) |>

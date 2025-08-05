@@ -5,14 +5,16 @@
 #' For the equivalence between 2D and 3D mesh and the possibility to compare models in different dimensions, the thin-plate spline interpolation model \eqn{\mathbb{R}^2 \rightarrow \mathbb{R}^3} is used for creating 3D mesh.
 #'
 #'
-#' @param dim A number (or a vector) indicating a dimension of the mesh: \code{2} for two dimensional, \code{3} for three dimensional mesh and \code{c(2,3)} for both of them in one output (default setting).
+#' @param dimension A number (or a vector) indicating a dimension of the mesh: \code{2} for two dimensional, \code{3} for three dimensional mesh and \code{c(2,3)} for both of them in one output (default setting).
 #' @param n Optionally, the required number of mesh points. Default setting is \code{n = 10 000}.
-#' @param r Optionally, desired radius of a circular mesh. If not defined, it is selected according to the sensor locations.
-#' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0.
-#' @param own_coordinates Optionally, a list with own sensor coordinates for mesh building, if no pre-defined template is to be used. See Details for more information.
+#' @param r Optionally, desired radius of a circular mesh. If not defined, it is computed from the convex hull of sensor locations, based on maximum Euclidean distance from centroid.
+#' @param template A character denoting sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0.
+#' @param own_coordinates Optionally, a list with own sensor coordinates for mesh building. See Details for more information.
 #' @param type A character indicating the shape of the mesh with 2 possible values: \code{"circle"} for circular mesh, \code{"polygon"} for irregular polygon shape with boundaries defined by sensor locations (default).
 #'
 #' @details
+#' If neither \code{template} nor \code{own_coordinates} is specified, \code{"HCGSN256"} template is used to create the mesh.
+#'
 #' In the case of using Geodesic Sensor Net (\code{template = 'HCGSN256'}), the (0,0) point of the resulting 2D mesh corresponds to a reference electrode located at the vertex.
 #'
 #' The number \code{n} for controlling the mesh density is only an approximate value. The final number of mesh nodes depends on the exact shape of the polygon (created as a convex hull of the sensor locations), and is only close to, not exactly equal to, the number \code{n}.
@@ -22,9 +24,10 @@
 #' \item \code{D2} a tibble or data frame with sensor coordinates in named \code{x} and \code{y} columns,
 #' \item \code{D3} a tibble or data frame with sensor coordinates in named \code{x}, \code{y} and \code{z} columns.
 #' }
-#' To build the appropriate meshes in both dimensions, it is necessary to have the input of 3D sensor locations and their corresponding projection onto a plane obtained in another way; the function itself does not perform this projection.
+#' To build the appropriate meshes in both dimensions, it is necessary to have the input of 3D sensor locations and their corresponding projection onto a plane; the function itself does not perform this projection.
+#' It is also necessary to keep the same sensor locations order in `D2` and `D3` part of the coordinates.
 #'
-#' @return Returns an object of class \code{"mesh"}. It is a list containing some (or all) of the following components:
+#' @return Returns a list of class \code{"mesh"} containing some (or all) of the following components:
 #'
 #' \item{D2}{A data frame with \code{x} and \code{y} coordinates of the created two dimensional point mesh.}
 #' \item{D3}{A data frame with \code{x}, \code{y} and \code{z} coordinates of the created three dimensional point mesh.}
@@ -41,38 +44,56 @@
 #'
 #' @examples
 #' # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template
-#' M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256", type = "circle")
+#' M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256", type = "circle")
 #'
-#' # Computing polygon 3D mesh with starting number 2000 points for HCGSN256 template
-#' M <- point_mesh(dim = 3, n = 2000, template = "HCGSN256")
+#' # Computing polygon 3D mesh with starting number 2000 points and own coordinates
+#' ## Note: the coordinates are the same as for HCGSN256 template, it is
+#' ## just a mod example of using the own_coordinates parameter
+#' M <- point_mesh(dimension = 3, n = 2000, own_coordinates = HCGSN256)
 #'
 #' # Computing coordinates of a polygon mesh in 2D and 3D in one step (starting number 3000 points):
 #' M <- point_mesh(n = 3000, template = "HCGSN256")
-point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordinates = NULL, type = "polygon") {
+point_mesh <- function(dimension = c(2,3),
+                       n = 10000,
+                       r,
+                       template = NULL,
+                       own_coordinates = NULL,
+                       type = "polygon") {
+
+  if (!is.numeric(n) || length(n) != 1 || n <= 0) {
+    stop("'n' must be a positive number.")
+  }
 
   if (is.null(template) && !is.null(own_coordinates)) {
     if (!"D2" %in% names(own_coordinates)) {
       stop("There must be an element named D2 in the own_coordinates list.")
     }
-    if (any(dim == 3) && !"D3" %in% names(own_coordinates)) {
+    if (any(dimension == 3) && !"D3" %in% names(own_coordinates)) {
       stop("There must be an element named D3 in the own_coordinates list for computing 3D mesh.")
     }
-    coordinates <- {{ own_coordinates }}
+    coordinates <- own_coordinates
   } else if (is.null(template) && is.null(own_coordinates)) {
-    coordinates <- diegr::HCGSN256
-
+    #coordinates <- diegr::HCGSN256
+    template <- "HCGSN256"
    }
 
 
   if (!is.null(template)) {
     coordinates <- switch(template,
-                          "HCGSN256" = diegr::HCGSN256)
-    if (is.null(coordinates)) {
-      stop("Unknown template.")
+                          "HCGSN256" = diegr::HCGSN256,
+                          stop("Unknown template.")
+                          )
+    if (!is.null(own_coordinates)) {
+      warning("Both 'template' and 'own_coordinates' were specified. Using 'template' and ignoring 'own_coordinates'.")
     }
   }
 
   coords <- coordinates$D2
+
+  if (!req_cols(coords, c("x", "y"))) {
+    stop("Columns 'x', 'y' are required in 'D2' part of a list with coordinates.")
+  }
+
   coords_xy <- coords |>
     dplyr::select("x", "y")
   conv_hull <- chull(coords$x, coords$y)
@@ -89,6 +110,10 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordina
       r <- ceiling(r)
     }
 
+  } else {
+    if (!is.numeric(r) || length(r) != 1 || r <= 0) {
+      stop("'r' must be a positive number.")
+    }
   }
 
   N <- round(sqrt(2*n))
@@ -104,7 +129,7 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordina
   coords_ch <- coords_xy[conv_hull,]
   coords_ch <- rbind(coords_ch, coords_ch[1,])
 
-  if (identical(dim, 2)) {
+  if (identical(dimension, 2)) {
 
     switch(type,
            "circle" = {
@@ -115,9 +140,9 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordina
              mesh_polygon <- mesh_circle[inside > 0,]
              mesh_out <- list(D2 = data.frame(x = mesh_polygon[,1], y = mesh_polygon[,2]))
            },
-           stop("Invalid type argument")
+           stop("Invalid type argument.")
     )
-  } else if (identical(dim, 3)) {
+  } else if (identical(dimension, 3)) {
     coords_xyz <- coordinates$D3 |>
       dplyr::select("x", "y", "z")
     switch(type,
@@ -129,9 +154,9 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordina
              mesh_polygon <- mesh_circle[inside > 0,]
              mesh_out <- list(D3 = recompute_3d(coords_xy, coords_xyz, mesh_polygon))
            },
-           stop("Invalid type argument")
+           stop("Invalid type argument.")
     )
-  } else if (identical(dim, c(2, 3)) || identical(dim, c(3, 2))) {
+  } else if (identical(dimension, c(2, 3)) || identical(dimension, c(3, 2))) {
     coords_xyz <- coordinates$D3 |>
       dplyr::select("x", "y", "z")
     switch(type,
@@ -145,13 +170,13 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordina
              mesh_out <- list(D2 = data.frame(x = mesh_polygon[,1], y = mesh_polygon[,2]),
                               D3 = recompute_3d(coords_xy, coords_xyz, mesh_polygon))
            },
-           stop("Invalid type argument")
+           stop("Invalid type argument.")
     )
   } else {
-    stop("Invalid dim argument")
+    stop("Invalid dimension argument.")
   }
 
-  mesh_out$template <- {{ template }}
+  mesh_out$template <- template
   mesh_out$r <- r
   class(mesh_out) <- c("mesh", class(mesh_out))
 
@@ -164,16 +189,16 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordina
 #' Plot point mesh
 #'
 #' @description
-#' Function for plotting a mesh of points (not only) created by \code{\link{point_mesh}} function. The output is two dimensional \code{ggplot} of point mesh or three dimensional \code{rgl} plot depending on the input dimension.
+#' Plots a mesh of points (typically from \code{\link{point_mesh}}, but not necessary) as either a 2D \code{ggplot} or 3D \code{rgl} plot depending on mesh dimension.
 #'
 #' @param mesh A data frame or tibble with cartesian coordinates of point mesh to plot. It could be \code{D2} or \code{D3} element of output from \code{\link{point_mesh}} function or any data frame (or tibble) with named x and y (x, y and z, respectively) columns. See Details for more information.
 #' @param sensors A logical value indicating whether the sensor locations should also be plotted (default value is \code{TRUE}).
-#' @param names A logical value indicating whether the sensor names should also be plotted (default value is \code{FALSE}).
-#' @param names_vec A vector with sensor names. The argument is required when using \code{own_coordinates} together with setting \code{names = TRUE}, otherwise is optional.
+#' @param label_sensors A logical value indicating whether the sensor labels should also be plotted (default value is \code{FALSE}).
+#' @param names_vec A character vector of labels matching rows in \code{own_coordinates}. The argument is required when using \code{own_coordinates} together with setting \code{label_sensors = TRUE}, otherwise is optional.
 #' @param col The colour of mesh points (default colour is gray).
-#' @param cex The \code{cex} argument for points of the mesh.
+#' @param cex The \code{cex} (size) argument for points of the mesh.
 #' @param col_sensors The colour of sensor locations points (default colour is green).
-#' @param own_coordinates A data frame or tibble with coordinates of the sensor locations. If the value is \code{NULL} and \code{sensors} is set to \code{TRUE}, the HCGSN256 template is used.
+#' @param own_coordinates A data frame or tibble with coordinates of the sensor locations (matching the dimensionality of mesh and containing appropriate coordinate columns). If the value is \code{NULL} and \code{sensors} is set to \code{TRUE}, the HCGSN256 template is used.
 #'
 #' @details Please follow the instructions below when entering \code{own_coordinates}:
 #'
@@ -183,9 +208,9 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordina
 #'
 #' The order of elements in \code{names_vec} must be consistent with elements of \code{own_coordinates}.
 #'
-#' When both \code{names_vec} and \code{own_coordinates} are provided, it is essential that the length of \code{names_vec} matches the number of rows in \code{own_coordinates}, otherwise the names are not plotted (despite the setting \code{names = TRUE}).
+#' When both \code{names_vec} and \code{own_coordinates} are provided, it is essential that the length of \code{names_vec} matches the number of rows in \code{own_coordinates}, otherwise the names are not plotted (despite the setting \code{label_sensors = TRUE}).
 #'
-#' @return A `ggplot` or `rgl` object with mesh coordinates plot.
+#' @return A `ggplot` object (for 2D mesh) or plots directly to `rgl` 3D viewer (for 3D mesh).
 #'
 #' @import rgl
 #' @import ggplot2
@@ -212,45 +237,52 @@ point_mesh <- function(dim = c(2,3), n = 10000, r, template = NULL, own_coordina
 #' # Plotting the same mesh with marking only midline electrodes
 #' midline <- HCGSN256$D2[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204),]
 #' names_vec <- HCGSN256$sensor[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204)]
-#' plot_point_mesh(M$D2, names = TRUE, names_vec = names_vec, own_coordinates = midline)
+#' plot_point_mesh(M$D2, label_sensors = TRUE, names_vec = names_vec, own_coordinates = midline)
 #'
-plot_point_mesh <- function(mesh, sensors = TRUE, names = FALSE, names_vec = NULL,
-                            col = "gray", cex = 0.4, col_sensors = "green",
+plot_point_mesh <- function(mesh,
+                            sensors = TRUE,
+                            label_sensors = FALSE,
+                            names_vec = NULL,
+                            col = "gray",
+                            cex = 0.4,
+                            col_sensors = "green",
                             own_coordinates = NULL ) {
 
   if (!(is.logical(sensors))) {
     stop("Argument 'sensors' has to be logical.")
   }
-  if (!(is.logical(names))) {
-    stop("Argument 'names' has to be logical.")
+  if (!(is.logical(label_sensors))) {
+    stop("Argument 'label_sensors' has to be logical.")
   }
 
-  if (names == TRUE && !is.null(own_coordinates) && is.null(names_vec)) {
-    stop("With using own_coordinates please define the names_vec or set names to FALSE.")
+  if (label_sensors == TRUE && !is.null(own_coordinates) && is.null(names_vec)) {
+    stop("With using 'own_coordinates' please define the 'names_vec' or set 'label_sensors' to FALSE.")
   }
 
-  if (names == TRUE && is.null(names_vec)) {
+  if (label_sensors == TRUE && is.null(names_vec)) {
     names_vec <- diegr::HCGSN256$sensor
   }
 
+  stopifnot(is.data.frame(mesh))
 
   if (all(c("x", "y", "z") %in% colnames(mesh))) {
-    rgl::points3d(mesh$x, mesh$y, mesh$z, col = {{ col }}, cex = {{ cex }})
+    rgl::points3d(mesh$x, mesh$y, mesh$z, col = col, cex = cex)
 
     if (is.null(own_coordinates)) {
       own_coordinates <- diegr::HCGSN256$D3
     }
 
     if (sensors == TRUE) {
-
-      rgl::points3d(own_coordinates, col = {{ col_sensors}}, size = 5)
+      rgl::points3d(own_coordinates, col = col_sensors, size = 5)
     }
 
-    if (names == TRUE) {
+    if (label_sensors == TRUE) {
 
-      if (length(names_vec) != length(own_coordinates$x)) {
+     if (length(names_vec) != length(own_coordinates$x)) {
         warning("The length of 'names_vec' must be the same as the number of coordinates rows. Names are not plotted.")
-      } else { rgl::text3d(own_coordinates, texts = names_vec, cex = 0.7) }
+     } else {
+       rgl::text3d(own_coordinates, texts = names_vec, cex = 0.7)
+       }
     }
 
   }
@@ -265,7 +297,7 @@ plot_point_mesh <- function(mesh, sensors = TRUE, names = FALSE, names_vec = NUL
     x0 <- mean(mesh[["x"]], na.rm = TRUE)
 
     g <- ggplot(mesh, aes(x = .data$x, y = .data$y)) +
-      geom_point(col = { col }, cex = { cex }) +
+      geom_point(col = col, size = cex) +
       coord_fixed(ratio = 1) +
       theme_minimal() +
       theme(
@@ -279,18 +311,20 @@ plot_point_mesh <- function(mesh, sensors = TRUE, names = FALSE, names_vec = NUL
 
     if (sensors == TRUE) {
       g <- g +
-        annotate("point", x = own_coordinates$x, y = own_coordinates$y, col = { col_sensors })
+        annotate("point", x = own_coordinates$x, y = own_coordinates$y, col = col_sensors)
     }
 
-    if (names == TRUE) {
+    if (label_sensors == TRUE) {
+
       if (length(names_vec) != length(own_coordinates$x)) {
         warning("The length of 'names_vec' must be the same as the number of coordinates rows. Names are not plotted.")
       } else {
-        g <- g + geom_text(data = own_coordinates, aes(label = names_vec), size = 2, vjust = -0.9) }
+        own_coordinates$label <- names_vec
+        g <- g + geom_text(data = own_coordinates, aes(label = .data$label), size = 2, vjust = -0.9)
+        }
     }
 
     g
-
   }
   else
     stop("The mesh input does not have x and y column.")
@@ -305,15 +339,17 @@ plot_point_mesh <- function(mesh, sensors = TRUE, names = FALSE, names_vec = NUL
 #' See Details for more information.
 #'
 #'
-#' @param mesh A data frame or tibble with named columns: \code{x}, \code{y} (required) and \code{index} (optionally). It should optimally be a \code{D2} element of a \code{"mesh"} object or a list with the same structure.
+#' @param mesh A data frame or tibble with named columns: \code{x}, \code{y} (required) and \code{index} (optionally, if missing, it will be generated internally). It should optimally be a \code{D2} element of a \code{"mesh"} object or a list with the same structure of uniformly spaced grid.
 #'
 #' @details
 #' The type-I Delaunay triangulation is a triangulation obtained by drawing in the north-east diagonals in all subrectangles of the triangulated area.
 #' Due to the regularity of the input mesh (in the sense of distances between mesh points), a simplified procedure is used: The triangulation is created within the individual strips and then bound together.
 #' The order of the vertices is chosen to maintain a consistent orientation of the triangles (for more details see Schneider 2003).
 #'
+#' If the input mesh has not regular grid spacing, the result triangulation may not be meaningful and will not meet the Delaunay triangulation criteria.
 #'
-#' @return A three column matrix with indices of the vertices of the triangles.
+#'
+#' @return A three column matrix with indices of the vertices of the triangles. Each row represents one triangle, defined by three vertex indices pointing to rows in the input mesh.
 #'
 #' @references Lai M-J, Schumaker LL. \emph{Spline functions on triangulations.} Cambridge University Press; 2007.
 #'
@@ -331,9 +367,30 @@ plot_point_mesh <- function(mesh, sensors = TRUE, names = FALSE, names_vec = NUL
 #' # b) Make triangulation on this mesh
 #' TRI <- make_triangulation(M$D2)
 #' head(TRI)
+#'
+#' # c) plot triangulation in 2D
+#' # prepare empty plot
+#' plot(M$D2, type = "n", main = "Triangulation plot",
+#' xlab = "", ylab = "", asp = 1, axes = FALSE)
+#' # create a structure for plotting
+#' x0 <- c()
+#' y0 <- c()
+#' x1 <- c()
+#' y1 <- c()
+#' for (i in 1:nrow(TRI)) {
+#'   v_indices <- TRI[i, ]
+#'   v_coords <- M$D2[v_indices, ]
+#'   x0 <- c(x0, v_coords[1, "x"], v_coords[2, "x"], v_coords[3, "x"])
+#'   y0 <- c(y0, v_coords[1, "y"], v_coords[2, "y"], v_coords[3, "y"])
+#'   x1 <- c(x1, v_coords[2, "x"], v_coords[3, "x"], v_coords[1, "x"])
+#'   y1 <- c(y1, v_coords[2, "y"], v_coords[3, "y"], v_coords[1, "y"])
+#'  }
+#' # plot triangulation using segments
+#' segments(x0, y0, x1, y1)
+#'
 #' \dontrun{
 #' ## Note: this code opens a rgl 3D viewer
-#' # c) Plot the result triangulation as 3D wire model using rgl
+#' # d) Plot the result triangulation as 3D wire model using rgl
 #'  rgl::wire3d(mesh3d(M$D3$x, M$D3$y, M$D3$z, triangles = t(TRI)))
 #'  }
 make_triangulation <- function(mesh) {
@@ -346,6 +403,10 @@ make_triangulation <- function(mesh) {
                paste(missing_cols, collapse = ", ")))
   }
 
+  if (!is.numeric(mesh$x) || !is.numeric(mesh$y)) {
+    stop("Columns 'x' and 'y' must be numeric.")
+  }
+
   if (!"index" %in% colnames(mesh) ) {
     mesh$index <- 1:length(mesh$x)
   }
@@ -355,6 +416,7 @@ make_triangulation <- function(mesh) {
 
   TRIMAT <- c()
   for (i in (1:(ky - 1))) {
+    # Construct diagonally oriented triangles across horizontal strips
 
     line1 <- mesh[mesh$y == seqy[i],]
     line2 <- mesh[mesh$y == seqy[i + 1],]

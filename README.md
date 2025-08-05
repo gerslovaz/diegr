@@ -112,7 +112,7 @@ the oulier epochs 14 and 15) and then display it along with CI bounds
 edata <- epochdata |>
 dplyr::filter(subject == 2 & sensor == "E65" & epoch %in% 1:13)
 # baseline correction
-data_base <- baseline_correction(edata, base_int = 1:10)
+data_base <- baseline_correction(edata, baseline_range = 1:10)
 # compute average
 data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2,
                           channel = "E65", type = "point")

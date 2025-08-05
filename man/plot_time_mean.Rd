@@ -41,7 +41,7 @@ Plot a time curve of the average EEG signal amplitude together with pointwise co
 edata <- epochdata |>
 dplyr::filter(subject == 2 & sensor == "E65" & epoch \%in\% 1:13)
 # a2) baseline correction
-data_base <- baseline_correction(edata, base_int = 1:10)
+data_base <- baseline_correction(edata, baseline_range = 1:10)
 # a3) average computing
 data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, channel = "E65",
  type = "point")

@@ -7,10 +7,10 @@
 make_triangulation(mesh)
 }
 \arguments{
-\item{mesh}{A data frame or tibble with named columns: \code{x}, \code{y} (required) and \code{index} (optionally). It should optimally be a \code{D2} element of a \code{"mesh"} object or a list with the same structure.}
+\item{mesh}{A data frame or tibble with named columns: \code{x}, \code{y} (required) and \code{index} (optionally, if missing, it will be generated internally). It should optimally be a \code{D2} element of a \code{"mesh"} object or a list with the same structure of uniformly spaced grid.}
 }
 \value{
-A three column matrix with indices of the vertices of the triangles.
+A three column matrix with indices of the vertices of the triangles. Each row represents one triangle, defined by three vertex indices pointing to rows in the input mesh.
 }
 \description{
 Function for creating Delaunay type-I triangulation (see Schumaker 2007) with consistent oriented edges adapted for a regular point mesh created by \code{\link{point_mesh}} function.
@@ -20,6 +20,8 @@ See Details for more information.
 The type-I Delaunay triangulation is a triangulation obtained by drawing in the north-east diagonals in all subrectangles of the triangulated area.
 Due to the regularity of the input mesh (in the sense of distances between mesh points), a simplified procedure is used: The triangulation is created within the individual strips and then bound together.
 The order of the vertices is chosen to maintain a consistent orientation of the triangles (for more details see Schneider 2003).
+
+If the input mesh has not regular grid spacing, the result triangulation may not be meaningful and will not meet the Delaunay triangulation criteria.
 }
 \examples{
 
@@ -29,9 +31,30 @@ M <- point_mesh(n = 500, template = "HCGSN256")
 # b) Make triangulation on this mesh
 TRI <- make_triangulation(M$D2)
 head(TRI)
+
+# c) plot triangulation in 2D
+# prepare empty plot
+plot(M$D2, type = "n", main = "Triangulation plot",
+xlab = "", ylab = "", asp = 1, axes = FALSE)
+# create a structure for plotting
+x0 <- c()
+y0 <- c()
+x1 <- c()
+y1 <- c()
+for (i in 1:nrow(TRI)) {
+  v_indices <- TRI[i, ]
+  v_coords <- M$D2[v_indices, ]
+  x0 <- c(x0, v_coords[1, "x"], v_coords[2, "x"], v_coords[3, "x"])
+  y0 <- c(y0, v_coords[1, "y"], v_coords[2, "y"], v_coords[3, "y"])
+  x1 <- c(x1, v_coords[2, "x"], v_coords[3, "x"], v_coords[1, "x"])
+  y1 <- c(y1, v_coords[2, "y"], v_coords[3, "y"], v_coords[1, "y"])
+ }
+# plot triangulation using segments
+segments(x0, y0, x1, y1)
+
 \dontrun{
 ## Note: this code opens a rgl 3D viewer
-# c) Plot the result triangulation as 3D wire model using rgl
+# d) Plot the result triangulation as 3D wire model using rgl
  rgl::wire3d(mesh3d(M$D3$x, M$D3$y, M$D3$z, triangles = t(TRI)))
  }
 }

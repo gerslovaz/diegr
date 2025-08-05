@@ -7,7 +7,7 @@
 plot_point_mesh(
   mesh,
   sensors = TRUE,
-  names = FALSE,
+  label_sensors = FALSE,
   names_vec = NULL,
   col = "gray",
   cex = 0.4,
@@ -20,23 +20,23 @@ plot_point_mesh(
 
 \item{sensors}{A logical value indicating whether the sensor locations should also be plotted (default value is \code{TRUE}).}
 
-\item{names}{A logical value indicating whether the sensor names should also be plotted (default value is \code{FALSE}).}
+\item{label_sensors}{A logical value indicating whether the sensor labels should also be plotted (default value is \code{FALSE}).}
 
-\item{names_vec}{A vector with sensor names. The argument is required when using \code{own_coordinates} together with setting \code{names = TRUE}, otherwise is optional.}
+\item{names_vec}{A character vector of labels matching rows in \code{own_coordinates}. The argument is required when using \code{own_coordinates} together with setting \code{label_sensors = TRUE}, otherwise is optional.}
 
 \item{col}{The colour of mesh points (default colour is gray).}
 
-\item{cex}{The \code{cex} argument for points of the mesh.}
+\item{cex}{The \code{cex} (size) argument for points of the mesh.}
 
 \item{col_sensors}{The colour of sensor locations points (default colour is green).}
 
-\item{own_coordinates}{A data frame or tibble with coordinates of the sensor locations. If the value is \code{NULL} and \code{sensors} is set to \code{TRUE}, the HCGSN256 template is used.}
+\item{own_coordinates}{A data frame or tibble with coordinates of the sensor locations (matching the dimensionality of mesh and containing appropriate coordinate columns). If the value is \code{NULL} and \code{sensors} is set to \code{TRUE}, the HCGSN256 template is used.}
 }
 \value{
-A \code{ggplot} or \code{rgl} object with mesh coordinates plot.
+A \code{ggplot} object (for 2D mesh) or plots directly to \code{rgl} 3D viewer (for 3D mesh).
 }
 \description{
-Function for plotting a mesh of points (not only) created by \code{\link{point_mesh}} function. The output is two dimensional \code{ggplot} of point mesh or three dimensional \code{rgl} plot depending on the input dimension.
+Plots a mesh of points (typically from \code{\link{point_mesh}}, but not necessary) as either a 2D \code{ggplot} or 3D \code{rgl} plot depending on mesh dimension.
 }
 \details{
 Please follow the instructions below when entering \code{own_coordinates}:
@@ -47,7 +47,7 @@ For displaying 3D rgl plot, the \code{own_coordinates} must contain the x, y and
 
 The order of elements in \code{names_vec} must be consistent with elements of \code{own_coordinates}.
 
-When both \code{names_vec} and \code{own_coordinates} are provided, it is essential that the length of \code{names_vec} matches the number of rows in \code{own_coordinates}, otherwise the names are not plotted (despite the setting \code{names = TRUE}).
+When both \code{names_vec} and \code{own_coordinates} are provided, it is essential that the length of \code{names_vec} matches the number of rows in \code{own_coordinates}, otherwise the names are not plotted (despite the setting \code{label_sensors = TRUE}).
 }
 \examples{
 # 2D polygon point mesh with plotted sensors and default settings
@@ -68,6 +68,6 @@ plot_point_mesh(M$D2, col_sensors = "orange")
 # Plotting the same mesh with marking only midline electrodes
 midline <- HCGSN256$D2[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204),]
 names_vec <- HCGSN256$sensor[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204)]
-plot_point_mesh(M$D2, names = TRUE, names_vec = names_vec, own_coordinates = midline)
+plot_point_mesh(M$D2, label_sensors = TRUE, names_vec = names_vec, own_coordinates = midline)
 
 }

@@ -28,17 +28,15 @@ The package `diegr` displays high-density electroencephalography (HD-EEG) data i
 
 ### Installation
 
-You can install the development version of diegr from GitHub with:
-
 ```{r}
 #| eval: false
-# install.packages("devtools")
-devtools::install_github("gerslovaz/diegr")
+install.packages("diegr")
+# devtools::install_github("gerslovaz/diegr") development version will be available later
 ```
 
 ### Data
 
-The package contains built-in datasets. Due to the nature of the experiment and the size of the data, this is only a small section which serves as a demonstration of the implemented functions and it is not possible to reconstruct the real signal of a specific subject from it. 
+The package contains built-in datasets. Due to the nature of the experiment and the size of the data, this is only a small section which serves as a demonstration of the implemented functions and it is not possible to reconstruct the real signal of a specific sensor or subject from it. 
 
 #### epochdata
 The brain signal originally measured by 256-channel HydroCel Geodesic Sensor Net with sampling frequency 250 Hz. 
@@ -58,7 +56,7 @@ The Cartesian coordinates of high-density EEG sensor positions in 3D space on th
 
 The data is organized into a list with the following elements:
 
-- `sensor`: Sensor label (according to EGI GSN Technical Manual, the same as in `epochdata`).
+- `sensor`: Sensor labels (according to EGI GSN Technical Manual, the same as in `epochdata`).
 - `D2`: A tibble with coordinates of sensors in 2D.
 - `D3`: A tibble with coordinates of sensors in 3D. 
 - `ROI`: The name of the region to which the corresponding sensor belongs (one of "central", "frontal", "occipital", "parietal" or "temporal").
@@ -94,10 +92,11 @@ There is also an interactive graph of amplitudes in individual epochs with (or w
 # channel and concrete time range,
 # in which the boxplots should be plotted
 # example for subject 1 and channel E34 in time points from 10 to 20
-boxplot_epoch(epochdata, subject = 1, channel = "E34", time_lim = c(10:20))
+boxplot_epoch(epochdata, amplitude = "signal", subject = 1, channel = "E34",
+              time_lim = c(10:20))
 
 # customizing the output title and axis labels using |> operator
-p1 <- boxplot_epoch(epochdata, subject = 1, channel = "E34", 
+p1 <- boxplot_epoch(epochdata, amplitude = "signal", subject = 1, channel = "E34", 
                     time_lim = c(10:20))
 p1 |> plotly::layout(xaxis = list(title = ""),
                      yaxis = list(title = "Amplitude"),
@@ -119,7 +118,46 @@ outliers_epoch(epochdata, subject = 1, sensor = "E34", method = "iqr")
 
 The results correspond with findings from `boxplot_epoch()` - the epoch 14 was evaluated as an outlier in all 50 time points.
 
-### Spatial Visualization 
+Analogously to function `boxplot_epoch()`, function `boxplot_subject()` works to identify outliers at the subject level.
+
+### Preparing signal for visualisation
+The main focus of the package is interactive visualization and animation of the HD-EEG data. This often requires first baseline correcting the data or averaging the signal across epochs, sensors/time points, or subjects. 
+
+The baseline correction of the amplitude is enabled through the function `baseline_correction()`. In the first release of the package, only most commonly used absolute correction (`type = "absolute"`) is available.
+
+The calculation of the average signal can be performed using the function `compute_mean()`, which computes pointwise or jackknife (leave one out) mean of the signal at different levels. In addition to the mean itself, the function also calculates the boundaries of the point confidence interval (`ci_low` and `ci_up` in the output). The argument `group` determines whether the average is calculated within individual time points (for curves) - `group = "time"` or sensors (for topographic maps) - `group = "space"`.
+
+```{r}
+#| eval: true
+# preparing data for later visualisation 
+# filtering signal without outlier epochs 14 and 15
+# and computing epoch level jackknife average from baseline corrected data
+edata <- epochdata |>
+  dplyr::filter(subject == 2, epoch %in% c(1:13))
+edata <- baseline_correction(edata, baseline_range = 1:10)
+
+s1 <- compute_mean(edata, amplitude = "signal_base", time = 10,
+                   level = "epoch", group = "space",
+                   type = "jack")
+```
+
+### Temporal domain visualization
+
+The `interactive_waveforms()` and `plot_time_mean()` can be used to display the time course of the signal. While function `interactive_waveforms()` interactively displays individual waveforms at different levels via `plotly`, function `plot_time_mean()` is adapted directly to display the average signal including the pointwise confidence interval as a `ggplot` object. 
+
+```{r}
+#| eval: true
+# computing jackknife average from channel E65 
+s2 <- compute_mean(edata, amplitude = "signal_base", channel = "E65",
+                   level = "epoch", group = "time",
+                   type = "jack")
+
+# plotting the average, the zero time point (stimulus) is set to 10
+plot_time_mean(s2, t0 = 10)
+```
+
+
+### Spatial visualization 
 
 #### Mesh Generation
 The original electrode grid is too coarse for graphical rendering. To achieve smoother and more visually appealing results in plots, it's necessary to generate a denser mesh of points. This refined mesh provides better spatial resolution and enhances the quality of visualizations.
@@ -142,9 +180,9 @@ M1 <- point_mesh(template = "HCGSN256")
 plot_point_mesh(M1$D2)
 
 # creating a circular mesh, only 2D coordinates
-M2 <- point_mesh(dim = 2, n = 3000, template = "HCGSN256", type = "circle")
+M2 <- point_mesh(dimension = 2, n = 3000, template = "HCGSN256", type = "circle")
 # plotting a mesh - function allows different options of the result plot
-plot_point_mesh(M2$D2, col_sensors = "purple", names = TRUE, cex = 0.1)
+plot_point_mesh(M2$D2, col_sensors = "purple", label_sensors = TRUE, cex = 0.1)
 ```
 
 
@@ -153,12 +191,12 @@ If the `mesh` input is not specified, the graphic functions automatically use th
 
 #### Topographical maps in 2D projection
 
-The `topo_plot()` function is used to plot a topographic map of the brain signal on the scalp, the amplitude values are colored using a topographic scale (with zero value always at the border of blue and green shades). 
-The function allows setting some optionally arguments for editing the output appearance (with or without contours, sensor names, etc.) and further customization is for users available through output in the form of `ggplot` function. 
+The `topo_plot()` function is used to plot a topographic map of the brain signal on the scalp, the amplitude values are colored using a topographic scale (with zero value always at the border of blue and green shades). An alternative to this function adapted directly to plot the mean along with the confidence interval bounds is `plot_topo_mean()`.
+The functions allow setting some optionally arguments for editing the output appearance (with or without contours, sensor names, etc.) and further customization is for users available through output in the form of `ggplot` function. 
 
 Notes: 
 
-- The input values of `signal` outside the chosen `col.range` will cause "holes" in the resulting plot.
+- The input values of amplitude (or also CI bounds in the case of the `plot_topo_mean()` function) outside the chosen `col.range` will cause "holes" in the resulting plot. 
 
 - To compare results for different subjects or conditions, setting the same values of `col.range` and `col.scale` arguments in all cases is necessary.
 
@@ -171,19 +209,23 @@ Notes:
 # preparing data
 edata <- epochdata |>
   dplyr::filter(subject == 1 & time %in% 1:10)
-data_base <- baseline_correction(edata, base_int = 1:10)
+data_base <- baseline_correction(edata, baseline_range = 1:10)
 data_mean <- compute_mean(data_base, amplitude = "signal_base", time = 10,
-                          type = "point", ex_epoch = 14)
+                          type = "point", ex_epoch = 14, group = "space")
 
-# plotting the topographic polygon map with contours and legend
+# plotting the base topographic polygon map with contours and legend
 # interval (-30,15) is selected in consideration of the signal progress
-topo_plot(data = data_mean, amplitude = "average", col_range = c(-30, 15), contour = TRUE)
+topo_plot(data = data_mean, amplitude = "average", 
+          col_range = c(-30, 15), contour = TRUE)
 
 # plotting the same map without contours and legend 
 # but with sensor labels and adding the title
 g1 <- topo_plot(data = data_mean, amplitude = "average", col_range = c(-30, 15),
-                names = TRUE, legend = FALSE)
+                label_sensors = TRUE, show_legend = FALSE)
 g1 + ggplot2::ggtitle("Subject 1, time of the stimulus")
+
+# plotting the average together with CI bounds using plot_topo_mean
+plot_topo_mean(data = data_mean, template = "HCGSN256", col_range = c(-30, 15))
 ```
 
 
@@ -194,21 +236,12 @@ Correct mesh triangulation is required for appropriate colours rendering. This t
 
 The function allows setting the `col.range` argument, which is necessary to obtain comparable results between different subjects or conditions. 
 
-Note: The input values of `signal` outside the chosen `col.range` will cause "holes" in the resulting plot.
+Note: The input values of amplitude outside the chosen `col.range` will cause "holes" in the resulting plot.
 
 ```{r}
-# preparing data - filtering signal from time point 10 (time of the stimulus) for subject 2,
-# computing average from all epochs without outliers 14 and 15
-s1 <- epochdata |>
-dplyr::filter(.data$time == 10 & .data$subject == 2 & !.data$epoch %in% c(14,15)) |>
-dplyr::select("signal", "sensor", "epoch") |>
-dplyr::group_by(.data$sensor) |>
-dplyr::mutate(average = mean(.data$signal, na.rm = TRUE))
-s1 <- s1$average[1:204]
-
-# plotting the scalp polygon map
+# plotting the scalp polygon map of previously prepared signal s1
 #open3d()
-scalp_plot(signal = s1, col_range = c(-30, 15))
+scalp_plot(s1, amplitude = "average", col_range = c(-30, 15))
 
 # note: the output is not plotted to reduce the vignette file size
 ```
@@ -216,8 +249,9 @@ scalp_plot(signal = s1, col_range = c(-30, 15))
 The `rgl` output enables to zoom and rotate the image with default view of the back of the head.
 
 ### Animations
-The package includes the `animate_topo()` function for 2D topographic animation in time and `animate_scalp()` function for 3D scalp animation in time. Both of these functions allow to export the output, a gif animation using `gifski` package for 2D case and a .mp4 video format using `av` package for 3D case. 
+The package includes the `animate_topo()` and `animate_topo_mean()` function for 2D topographic animation in time and `animate_scalp()` function for 3D scalp animation in time. Both of these functions allow to export the output, a gif animation using `gifski` package for 2D case and a .mp4 video format using `av` package for 3D case. 
 The topographic map animation uses the `gganimate` package and enables ajdusting the output animation settings by adding parameters from the `gganimate::animate` function. The most of input parameters of `animate_topo()` are the same as in `topo_plot()` function, parameters related to animation properties and export are added and also the `t_lim` parameter for setting the length of the timeline displayed below the animation. 
+The `animate_topo_mean()` function is customized for topographic maps of average signal together with pointwise confidence interval bounds displayed as topographic maps on the sides of the average map. Usage is almost identical to the `animate_topo()` function, only input data must contain columns `average`, `ci_up` and `ci_low` (like the output from the `compute_mean` function).
 Example: The animation of time course of the EEG signal for subject 1 and epoch 5 (from `epochdata`) between time points 10 and 20 with the whole range of time 0:50 is created as follows:
 
 ```{r}
@@ -237,10 +271,12 @@ Example of scalp animation with the same data as above:
 ```{r}
 #| eval: false
 # Plot animation with default mesh and triangulation:
-animate_scalp(s1e05)
+animate_scalp(s1e05, amplitude = "signal")
 # export the video - the .mp4 extension is required for correct functioning
 rgl::par3d(windowRect = c(100, 100, 800, 800))
-animate_scalp(s1e05, frames_dir = "your_frames_dir_path", output_path = "your_created_video_path.mp4")
+animate_scalp(s1e05, amplitude = "signal", 
+              frames_dir = "your_frames_dir_path", 
+              output_path = "your_created_video_path.mp4")
 ```
 
 
@@ -248,7 +284,7 @@ If you are interested in animation of rotating scalp visualization in fixed time
 
 ```{r}
 #open3d()
-scalp_plot(signal = s1, col_range = c(-30,15))
+scalp_plot(s1, amplitude = "average", col_range = c(-30,15))
 rgl::play3d(rgl::spin3d(axis = c(0, 0, 1), rpm = 10), duration = 10)
 
 # note: the output is not plotted to reduce the vignette file size
@@ -259,6 +295,10 @@ rgl::play3d(rgl::spin3d(axis = c(0, 0, 1), rpm = 10), duration = 10)
 Lai M-J, Schumaker LL. *Spline functions on triangulations.* Cambridge University Press; 2007.
 
 Schneider PJ, Eberly DH. *Geometric Tools for Computer Graphics.* The Morgan Kaufmann Series in Computer Graphics. San Francisco: Morgan Kaufmann, 2003.
+
+Wickham H, Bryan J. *R Packages (2e).* O'Reilly Media; 2023.
+
+Wickham H. *ggplot2: Elegant Graphics for Data Analysis.* Springer; 2016.
 
 
 
