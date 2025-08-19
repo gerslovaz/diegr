@@ -9,7 +9,7 @@
 #' @param tri A three column matrix with indices of the vertices of the triangles. Each row represents one triangle, defined by three vertex indices. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the mesh.
 #' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y}, \code{z} and \code{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the HCGSN256 template is used.
 #' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
-#' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal expanded by a padding value equal to 5% is used.
+#' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of interpolated signal is used.
 #' @param col_scale Optionally, a colour scale to use for plotting. If not defined, it is computed from \code{col_range}.
 #' @param view A character for creating a temporary rotated scene (according to neurological terminology). Possible values are: \code{"superior", "anterior", "posterior", "left", "right"}. If missing, the default view according to user settings is displayed. Note: Input coordinates corresponding to the positions in the HCGSN template are required to obtain an appropriate view.
 #'
@@ -27,6 +27,7 @@
 #' Notes:
 #' For correct rendering of a plot, the function requires an openGL-capable device.
 #' Displaying the rotated scalp map using the \code{view} argument requires previous call \code{open3d()}.
+#' When specifying the `coords` and `template` at the same time, the `template` parameter takes precedence and the `coords` parameter is ignored.
 #'
 #' @return A 3D scalp map rendered via `rgl::shade3d()` in an interactive window.
 #' @export
@@ -66,22 +67,23 @@ scalp_plot <- function(data,
                        col_scale = NULL,
                        view) {
 
-  if (!amplitude %in% names(data)) {
+  if (!amplitude %in% colnames(data)) {
     stop(paste0("There is no column '", amplitude, "' in the input data."))
   }
 
-  if (!is.numeric(data[[amplitude]])) {
-    stop("The amplitude column must be numeric.")
+  if (!is.null(template) && !is.null(coords)) {
+    warning("Both 'template' and 'coords' were specified. Using 'template' and ignoring 'coords'.")
+  }
+
+  if (is.null(template) && is.null(coords)) {
+    # use HCGSN256 template
+    template <- "HCGSN256"
   }
 
   if (!is.null(template)) {
     coords <- switch(template,
                      "HCGSN256" = diegr::HCGSN256$D3,
                      stop("Unknown template."))
-  }
-
-  if (is.null(template) && is.null(coords)) {
-    coords <- diegr::HCGSN256$D3
   }
 
   required_cols <- c("x", "y", "z", "sensor")
@@ -110,16 +112,13 @@ scalp_plot <- function(data,
     }
     tri <- make_triangulation(mesh2)
   }
-  if (is.null(col_range)) {
-    padding <- 0.05 * diff(range(data[[amplitude]]))
-    col_range <- range(data[[amplitude]]) + c(-1, 1) * padding
-  }
-  if (is.null(col_scale)) {
-    col_scale <- create_scale(col_range)
-  }
 
   coords_xyz <- coords |>
     dplyr::select("x", "y", "z")
+
+  if (inherits(data, "tbl_sql") || inherits(data, "tbl_dbi")) {
+    data <- dplyr::collect(data) # collect data for DB table
+  }
 
   if (!all(unique(coords$sensor) %in% data$sensor)) {
     stop("Mismatch between sensors in data and coords.")
@@ -133,6 +132,14 @@ scalp_plot <- function(data,
 
   y_hat <- IM(coords_xyz, data_order[[amplitude]], mesh3)$Y_hat
   ycp_IM <- y_hat[1:nrow(mesh3)]
+
+  if (is.null(col_range)) {
+    #padding <- 0.05 * diff(range(ycp_IM))
+    col_range <- range(ycp_IM) #+ c(-1, 1) * padding
+  }
+  if (is.null(col_scale)) {
+    col_scale <- create_scale(col_range)
+  }
 
 
   y_cut <- cut(ycp_IM, breaks = col_scale$breaks, include.lowest = TRUE)
@@ -168,10 +175,6 @@ scalp_plot <- function(data,
                  col = y_col, lit = FALSE)
 
     rgl::useSubscene3d(current) # original subscene
-
-
-    #rotate_view(U, plot_function = rgl::shade3d(rgl::mesh3d(x = mesh3$x, y = mesh3$y, z = mesh3$z, triangles = t(tri)),
-    #                                            col = y_col, lit = FALSE))
   }
 
  }

@@ -29,7 +29,7 @@ scalp_plot(
 
 \item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.}
 
-\item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal expanded by a padding value equal to 5\% is used.}
+\item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of interpolated signal is used.}
 
 \item{col_scale}{Optionally, a colour scale to use for plotting. If not defined, it is computed from \code{col_range}.}
 
@@ -55,6 +55,7 @@ The default used scale is based on topographical colours with zero value always 
 Notes:
 For correct rendering of a plot, the function requires an openGL-capable device.
 Displaying the rotated scalp map using the \code{view} argument requires previous call \code{open3d()}.
+When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
 }
 \examples{
 \dontrun{

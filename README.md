@@ -19,7 +19,7 @@ The package `diegr` includes:
 - interactive boxplots
 - interactive epoch waveforms
 - topographic maps (2D projection)
-- head plots in 3D
+- scalp plots in 3D
 - functions for computing baseline correction, pointwise and jackknife
   mean
 - functions for plotting the mean with pointwise confidence interval
@@ -92,7 +92,7 @@ interactive elements, only the static preview of the result is shown.
 ``` r
 data("HCGSN256")
 # creating a mesh
-M1 <- point_mesh(dim = 2, n = 30000, type = "polygon")
+M1 <- point_mesh(dimension = 2, n = 30000, type = "polygon")
 # filtering a subset of data to display 
 data_short <- epochdata |>
   dplyr::filter(subject == 1 & epoch == 10 & time == 15) 

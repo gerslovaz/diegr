@@ -15,7 +15,7 @@ animate_topo(
   template = NULL,
   col_range = NULL,
   col_scale = NULL,
-  legend = TRUE,
+  show_legend = TRUE,
   contour = FALSE,
   output_path = NULL,
   ...
@@ -24,9 +24,9 @@ animate_topo(
 \arguments{
 \item{data}{An input data frame or tibble with at least this required columns: \code{time} - the number of time point, \code{sensor} - the sensor label and the column with the EEG amplitude to plot specified in the argument \code{amplitude}.}
 
-\item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values.}
+\item{amplitude}{A character specifying the name of the column from input data with EEG amplitude values.}
 
-\item{t_lim}{Limits of time points (i.e., the length of the timeline displayed below the animation).}
+\item{t_lim}{A numeric vector of length 2 with limits of time points (i.e., the length of the timeline displayed below the animation).}
 
 \item{FS}{The sampling frequency. Default value is 250 Hz.}
 
@@ -38,11 +38,11 @@ animate_topo(
 
 \item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.}
 
-\item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.}
+\item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of interpolated signal is used.}
 
 \item{col_scale}{Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.}
 
-\item{legend}{Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.}
+\item{show_legend}{Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.}
 
 \item{contour}{Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.}
 
@@ -61,7 +61,9 @@ Display a topographic animation of the change in amplitude over time. The functi
 For more details about required mesh structure see \code{\link{point_mesh}} function. If the input \code{mesh} structure does not match this format, an error or incorrect function behavior may occur.
 
 The time part of input data is assumed to be in numbers of time points, conversion to ms takes place inside the function for drawing the timeline labels.
-Due to the flexibility of the function (e.g. to mark and animate only a short section from the entire time course or to compare different data in the same time interval), it allows the user to enter and plot an arbitrary timeline values. If some values of the time are outside the \code{t_lim} range, the function writes a warning message - in that case the animation is still rendered, but the timeline will not match reality.
+Due to the flexibility of the function (e.g. to mark and animate only a short section from the entire time course or to compare different data in the same time interval), it allows to enter and plot user-defined time ranges. If some values of the time are outside the \code{t_lim} range, the function writes a warning message - in that case the animation is still rendered, but the timeline will not match reality.
+
+Note: When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
 }
 \examples{
 \dontrun{

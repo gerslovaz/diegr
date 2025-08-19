@@ -14,7 +14,7 @@ animate_topo_mean(
   template = NULL,
   col_range = NULL,
   col_scale = NULL,
-  legend = TRUE,
+  show_legend = TRUE,
   contour = FALSE,
   output_path = NULL,
   ...
@@ -39,7 +39,7 @@ animate_topo_mean(
 
 \item{col_scale}{Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.}
 
-\item{legend}{Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.}
+\item{show_legend}{Logical. Indicates, whether legend should be displayed below the graph. Default value is \code{TRUE}.}
 
 \item{contour}{Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.}
 
@@ -54,6 +54,9 @@ If \code{output_path} is specified, the animation is saved to the given file pat
 \description{
 An animation of the average signal time course as a topographic map along with the lower and upper bounds of the confidence interval, which are plotted as separate topographic maps alongside the average map.
 }
+\details{
+Note: When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
+}
 \examples{
 \dontrun{
 # This example may take a few seconds to render.
@@ -63,7 +66,7 @@ An animation of the average signal time course as a topographic map along with t
 # first 10 points and only 13 epochs (epochs 14 and 15 are outliers)
 edata <- epochdata |>
 dplyr::filter(subject == 2 & time \%in\% 1:10 & epoch \%in\% 1:13)
-data_base <- baseline_correction(edata, base_int = 1:10) # baseline correction
+data_base <- baseline_correction(edata, baseline_range = 1:10) # baseline correction
 data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2,
  type = "jack", group = "space") # compute mean
 # b) render the animation

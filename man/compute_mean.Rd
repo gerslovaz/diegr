@@ -9,31 +9,31 @@ compute_mean(
   amplitude = "signal_base",
   subject = NULL,
   channel = NULL,
+  time = NULL,
+  ex_epoch = NULL,
   group = "time",
   level = "epoch",
-  ex_epoch = NULL,
-  time = NULL,
   type = "point",
-  R = 1000,
+  R = NULL,
   alpha = 0.95
 )
 }
 \arguments{
-\item{data}{A data frame, tibble or a database table with input data, required columns: subject, sensor, epoch (only for epoch level), time and signal (for raw data) or signal_base (for baseline corrected data).}
+\item{data}{A data frame, tibble or a database table with input data, required columns: subject, sensor, epoch (only for epoch level), time and the column with the EEG amplitude specified in the argument \code{amplitude}.}
 
 \item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal_base"} for computing average from baseline corrected signal.}
 
-\item{subject}{A vector of subject indices to be included in the average calculation.}
+\item{subject}{A vector of subject indices to be included in the average calculation. If NULL, all subjects present in input data are included.}
 
 \item{channel}{A character vector specifying the channels to be averaged.  If NULL, all channels present in input data are included.}
+
+\item{time}{A numeric vector specifying the time points used for computing the average signal. If NULL, the whole time interval present in the input data is included.}
+
+\item{ex_epoch}{Optional. A vector of epoch indices to be excluded from the average calculation.}
 
 \item{group}{A character specifying the grouping factor. Default is \code{"time"} for calculation of the average at individual time points, other possibility is \code{"space"} for calculation of the average at individual space points (sensors).}
 
 \item{level}{A character specifying the level of average calculation. The possible values are \code{"epoch"}, \code{"sensor"} and \code{"subject"}. See details for more information.}
-
-\item{ex_epoch}{Optional. A vector of epoch indices to be excluded from the average calculation.}
-
-\item{time}{A numeric vector specifying the time points used for computing the average signal. If NULL, the whole time interval is included.}
 
 \item{type}{A character specifying the method of calculating the average, \code{"point"} for pointwise arithmetic average (default) and \code{"jack"} for jackknife leave-one-out average.}
 
@@ -42,9 +42,10 @@ compute_mean(
 \item{alpha}{A number indicating confidence interval level. The default value is 0.95 for 95\% confidence intervals.}
 }
 \value{
-A tibble with result average and CI bounds according to the chosen \code{level}, \code{group} and \code{alpha} arguments. The statistics are saved in columns
+A tibble with resulting average and CI bounds according to the chosen \code{level}, \code{group} and \code{alpha} arguments. The statistics are saved in columns
 \itemize{
 \item \code{average} for computed average amplitude value,
+\item \code{se} for standard error of the mean,
 \item \code{ci_low} for lower bound of the confidence interval and
 \item \code{ci_up} for upper bound of the confidence interval.
 }
@@ -55,15 +56,25 @@ Function calculates a pointwise or a jackknife (leave-one-out) average signal fo
 \details{
 The \code{level} parameter enables to choose the level at which the average is calculated:
 \itemize{
-\item \code{"epoch"} means averaging on epoch level, the result is the average curve (from all included epochs) for individual sensors and subjects in the \code{group = "time"} case or the average area (from all included epochs) for individual time points and subjects in the \code{group = "space"} case.
-\item \code{"sensor"} means averaging on sensor or time point level, the result is the average curve from all included sensors for individual subjects in the \code{group = "time"} case or the average area from all time points for individual subjects in the \code{group = "space"} case.
-\item \code{"subject"} means averaging on subject level, the result is the average curve or area from all included subjects.
+\item \code{"epoch"} means averaging on epoch level, the result is the average curve (from all included epochs) for individual sensors and subjects in the \code{group = "time"} case or the 2D sensor array average (from all included epochs) for individual time points and subjects in the \code{group = "space"} case.
+\item \code{"sensor"} means averaging on sensor or time point level, the result is the average curve from all included sensors for individual subjects in the \code{group = "time"} case or the average sensor array from all time points for individual subjects in the \code{group = "space"} case.
+\item \code{"subject"} means averaging on subject level, the result is the average curve or sensor array from all included subjects.
 The function assumes input adapted to the desired level of averaging (i.e. for epoch level the epoch column must be present etc.).
 }
 
-Computing confidence intervals:
-For each average value, the upper and lower bounds of the point confidence interval are also available. In the case of pointwise mean, the bounds are computed using bootstrapping with \code{R} replicates. For jackknife mean are the bounds computed using jackknife standard deviation and approximation by the Student distribution.
-Note: Computing pointwise bootstrap CI bounds can be slow for large amounts of data.
+Computing standard error of the mean:
+\itemize{
+\item for \code{type = "point"}, the standard error is computed as sample standard deviation divided by square root of the sample size
+\item for \code{type = "jack"}, the standard error is jackknife standard error of the mean (for the exact formula see Efron and Tibshirani 1994)
+}
+
+Computing point confidence intervals:
+For each average value, the upper and lower bounds of the point confidence interval are also available.
+\itemize{
+\item Setting \code{type = "point"} and \code{R}: the bounds are computed using percentile method from bootstrapping with \code{R} replicates (can be slow for large amounts of data).
+\item Setting \code{type = "point"} without specifying \code{R}: the bounds are computed using standard error of the mean and approximation by the Student distribution.
+\item Setting \code{type = "jack"}: the bounds are computed using jackknife standard error of the mean and approximation by the Student t-distribution. Note: used method assumes equal variance and symmetric distribution, which may be problematic for very small samples.
+}
 }
 \examples{
 # Average (pointwise) raw signal for subject 1 and electrode E1
@@ -82,11 +93,27 @@ level = "sensor", avg = FALSE, CI = TRUE)
 # on interval 1:10 (again without outlier epoch 14)
 # a) prepare corrected data
 data01 <- epochdata |> dplyr::filter(.data$subject == 1)
-basedata <- baseline_correction(data01, base_int = 1:10, type = "absolute")
+basedata <- baseline_correction(data01, baseline_range = 1:10, type = "absolute")
 # b) compute the average in time point 11
 avg_data <- compute_mean(basedata, amplitude = "signal_base", time = 11, level = "epoch",
  group = "space", type = "jack", ex_epoch = 14)
 str(avg_data)
 # c) plot the result with topo_plot()
 topo_plot(data = avg_data, amplitude = "average")
+
+\dontrun{
+# Space average on subject level (average for all included subjects in time point 11)
+# a) filter time point 11
+data02 <- epochdata |> dplyr::filter(.data$time == 11)
+# b) compute mean from all epochs for each subject
+mean_epoch <- compute_mean(data02, amplitude = "signal", time = 11, level = "epoch",
+group = "space", type = "point", ex_epoch = c(14,15))
+# c) compute mean on subject level
+mean_subjects <- compute_mean(mean_epoch, amplitude = "average", level = "subject",
+group = "space", type = "point")
+head(mean_subjects)
+}
+}
+\references{
+Efron B., Tibshirani RJ. \emph{An Introduction to the Bootstrap.} Chapman & Hall/CRC; 1994.
 }

@@ -12,12 +12,12 @@ plot_topo_mean(
   col_range = NULL,
   col_scale = NULL,
   contour = FALSE,
-  legend = TRUE,
-  names = FALSE
+  show_legend = TRUE,
+  label_sensors = FALSE
 )
 }
 \arguments{
-\item{data}{A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: \code{sensor} with sensor labels and \code{average, ci_low, ci_up} with values of average signal and lower and upper CI bounds.}
+\item{data}{A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: \code{sensor} with sensor labels and \code{average, ci_low, ci_up} with values of average signal and its lower and upper CI bounds in one time point (or precomputed average of multiple time points).}
 
 \item{mesh}{A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.}
 
@@ -31,28 +31,31 @@ plot_topo_mean(
 
 \item{contour}{Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.}
 
-\item{legend}{Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.}
+\item{show_legend}{Logical. Indicates, whether legend should be displayed below the graph. Default value is \code{TRUE}.}
 
-\item{names}{A logical value indicating whether the sensor names should also be plotted (default value is \code{FALSE}).}
+\item{label_sensors}{A logical value indicating whether the sensor labels should also be plotted (default value is \code{FALSE}).}
 }
 \value{
 A \code{ggplot} object showing the topographic map of the signal for chosen time.
 }
 \description{
-Plot a topographic circle or polygon map of the average EEG signal amplitude using topographic colour scale. The function displays topographic map of average and lower and upper confidence interval bounds.
+Plot a topographic circle or polygon map of the average EEG signal amplitude and its lower and upper confidence interval bounds using topographic colour scale.
 The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^2 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations.
-The output in the form of a \code{ggplot} object allows to easily edit the result image properties. For animated version of the plot see \code{\link{animate_topo_mean}}.
+The output in the form of a \code{ggplot} object allows to easily edit the result image properties.
+}
+\details{
+Note: When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
 }
 \examples{
 # Plot average topographic map with CI bounds of signal for subject 2 from the time point 10
-# (the time of the stimulus) without the outliers (epoch 14 and 15)
+# (the time of the stimulus) excluding outlier epochs 14 and 15
 
 # a) preparing data
 # a1) extract required data
 edata <- epochdata |>
 dplyr::filter(subject == 2 & time \%in\% 1:10 & epoch \%in\% 1:13)
 # a2) baseline correction (needed for suitable topographic map)
-data_base <- baseline_correction(edata, base_int = 1:10)
+data_base <- baseline_correction(edata, baseline_range = 1:10)
 # a3) average computing
 data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, time = 10,
  type = "jack", group = "space")
@@ -62,5 +65,5 @@ data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, tim
 plot_topo_mean(data = data_mean, template = "HCGSN256", legend = TRUE)
 }
 \seealso{
-\code{\link{animate_topo_mean}, \link{topo_plot}}
+\code{\link{animate_topo_mean}}: animated version of the plot; \code{\link{topo_plot}}
 }

@@ -52,6 +52,8 @@ The \code{own_coordinates} enables computing a mesh from user's own sensor locat
 }
 To build the appropriate meshes in both dimensions, it is necessary to have the input of 3D sensor locations and their corresponding projection onto a plane; the function itself does not perform this projection.
 It is also necessary to keep the same sensor locations order in \code{D2} and \code{D3} part of the coordinates.
+
+Note: When specifying the \code{own_coordinates} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{own_coordinates} parameter is ignored.
 }
 \examples{
 # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template

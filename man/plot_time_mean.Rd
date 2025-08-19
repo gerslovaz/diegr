@@ -10,7 +10,10 @@ plot_time_mean(
   t0 = 1,
   color = "red",
   fill = "lightsalmon",
-  transp = 0.4
+  transp = 0.4,
+  y_limits = NULL,
+  label_0ms = "stimulus",
+  label_offset = c(0, 0)
 )
 }
 \arguments{
@@ -20,21 +23,30 @@ plot_time_mean(
 
 \item{t0}{Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).}
 
-\item{color}{The color of line. Default value is \code{red}.}
+\item{color}{The color of line. Default value is \code{red}. The argument accepts standard R color names or hex codes.}
 
-\item{fill}{The color of CI bound, default value is \code{lightsalmon}.}
+\item{fill}{The color of CI bound, default value is \code{lightsalmon}. The argument accepts standard R color names or hex codes.}
 
-\item{transp}{The value between 0 and 1 relating to the opacity of a CI (corresponding to \code{alpha} parameter in \link[ggplot2]{geom_ribbon} function).}
+\item{transp}{A numeric value between 0 and 1 controlling the transparency of the confidence ribbon (corresponding to \code{alpha} parameter in \link[ggplot2]{geom_ribbon} function).}
+
+\item{y_limits}{A numeric vector of length two, specifying the minimum and maximum y-axis limits. Defaults to \code{NULL}for plot limits determined according to input data.}
+
+\item{label_0ms}{Character string for the annotation label at the 0ms mark. Default is \code{"stimulus"}.}
+
+\item{label_offset}{A numeric vector of length two to offset the stimulus label. The first value indicates a horizontal shift, the second a vertical one. Default is \code{c(0,0)} for no shift.}
 }
 \value{
-A \code{ggplot} object showing the time course of the signal for chosen sensor.
+A \code{ggplot} object showing the time course of the average EEG signal with pointwise confidence intervals for chosen sensor.
 }
 \description{
-Plot a time curve of the average EEG signal amplitude together with pointwise confidence interval (CI). The output in the form of a ggplot object allows to easily edit the result image properties. For interactive vesrion of plot see \link{interactive_waveforms} function.
+Plot a time curve of the average EEG signal amplitude together with pointwise confidence intervals (CIs).
+}
+\details{
+The output in the form of a ggplot object allows to easily edit the result image properties. For interactive version of plot see \link{interactive_waveforms} function.
 }
 \examples{
 # Plot average signal with CI bounds for subject 2 from the sensor E65
-# without the outliers (epoch 14 and 15)
+# excluding outlier epochs 14 and 15
 
 # a) preparing data
 # a1) extract required data

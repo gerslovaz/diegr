@@ -3,16 +3,16 @@
 #' @description Display a topographic animation of the change in amplitude over time. The function enables direct rendering in Rstudio Viewer or saving the animation in gif format to the chosen location.
 #'
 #' @param data An input data frame or tibble with at least this required columns: \code{time} - the number of time point, \code{sensor} - the sensor label and the column with the EEG amplitude to plot specified in the argument \code{amplitude}.
-#' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values.
-#' @param t_lim Limits of time points (i.e., the length of the timeline displayed below the animation).
+#' @param amplitude A character specifying the name of the column from input data with EEG amplitude values.
+#' @param t_lim A numeric vector of length 2 with limits of time points (i.e., the length of the timeline displayed below the animation).
 #' @param FS The sampling frequency. Default value is 250 Hz.
 #' @param t0 Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).
 #' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
 #' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.
 #' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
-#' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.
+#' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of interpolated signal is used.
 #' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
-#' @param legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.
+#' @param show_legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.
 #' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.
 #' @param output_path File path where the animation will be saved using `gifski` renderer (optional). If not defined, the animation is plotted in the RStudio Viewer.
 #' @param ... Additional parameters for animation according to [gganimate::animate].
@@ -21,9 +21,11 @@
 #' For more details about required mesh structure see \code{\link{point_mesh}} function. If the input \code{mesh} structure does not match this format, an error or incorrect function behavior may occur.
 #'
 #' The time part of input data is assumed to be in numbers of time points, conversion to ms takes place inside the function for drawing the timeline labels.
-#' Due to the flexibility of the function (e.g. to mark and animate only a short section from the entire time course or to compare different data in the same time interval), it allows the user to enter and plot an arbitrary timeline values. If some values of the time are outside the \code{t_lim} range, the function writes a warning message - in that case the animation is still rendered, but the timeline will not match reality.
+#' Due to the flexibility of the function (e.g. to mark and animate only a short section from the entire time course or to compare different data in the same time interval), it allows to enter and plot user-defined time ranges. If some values of the time are outside the \code{t_lim} range, the function writes a warning message - in that case the animation is still rendered, but the timeline will not match reality.
 #'
-#' @returns
+#' Note: When specifying the `coords` and `template` at the same time, the `template` parameter takes precedence and the `coords` parameter is ignored.
+#'
+#' @return
 #' If `output_path` is `NULL`, the function prints the animation to the RStudio Viewer.
 #' If `output_path` is specified, the animation is saved to the given file path and not displayed.
 #'
@@ -50,24 +52,55 @@
 #' animate_topo(s1e05, amplitude = "signal", t_lim = c(1,50), t0 = 10)
 #' }
 #'
-animate_topo <- function(data, amplitude, t_lim, FS = 250, t0 = 1, mesh, coords = NULL, template = NULL,
-                         col_range = NULL, col_scale = NULL,
-                         legend = TRUE, contour = FALSE,
-                         output_path = NULL, ...){
+animate_topo <- function(data,
+                         amplitude,
+                         t_lim,
+                         FS = 250,
+                         t0 = 1,
+                         mesh,
+                         coords = NULL,
+                         template = NULL,
+                         col_range = NULL,
+                         col_scale = NULL,
+                         show_legend = TRUE,
+                         contour = FALSE,
+                         output_path = NULL,
+                         ...){
 
-  amp_value <- {{ amplitude }}
-  amp_name <- rlang::as_string(amp_value)
+  #amp_value <- {{ amplitude }}
+  #amp_name <- rlang::as_string(amp_value)
 
-  if (!amp_name %in% names(data)) {
-    stop(paste0("There is no column '", amp_name, "' in the input data."))
+  if (!amplitude %in% colnames(data)) {
+    stop(paste0("There is no column '", amplitude, "' in the input data."))
   }
 
   if (!(is.logical(contour))) {
     stop("Argument 'contour' has to be logical.")
   }
 
-  if (!(is.logical(legend))) {
-    stop("Argument 'legend' has to be logical.")
+  if (!(is.logical(show_legend))) {
+    stop("Argument 'show_legend' has to be logical.")
+  }
+
+  if (!is.numeric(t_lim) || length(t_lim) != 2) {
+    stop("'t_lim' must be a numeric vector of length 2.")
+  }
+
+  if (!is.numeric(FS) || FS <= 0) {
+    stop("'FS' must be a positive number.")
+  }
+
+  if (!is.numeric(t0) || length(t0) != 1) {
+    stop("'t0' must be a numeric value.")
+  }
+
+  if (!is.null(template) && !is.null(coords)) {
+    warning("Both 'template' and 'coords' were specified. Using 'template' and ignoring 'coords'.")
+  }
+
+  if (is.null(template) && is.null(coords)) {
+    # use HCGSN256 template
+    template <- "HCGSN256"
   }
 
   if (!is.null(template)) {
@@ -75,11 +108,6 @@ animate_topo <- function(data, amplitude, t_lim, FS = 250, t0 = 1, mesh, coords 
                      "HCGSN256" = diegr::HCGSN256$D2,
                      stop("Unknown template.")
                      )
-  }
-
-  if (is.null(template) && is.null(coords)) {
-    # use HCGSN256 template
-    coords <- diegr::HCGSN256$D2
   }
 
   required_cols <- c("x", "y", "sensor")
@@ -91,14 +119,14 @@ animate_topo <- function(data, amplitude, t_lim, FS = 250, t0 = 1, mesh, coords 
   }
 
   if (missing(mesh)) {
-    mesh <- point_mesh(dim = 2, template = { template })
+    mesh <- point_mesh(dimension = 2, template = template)
   }
 
-  if (control_D2(mesh)){
+  if (control_D2(mesh)) {
     mesh_mat <- mesh$D2
   }
 
-  newdata <- prepare_anim_structure(data, amp_name = amp_name, coords, mesh_mat)
+  newdata <- prepare_anim_structure(data, amp_name = amplitude, coords, mesh_mat)
 
   M <- max(mesh_mat[,2], na.rm = TRUE)
   Mm <- min(mesh_mat[,2], na.rm = TRUE)
@@ -116,21 +144,21 @@ animate_topo <- function(data, amplitude, t_lim, FS = 250, t0 = 1, mesh, coords 
   time_range <- sort(unique(newdata$time))
   timeline <- tibble(time = time_range, x = time_positions[time_range], y = y_l)
 
-
   if (is.null(col_scale)) {
 
     if (is.null(col_range)) {
-      if (all(is.na(newdata$y_IM))) {
-        stop("No valid values in y_IM to create color scale.")
+      if (all(is.na(newdata$amplitude_IM))) {
+        stop("No valid values in amplitude_IM to create color scale.")
       }
-      col_range <- c(1.1 * range(newdata$y_IM))
+      #padding <- 0.05 * diff(range(newdata$amplitude_IM))
+      col_range <- range(newdata$amplitude_IM) #+ c(-1, 1) * padding
     }
 
     col_scale <- create_scale(col_range)
   }
 
   g <- ggplot(newdata, aes(x = .data$mesh_coord$x, y = .data$mesh_coord$y)) +
-    geom_raster(aes(fill = .data$y_IM)) +
+    geom_raster(aes(fill = .data$amplitude_IM)) +
     scale_fill_gradientn(
       colors = col_scale$colors,
       breaks = col_scale$breaks,
@@ -144,8 +172,7 @@ animate_topo <- function(data, amplitude, t_lim, FS = 250, t0 = 1, mesh, coords 
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       axis.text = element_blank(),
-      axis.title = element_blank(),
-      legend.position = "none"
+      axis.title = element_blank()
     ) +
     annotate("segment", x = x0, y = M + 0.07 * abs(M), xend = x0 - 0.08 * M, yend = M + 0.01 * abs(M), col = "gray40") +
     annotate("segment", x = x0, y = M + 0.07 * abs(M), xend = x0 + 0.08 * M, yend = M + 0.01 * abs(M), col = "gray40") +
@@ -160,7 +187,7 @@ animate_topo <- function(data, amplitude, t_lim, FS = 250, t0 = 1, mesh, coords 
               vjust = 1.5, color = "red", inherit.aes = FALSE)  # label for the point
 
 
-  if (legend == TRUE) {
+  if (show_legend == TRUE) {
     g <- g  +
       labs(fill = expression(paste("Amplitude (", mu, "V)"))) +
       guides(fill = guide_colorbar(barwidth = 0.7, barheight = 20)) +
@@ -169,10 +196,15 @@ animate_topo <- function(data, amplitude, t_lim, FS = 250, t0 = 1, mesh, coords 
         legend.text = element_text(size = 7),
         legend.title = element_text(size = 8)
       )
+  } else {
+    g <- g +
+      theme(
+        legend.position = "none"
+      )
   }
 
   if (contour == TRUE) {
-    g <- g + geom_contour(aes(z = .data$y_IM), color = "gray", breaks = col_scale$breaks)
+    g <- g + geom_contour(aes(z = .data$amplitude_IM), color = "gray", breaks = col_scale$breaks)
   }
 
 
@@ -193,14 +225,39 @@ animate_topo <- function(data, amplitude, t_lim, FS = 250, t0 = 1, mesh, coords 
 }
 
 
+#' Prepare animation structure from EEG data
+#'
+#' @description
+#' Internal helper function to prepare time-split spatial interpolation results for topographic animation.
+#' It joins sensor coordinates to EEG signal data, performs interpolation for each time point,
+#' and returns a long-format tibble suitable for animation.
+#'
+#' @param data A data frame, tibble or database table containing EEG signal data, including time, sensor, and amplitude.
+#' @param amp_name A character string specifying the name of the amplitude column in `data`.
+#' @param coords A data frame with sensor coordinate information. Must include columns `x`, `y` (and `z` for 3D animation) and `sensor`.
+#' @param mesh_mat A matrix of 2D or 3D coordinates over which the EEG signal will be interpolated.
+#'
+#' @return
+#' A tibble with interpolated signal values over the mesh, including columns:
+#' \itemize{
+#'   \item{time}{Time point corresponding to the EEG frame.}
+#'   \item{mesh_coord}{Matrix of mesh coordinates (repeated across time).}
+#'   \item{amplitude_IM}{Interpolated amplitude values at mesh points.}
+#' }
+#'
+#' @import dplyr
+#' @importFrom purrr map_dfr
+#'
+#' @noRd
 prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
-  ## create structure for animate_topo from database
-  ## need to change also for 3D case
 
-  if (inherits(data, "tbl_sql")) {
+  if (inherits(data, "tbl_sql") || inherits(data, "tbl_dbi")) {
     data <- dplyr::collect(data)
   }
 
+  if (!"sensor" %in% names(coords)) {
+    stop("The 'coords' data frame must include a 'sensor' column.")
+  }
 
   if (all(c("x", "y", "z") %in% names(coords))) {
     coords_df <- data.frame(x = coords[["x"]], y = coords[["y"]], z = coords[["z"]])
@@ -210,20 +267,23 @@ prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
 
   # add coordinates of sensors to the tibble with time and signal data
   tib_signal <- data |>
-    left_join(coords, by = "sensor") #coords_sen
+    left_join(coords, by = "sensor")
 
+  col_name <- enquo(amp_name)
 
-  # splitting the tibble and computing IM model on splitted tibble
+  # split the tibble and computing IM model on splitted tibble
   tib_split <- split(tib_signal, tib_signal$time)
 
   tib_IM <- purrr::map_dfr(names(tib_split), function(t) {
     df_t <- tib_split[[t]]
-    interpolated_values <- IM(coords_df, df_t[[amp_name]], mesh_mat)$Y_hat
+    y_values <- df_t |>
+      pull(!!col_name)
+    interpolated_values <- IM(coords_df, y_values , mesh_mat)$Y_hat #df_t[[amp_name]]
 
     tibble(
-      time = as.numeric(t),
+      time = as.numeric(df_t$time[1]),#as.numeric(t),
       mesh_coord = mesh_mat,
-      y_IM = interpolated_values[1:dim(mesh_mat)[1]]
+      amplitude_IM = interpolated_values[1:dim(mesh_mat)[1]]
     )
   })
 
@@ -234,26 +294,30 @@ prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
 #' 3D scalp plot animation in time
 #'
 #' @param data An input data frame or tibble with at least this required columns: \code{time} - the number of time point, \code{sensor} - the sensor label and the column with the EEG amplitude to plot specified in the argument \code{amplitude}.
-#' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values.
+#' @param amplitude A character string naming the column with EEG amplitude values.
 #' @param mesh An object of class \code{"mesh"} (or a named list with the same structure) used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. See \code{\link{scalp_plot}} for details about the structure.
 #' @param tri A matrix with indices of the triangles. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the mesh.
 #' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{z} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.
 #' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
-#' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.
-#' @param col_scale Optionally, a colour scale to be utilised for plotdata:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAkCAYAAAD7PHgWAAABBklEQVR4Xu2XMQrCQBBFBQvR6wgJHsEDpHVjBDvvoBhbI3bWCkZbFUyhFrYiEat0WgmC6AVkdQqbIVmWZAOi82C64b+/bDWZDEEQP4phTLMaa9d003bTGMgu1psF7JVGNzuWPdzs18GDz443rgrIcndXbvW8g1axGfZKo7P2eBXc+WB74a3FGXtiA1kwzfnpqTF7hL3SwDfAaz+BqvjkwYADe6WhglQwJlQwKVQwKakVTGOoYNL5z4JxwBlUMEwqAu9SwTCpCLxLBcOkIvCusoKT9/WFQ6OkIvCukoJwt5rO0sehUVIReBem6ng+OLBXmnKjn4PbGM5PeKnqgXIlo5vHXoL4Nl4ZYqbbEGA7+wAAAABJRU5ErkJggg==ting. If not defined, it is computed from \code{col_range}.
+#' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of interpolated signal is used.
+#' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
 #' @param sec The time interval used between individual animation frames, in seconds (default: 0.3).
 #' @param frames_dir Directory where the individual frames will be saved. If NULL, the video is only displayed in viewer and the frames are not saved.
 #' @param output_path Optional path to the output mp4 video file (".mp4" extension is required for correct rendering). If NULL, no video is created.
 #' @param framerate Number of frames per second for the output mp4 video (default: 3).
+#' @param cleanup Logical. Indicates, if all the PNG files should be deleted after encoding video. Default value is `TRUE`.
 #'
 #' @details
 #' Setting the parameter `tri` requires defining a `mesh` parameter.
 #' The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
-#' If the input \code{mesh} contains only 3D coordinates of a point mesh in \code{D3} element, the use of previously created triangulation (through \code{tri} argument) is necessary.
+#' If the input \code{mesh} contains only 3D coordinates of a point mesh in \code{D3} element, the use of previously created triangulation (through \code{tri} argument) is required.
 #'
-#' Note: For exporting the video, setting `frames_dir` together with `output_path` is required.
+#' Notes:
+#' For exporting the video, setting `frames_dir` together with `output_path` is required.
 #'
-#' @returns
+#' When specifying the `coords` and `template` at the same time, the `template` parameter takes precedence and the `coords` parameter is ignored.
+#'
+#' @return
 #' The output depends on the provided arguments:
 #' - If `frames_dir` is specified, individual animation frames (PNG) are saved to that directory.
 #' - If also `output_path` is specified, a video (MP4) is created and saved using the `av` package.
@@ -271,20 +335,49 @@ prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
 #' \dontrun{
 #' # This example may take a few seconds to render.
 #' # Run only if you want to generate the full animation.
+#' # Note: The example opens a rgl 3D viewer.
 #' # Prepare a data structure:
 #' s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time %in% c(10:20))
 #' # Plot animation with default mesh and triangulation:
 #' animate_scalp(s1e05, amplitude = "signal")
 #' }
-animate_scalp <- function(data, amplitude, mesh, tri, coords = NULL, template = NULL,
-                          col_range = NULL, col_scale = NULL,
-                          sec = 0.3, frames_dir = NULL, output_path = NULL, framerate = 3) {
+animate_scalp <- function(data,
+                          amplitude,
+                          mesh,
+                          tri,
+                          coords = NULL,
+                          template = NULL,
+                          col_range = NULL,
+                          col_scale = NULL,
+                          sec = 0.3,
+                          frames_dir = NULL,
+                          output_path = NULL,
+                          framerate = 3,
+                          cleanup = TRUE) {
 
-  amp_value <- {{ amplitude }}
-  amp_name <- rlang::as_string(amp_value)
+  if (!amplitude %in% colnames(data)) {
+    stop(paste0("There is no column '", amplitude, "' in the input data."))
+  }
 
-  if (!amp_name %in% names(data)) {
-    stop(paste0("There is no column '", amp_name, "' in the input data."))
+  if (!is.numeric(sec) || sec <= 0) {
+    stop("'sec' must be a positive number.")
+  }
+
+  if (!is.numeric(framerate) || framerate <= 0) {
+    stop("'framerate' must be a positive number.")
+  }
+
+  if (!is.null(output_path) && !endsWith(output_path, ".mp4")) {
+    stop("The output path does not end with '.mp4'.")
+  }
+
+  if (!is.null(template) && !is.null(coords)) {
+    warning("Both 'template' and 'coords' were specified. Using 'template' and ignoring 'coords'.")
+  }
+
+  if (is.null(template) && is.null(coords)) {
+    # use HCGSN256 template
+    template <- "HCGSN256"
   }
 
   if (!is.null(template)) {
@@ -292,11 +385,6 @@ animate_scalp <- function(data, amplitude, mesh, tri, coords = NULL, template = 
                      "HCGSN256" = diegr::HCGSN256$D3,
                      stop("Unknown template.")
     )
-  }
-
-  if (is.null(template) && is.null(coords)) {
-    # use HCGSN256 template
-    coords <- diegr::HCGSN256$D3
   }
 
   required_cols <- c("x", "y", "z", "sensor")
@@ -312,7 +400,7 @@ animate_scalp <- function(data, amplitude, mesh, tri, coords = NULL, template = 
     if (!missing(tri)) {
       stop("The argument 'mesh' must be provided when argument 'tri' is specified.")
     }
-     mesh <- point_mesh(dim = c(2,3), template = { template })
+     mesh <- point_mesh(dimension = c(2,3), template = template)
   }
 
   if (control_D3(mesh)) {
@@ -326,15 +414,16 @@ animate_scalp <- function(data, amplitude, mesh, tri, coords = NULL, template = 
     tri <- make_triangulation(mesh2)
   }
 
-  newdata <- prepare_anim_structure(data, amp_name = amp_name, coords, mesh3)
+  newdata <- prepare_anim_structure(data, amp_name = amplitude, coords, mesh3)
 
   if (is.null(col_scale)) {
 
     if (is.null(col_range)) {
-      if (all(is.na(newdata$y_IM))) {
-        stop("No valid values in y_IM to create color scale.")
+      if (all(is.na(newdata$amplitude_IM))) {
+        stop("No valid values in amplitude_IM to create color scale.")
       }
-      col_range <- c(1.1 * range(newdata$y_IM))
+      #padding <- 0.05 * diff(range(newdata$amplitude_IM))
+      col_range <- range(newdata$amplitude_IM) #+ c(-1, 1) * padding
     }
 
     col_scale <- create_scale(col_range)
@@ -348,7 +437,7 @@ animate_scalp <- function(data, amplitude, mesh, tri, coords = NULL, template = 
       filter(.data$time == time_point) # filter actual time point
 
     rgl::clear3d()
-    y_cut <- cut(time_data$y_IM, breaks = col_scale$breaks, include.lowest = TRUE)
+    y_cut <- cut(time_data$amplitude_IM, breaks = col_scale$breaks, include.lowest = TRUE)
     y_col <- col_scale$colors[y_cut]
 
     rgl::shade3d(mesh0, col = y_col, lit = FALSE)
@@ -356,64 +445,147 @@ animate_scalp <- function(data, amplitude, mesh, tri, coords = NULL, template = 
   }
 
   if (is.null(frames_dir) && !is.null(output_path)) {
-    warning("The 'frames_dir' setting is required for video export.")
+    warning("The 'frames_dir' setting is required for video export. Video was not exported.")
   }
 
   if (!is.null(frames_dir)) { # export frames (and mp4 video)
     export_video(frames_dir = frames_dir, plot_function = plot_3d_time,
                  time_points = unique(newdata$time),
-                 output_path = output_path, framerate = framerate)
+                 output_path = output_path, framerate = framerate,
+                 cleanup = cleanup)
   } else {
 
     for (t in unique(newdata$time)) {  # animation
-      plot_3d_time(t)
-      Sys.sleep({ sec })
+      tryCatch({
+        plot_3d_time(t)
+        Sys.sleep(sec)
+      }, error = function(e) {
+        warning(paste("Failed to plot frame:", t, "with error:", e$message))
+      })
     }
   }
 
 }
 
-export_video <- function(frames_dir, plot_function, time_points,
-                         output_path, framerate){
-
-    if (!dir.exists(frames_dir)) { # create a dir if not exists
-      dir.create(frames_dir, recursive = TRUE)
-    }
-
-    frame_index <- 1
-
-    for (t in time_points) {
-      plot_function(t)
-
-      snapshot_filename <- sprintf("%s/frame_%03d.png", frames_dir, frame_index)
-      rgl::rgl.snapshot(snapshot_filename)
-
-      frame_index <- frame_index + 1
-    }
-
-    message("Frames saved to: ", normalizePath(frames_dir))
-
-    if (!is.null(output_path)) { # create video in mp4
-      if (!requireNamespace("av", quietly = TRUE)) {
-        stop("To export video, the 'av' package is required.")
-      }
-
-      img_list <- list.files(frames_dir, pattern = "frame_\\d+\\.png", full.names = TRUE)
-      av::av_encode_video(img_list, output = output_path, framerate = framerate)
-      message("Video created at: ", normalizePath(output_path))
-    }
+#' Export EEG animation frames as video
+#'
+#' @description
+#' Helper function to render a series of 3D EEG visualizations and export them as PNG frames, then encode them into an `.mp4` video using the `av` package.
+#'
+#' @param frames_dir A name of directory where frame images will be saved.
+#' @param plot_function A function that draws a 3D EEG plot for a single time point with time index as input.
+#' @param time_points A numeric vector of time indices or values to render sequentially.
+#' @param output_path Optional file path to save the encoded `.mp4` video. If `NULL`, only PNG frames are generated.
+#' @param framerate Frame rate (in frames per second) for the output video.
+#' @param cleanup Logical. Indicates, if all the PNG files should be deleted after encoding video. Default value is `TRUE`.
+#'
+#' @return
+#' Invisibly returns `NULL`. Saves PNG frames to `frames_dir` and, if specified, creates an `.mp4` video at `output_path`.
+#'
+#' @import rgl
+#'
+#' @noRd
+export_video <- function(frames_dir,
+                         plot_function,
+                         time_points,
+                         output_path,
+                         framerate,
+                         cleanup) {
+  if (!is.function(plot_function)) {
+    stop("plot_function must be a function.")
   }
 
+  if (!dir.exists(frames_dir)) { # create a dir if not exists
+    dir.create(frames_dir, recursive = TRUE)
+  }
+
+  if (file.access(frames_dir, 2) != 0) {
+    stop(paste("Cannot write to directory:", frames_dir, " - Check permissions."))
+  }
+
+  if (!is.numeric(time_points)) {
+    stop("Time points must be numeric.")
+  }
+
+  frame_index <- 1
+
+  for (t in time_points) {
+    plot_function(t)
+
+    snapshot_filename <- sprintf("%s/frame_%03d.png", frames_dir, frame_index)
+
+    tryCatch({
+      # check if rgl context is active and then attempt the snapshot
+      if (rgl::rgl.cur() != 0) {
+        rgl::rgl.snapshot(snapshot_filename)
+      } else {
+        stop("No active rgl device.")
+      }
+    }, error = function(e) {
+      warning(paste("Failed to take rgl snapshot:", e$message))
+    })
+
+    frame_index <- frame_index + 1
+  }
+
+  if (!is.null(output_path)) { # create video in mp4
+    if (!requireNamespace("av", quietly = TRUE)) {
+      stop("To export video, the 'av' package is required.")
+    }
+
+    img_list <- sort(list.files(frames_dir, pattern = "frame_\\d+\\.png", full.names = TRUE))
+    av::av_encode_video(img_list, output = output_path, framerate = framerate)
+
+    if (cleanup == TRUE) {
+      # delete all the PNG files after encoding video
+      file.remove(img_list)
+    } else {
+      message("Frames saved to: ", normalizePath(frames_dir))
+    }
+
+    message("Video created at: ", normalizePath(output_path))
+  }
+}
 
 
+
+#' Prepare interpolated animation structure with confidence intervals
+#'
+#' @description
+#' Internal helper function for generating a time-series of interpolated EEG topographic maps that include lower and upper confidence interval bounds.
+#' The result is reshaped into long format to facilitate animation of both average and uncertainty ribbons.
+#'
+#' @param data A data frame, tibble or database table containing EEG signal data. Must include columns `average`, `ci_low`, `ci_up`, `time`, and `sensor`.
+#' @param coords A data frame containing sensor coordinate information. Must include `sensor`, `x`, `y` (and `z` for 3D figure).
+#' @param mesh_mat A numeric matrix of mesh coordinates (2D or 3D) over which the signal will be interpolated.
+#'
+#' @return
+#' A tibble in long format with the following columns:
+#' \itemize{
+#'   \item{time}{Time point of the EEG signal.}
+#'   \item{mesh_coord}{Coordinates of mesh grid (repeated across time and statistic type).}
+#'   \item{stats}{Type of the statistics value — "Average", "CI, lower bound", or "CI, upper bound".}
+#'   \item{stats_value}{Interpolated value at each mesh point.}
+#' }
+#'
+#' @noRd
 prepare_anim_structure_CI <- function(data, coords, mesh_mat) {
-  ## create structure for animate_topo from database
-  ## need to change also for 3D case
 
   if (inherits(data, "tbl_sql")) {
     data <- dplyr::collect(data)
   }
 
+  if (!"sensor" %in% names(coords)) {
+    stop("The 'coords' data frame must include a 'sensor' column.")
+  }
+
+  required_cols <- c("average", "ci_low", "ci_up")
+  missing_cols <- setdiff(required_cols, colnames(data))
+
+  if (length(missing_cols) > 0) {
+    stop(paste("The following required columns in 'data' are missing:",
+               paste(missing_cols, collapse = ", ")))
+  }
 
   if (all(c("x", "y", "z") %in% names(coords))) {
     coords_df <- data.frame(x = coords[["x"]], y = coords[["y"]], z = coords[["z"]])
@@ -423,7 +595,7 @@ prepare_anim_structure_CI <- function(data, coords, mesh_mat) {
 
   # add coordinates of sensors to the tibble with time and signal data
   tib_signal <- data |>
-    left_join(coords, by = "sensor") #coords_sen
+    left_join(coords, by = "sensor")
 
 
   # splitting the tibble and computing IM model on splitted tibble
@@ -436,7 +608,7 @@ prepare_anim_structure_CI <- function(data, coords, mesh_mat) {
     y_hat_up <- IM(coords_df, df_t[["ci_up"]], mesh_mat)$Y_hat
 
     interp_tib <- tibble(
-      time = as.numeric(t),
+      time = as.numeric(df_t$time[1]),
       mesh_coord = mesh_mat,
       y_avg = interpolated_values[1:dim(mesh_mat)[1]],
       y_low = y_hat_low[1:dim(mesh_mat)[1]],
@@ -456,10 +628,10 @@ prepare_anim_structure_CI <- function(data, coords, mesh_mat) {
   return(tib_IM)
 }
 
-#' Topographic map animation of the average signal with confidence interval bounds in time
+#' Animate EEG average topographic map with confidence bounds
 #'
 #' @description
-#' An animation of the average signal time course as a topographic map along with the lower and upper bounds of the confidence interval, which are plotted as separate topographic maps alongside the average map.
+#' An animation of the average signal time course as a topographic map along with the lower and upper bounds of the confidence interval. In the output, three facets are plotted per frame: CI lower, average, CI upper.
 #'
 #'
 #' @param data A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: \code{sensor} with sensor labels and \code{average, ci_low, ci_up} with values of average signal and lower and upper CI bounds.
@@ -469,18 +641,21 @@ prepare_anim_structure_CI <- function(data, coords, mesh_mat) {
 #' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
 #' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.
 #' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
-#' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.
+#' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of the input signal is used.
 #' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
-#' @param legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.
+#' @param show_legend Logical. Indicates, whether legend should be displayed below the graph. Default value is \code{TRUE}.
 #' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.
 #' @param output_path File path where the animation will be saved using `gifski` renderer (optional). If not defined, the animation is plotted in the RStudio Viewer.
 #' @param ... Additional parameters for animation according to [gganimate::animate].
 #'
+#' @details
+#' Note: When specifying the `coords` and `template` at the same time, the `template` parameter takes precedence and the `coords` parameter is ignored.
+#'
 #' @returns
 #' If `output_path` is `NULL`, the function prints the animation to the RStudio Viewer.
-#' If `output_path` is specified, the animation is saved to the given file path and not displayed.
+#' If `output_path` is specified, the animation is saved to the given file path and not displayed. The `gifski` and `magick` packages are required for animation export.
 #'
-#' @seealso \code{\link{animate_topo}}
+#' @seealso \code{\link{animate_topo}}, \code{\link{compute_mean}}, \code{\link{baseline_correction}}
 #'
 #' @export
 #'
@@ -499,7 +674,7 @@ prepare_anim_structure_CI <- function(data, coords, mesh_mat) {
 #' # first 10 points and only 13 epochs (epochs 14 and 15 are outliers)
 #' edata <- epochdata |>
 #' dplyr::filter(subject == 2 & time %in% 1:10 & epoch %in% 1:13)
-#' data_base <- baseline_correction(edata, base_int = 1:10) # baseline correction
+#' data_base <- baseline_correction(edata, baseline_range = 1:10) # baseline correction
 #' data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2,
 #'  type = "jack", group = "space") # compute mean
 #' # b) render the animation
@@ -508,10 +683,19 @@ prepare_anim_structure_CI <- function(data, coords, mesh_mat) {
 #'
 #' }
 
-animate_topo_mean <- function(data, t_lim, FS = 250, t0 = 1, mesh, coords = NULL, template = NULL,
-                         col_range = NULL, col_scale = NULL,
-                         legend = TRUE, contour = FALSE,
-                         output_path = NULL, ...) {
+animate_topo_mean <- function(data,
+                              t_lim,
+                              FS = 250,
+                              t0 = 1,
+                              mesh,
+                              coords = NULL,
+                              template = NULL,
+                              col_range = NULL,
+                              col_scale = NULL,
+                              show_legend = TRUE,
+                              contour = FALSE,
+                              output_path = NULL,
+                              ...) {
 
   if (!requireNamespace("magick", quietly = TRUE)) {
     stop("To render the animation, the 'magick' package is required.")
@@ -521,8 +705,25 @@ animate_topo_mean <- function(data, t_lim, FS = 250, t0 = 1, mesh, coords = NULL
     stop("Argument 'contour' has to be logical.")
   }
 
-  if (!(is.logical(legend))) {
-    stop("Argument 'legend' has to be logical.")
+  if (!(is.logical(show_legend))) {
+    stop("Argument 'show_legend' has to be logical.")
+  }
+
+  if (!is.numeric(FS) || FS <= 0) {
+    stop("'FS' must be a positive number.")
+  }
+
+  if (!is.numeric(t0) || length(t0) != 1) {
+    stop("'t0' must be a numeric value.")
+  }
+
+  if (!is.null(template) && !is.null(coords)) {
+    warning("Both 'template' and 'coords' were specified. Using 'template' and ignoring 'coords'.")
+  }
+
+  if (is.null(template) && is.null(coords)) {
+    # use HCGSN256 template
+    template <- "HCGSN256"
   }
 
   if (!is.null(template)) {
@@ -530,11 +731,6 @@ animate_topo_mean <- function(data, t_lim, FS = 250, t0 = 1, mesh, coords = NULL
                      "HCGSN256" = diegr::HCGSN256$D2,
                      stop("Unknown template.")
     )
-  }
-
-  if (is.null(template) && is.null(coords)) {
-    # use HCGSN256 template
-    coords <- diegr::HCGSN256$D2
   }
 
   required_cols <- c("x", "y", "sensor")
@@ -546,7 +742,7 @@ animate_topo_mean <- function(data, t_lim, FS = 250, t0 = 1, mesh, coords = NULL
   }
 
   if (missing(mesh)) {
-    mesh <- point_mesh(dim = 2, template = { template })
+    mesh <- point_mesh(dimension = 2, template = { template })
   }
 
   if (control_D2(mesh)) {
@@ -555,11 +751,11 @@ animate_topo_mean <- function(data, t_lim, FS = 250, t0 = 1, mesh, coords = NULL
 
   newdata <- prepare_anim_structure_CI(data, coords, mesh_mat)
 
-  M <- max(mesh_mat[,2], na.rm = TRUE)
-  Mm <- min(mesh_mat[,2], na.rm = TRUE)
+  M <- max(mesh_mat$y, na.rm = TRUE)
+  Mm <- min(mesh_mat$y, na.rm = TRUE)
   y_l <- Mm - 0.1 * abs(Mm)
-  x_range <- range(mesh_mat[,1])
-  x0 <- mean(mesh_mat[,1], na.rm = TRUE)
+  x_range <- range(mesh_mat$x)
+  x0 <- mean(mesh_mat$x, na.rm = TRUE)
 
   if (any(newdata$time <  range(t_lim)[1] | newdata$time > range(t_lim)[2])) {
     warning("Some values of 'time' are outside the 't_lim' range.")
@@ -580,7 +776,7 @@ animate_topo_mean <- function(data, t_lim, FS = 250, t0 = 1, mesh, coords = NULL
       if (all(is.na(newdata$stats_value))) {
         stop("No valid values in stats_value to create color scale.")
       }
-      col_range <- c(1.1 * range(newdata$stats_value))
+      col_range <- range(newdata$stats_value)
     }
 
     col_scale <- create_scale(col_range)
@@ -602,11 +798,10 @@ animate_topo_mean <- function(data, t_lim, FS = 250, t0 = 1, mesh, coords = NULL
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       axis.text = element_blank(),
-      axis.title = element_blank(),
-      legend.position = "none"
+      axis.title = element_blank()
     )
 
-  if (legend == TRUE) {
+  if (show_legend == TRUE) {
     g <- g  +
       labs(fill = expression(paste("Amplitude (", mu, "V)"))) +
       guides(fill = guide_colorbar(barwidth = 20, barheight = 0.7)) +
@@ -615,6 +810,9 @@ animate_topo_mean <- function(data, t_lim, FS = 250, t0 = 1, mesh, coords = NULL
         legend.text = element_text(size = 5),
         legend.title = element_text(size = 8)
       )
+  } else {
+    g <- g +
+      theme(legend.position = "none")
   }
 
   if (contour == TRUE) {

@@ -16,13 +16,14 @@ animate_scalp(
   sec = 0.3,
   frames_dir = NULL,
   output_path = NULL,
-  framerate = 3
+  framerate = 3,
+  cleanup = TRUE
 )
 }
 \arguments{
 \item{data}{An input data frame or tibble with at least this required columns: \code{time} - the number of time point, \code{sensor} - the sensor label and the column with the EEG amplitude to plot specified in the argument \code{amplitude}.}
 
-\item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values.}
+\item{amplitude}{A character string naming the column with EEG amplitude values.}
 
 \item{mesh}{An object of class \code{"mesh"} (or a named list with the same structure) used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. See \code{\link{scalp_plot}} for details about the structure.}
 
@@ -32,9 +33,9 @@ animate_scalp(
 
 \item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.}
 
-\item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.}
+\item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of interpolated signal is used.}
 
-\item{col_scale}{Optionally, a colour scale to be utilised for plotdata:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAkCAYAAAD7PHgWAAABBklEQVR4Xu2XMQrCQBBFBQvR6wgJHsEDpHVjBDvvoBhbI3bWCkZbFUyhFrYiEat0WgmC6AVkdQqbIVmWZAOi82C64b+/bDWZDEEQP4phTLMaa9d003bTGMgu1psF7JVGNzuWPdzs18GDz443rgrIcndXbvW8g1axGfZKo7P2eBXc+WB74a3FGXtiA1kwzfnpqTF7hL3SwDfAaz+BqvjkwYADe6WhglQwJlQwKVQwKakVTGOoYNL5z4JxwBlUMEwqAu9SwTCpCLxLBcOkIvCusoKT9/WFQ6OkIvCukoJwt5rO0sehUVIReBem6ng+OLBXmnKjn4PbGM5PeKnqgXIlo5vHXoL4Nl4ZYqbbEGA7+wAAAABJRU5ErkJggg==ting. If not defined, it is computed from \code{col_range}.}
+\item{col_scale}{Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.}
 
 \item{sec}{The time interval used between individual animation frames, in seconds (default: 0.3).}
 
@@ -43,6 +44,8 @@ animate_scalp(
 \item{output_path}{Optional path to the output mp4 video file (".mp4" extension is required for correct rendering). If NULL, no video is created.}
 
 \item{framerate}{Number of frames per second for the output mp4 video (default: 3).}
+
+\item{cleanup}{Logical. Indicates, if all the PNG files should be deleted after encoding video. Default value is \code{TRUE}.}
 }
 \value{
 The output depends on the provided arguments:
@@ -58,14 +61,18 @@ The output depends on the provided arguments:
 \details{
 Setting the parameter \code{tri} requires defining a \code{mesh} parameter.
 The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
-If the input \code{mesh} contains only 3D coordinates of a point mesh in \code{D3} element, the use of previously created triangulation (through \code{tri} argument) is necessary.
+If the input \code{mesh} contains only 3D coordinates of a point mesh in \code{D3} element, the use of previously created triangulation (through \code{tri} argument) is required.
 
-Note: For exporting the video, setting \code{frames_dir} together with \code{output_path} is required.
+Notes:
+For exporting the video, setting \code{frames_dir} together with \code{output_path} is required.
+
+When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
 }
 \examples{
 \dontrun{
 # This example may take a few seconds to render.
 # Run only if you want to generate the full animation.
+# Note: The example opens a rgl 3D viewer.
 # Prepare a data structure:
 s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time \%in\% c(10:20))
 # Plot animation with default mesh and triangulation:

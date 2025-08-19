@@ -29,7 +29,7 @@ The package `diegr` includes:
 -   interactive boxplots
 -   interactive epoch waveforms
 -   topographic maps (2D projection)
--   head plots in 3D
+-   scalp plots in 3D
 -   functions for computing baseline correction, pointwise and jackknife mean
 -   functions for plotting the mean with pointwise confidence interval
 -   animations of time course of the raw signal or the average in 2D and 3D

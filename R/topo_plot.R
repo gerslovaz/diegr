@@ -10,8 +10,8 @@
 #' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
 #' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the HCGSN256 template is used.
 #' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
-#' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal expanded by a padding value equal to 5% is used.
-#' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
+#' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of interpolated signal is used.
+#' @param col_scale Optionally, a colour scale to be utilised for plotting. It should be a list with \code{colors} and \code{breaks} components (usually created via \code{\link{create_scale}}). If not defined, it is computed from \code{col_range}.
 #' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.
 #' @param show_legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.
 #' @param label_sensors A logical value indicating whether the sensor labels should also be plotted (default value is \code{FALSE}).
@@ -22,6 +22,8 @@
 #' Be careful when choosing the argument \code{col_range}. If the amplitude in input data contains values outside the chosen range, this will cause "holes" in the resulting plot.
 #' To compare results for different subjects or conditions, set the same values of \code{col_range} and \code{col_scale} arguments in all cases.
 #' The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
+#'
+#' Note: When specifying the `coords` and `template` at the same time, the `template` parameter takes precedence and the `coords` parameter is ignored.
 #'
 #' @return A `ggplot` object showing an interpolated topographic map of EEG amplitude.
 #' @export
@@ -72,12 +74,11 @@ topo_plot <- function(data,
                       show_legend = TRUE,
                       label_sensors = FALSE) {
 
-  if (!amplitude %in% names(data)) {
-    stop(paste0("There is no column '", amplitude, "' in the input data."))
-  }
+  #amp_value <- {{ amplitude }}
+  #amp_name <- rlang::as_string(amp_value)
 
-  if (!is.numeric(data[[amplitude]])) {
-    stop("The amplitude column must be numeric.")
+  if (!amplitude %in% colnames(data)) {
+    stop(paste0("There is no column '", amplitude, "' in the input data."))
   }
 
   if (!(is.logical(contour))) {
@@ -92,12 +93,13 @@ topo_plot <- function(data,
     stop("Argument 'label_sensors' has to be logical.")
   }
 
-  if (is.null(col_range)) {
-    padding <- 0.05 * diff(range(data[[amplitude]]))
-    col_range <- range(data[[amplitude]]) + c(-1, 1) * padding
+  if (!is.null(template) && !is.null(coords)) {
+    warning("Both 'template' and 'coords' were specified. Using 'template' and ignoring 'coords'.")
   }
-  if (is.null(col_scale)) {
-    col_scale <- create_scale(col_range)
+
+  if (is.null(template) && is.null(coords)) {
+    # use HCGSN256 template
+    template <- "HCGSN256"
   }
 
   if (!is.null(template)) {
@@ -105,15 +107,6 @@ topo_plot <- function(data,
                      "HCGSN256" = diegr::HCGSN256$D2,
                      stop("Unknown template.")
     )
-  }
-
-  if (!is.null(template) && !is.null(coords)) {
-    warning("Both 'template' and 'coords' were specified. Using 'template' and ignoring 'coords'.")
-  }
-
-  if (is.null(template) && is.null(coords)) {
-    # use HCGSN256 template
-    coords <- diegr::HCGSN256$D2
   }
 
   required_cols <- c("x", "y", "sensor")
@@ -137,6 +130,10 @@ topo_plot <- function(data,
 
   coords_df <- data.frame(x = coords[["x"]], y = coords[["y"]])
 
+  if (inherits(data, "tbl_sql") || inherits(data, "tbl_dbi")) {
+    data <- dplyr::collect(data) # collect data for DB table
+  }
+
   if (!all(unique(coords$sensor) %in% data$sensor)) {
     stop("Mismatch between sensors in data and coords.")
   }
@@ -149,6 +146,14 @@ topo_plot <- function(data,
   y_hat <- IM(coords_df, data_order[[amplitude]], mesh_mat)$Y_hat
   ycp_IM <- y_hat[1:dim(mesh_mat)[1]]
   interp_data <- data.frame(x = mesh_mat[,1], y = mesh_mat[,2], ycp_IM = ycp_IM)
+
+  if (is.null(col_range)) {
+    #padding <- 0.05 * diff(range(interp_data$ycp_IM)) ## expanded by a padding value equal to 5%
+    col_range <- range(interp_data$ycp_IM) # + c(-1, 1) * padding
+  }
+  if (is.null(col_scale)) {
+    col_scale <- create_scale(col_range)
+  }
 
 
   g <- ggplot(interp_data, aes(x = .data$x, y = .data$y)) +
@@ -166,8 +171,7 @@ topo_plot <- function(data,
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       axis.text = element_blank(),
-      axis.title = element_blank(),
-      legend.position = "none"
+      axis.title = element_blank()
     )
 
 

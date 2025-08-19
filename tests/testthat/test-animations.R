@@ -11,7 +11,7 @@ test_that("prepare_anim_structure otuput", {
                                   mesh_mat = M$D3)
 
   for (result in list(Prep1, Prep2)) {
-    expect_true(all(c("y_IM", "time", "mesh_coord") %in% names(result)))
+    expect_true(all(c("amplitude_IM", "time", "mesh_coord") %in% names(result)))
   }
 
   expect_equal(ncol(Prep1$mesh_coord), 2)

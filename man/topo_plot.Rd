@@ -28,9 +28,9 @@ topo_plot(
 
 \item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.}
 
-\item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal expanded by a padding value equal to 5\% is used.}
+\item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of interpolated signal is used.}
 
-\item{col_scale}{Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.}
+\item{col_scale}{Optionally, a colour scale to be utilised for plotting. It should be a list with \code{colors} and \code{breaks} components (usually created via \code{\link{create_scale}}). If not defined, it is computed from \code{col_range}.}
 
 \item{contour}{Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.}
 
@@ -51,6 +51,8 @@ For more details about required mesh structure see \code{\link{point_mesh}} func
 Be careful when choosing the argument \code{col_range}. If the amplitude in input data contains values outside the chosen range, this will cause "holes" in the resulting plot.
 To compare results for different subjects or conditions, set the same values of \code{col_range} and \code{col_scale} arguments in all cases.
 The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
+
+Note: When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
 }
 \examples{
 # Plot average topographic map of signal for subject 2 from the time point 10

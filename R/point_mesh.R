@@ -27,6 +27,8 @@
 #' To build the appropriate meshes in both dimensions, it is necessary to have the input of 3D sensor locations and their corresponding projection onto a plane; the function itself does not perform this projection.
 #' It is also necessary to keep the same sensor locations order in `D2` and `D3` part of the coordinates.
 #'
+#' Note: When specifying the `own_coordinates` and `template` at the same time, the `template` parameter takes precedence and the `own_coordinates` parameter is ignored.
+#'
 #' @return Returns a list of class \code{"mesh"} containing some (or all) of the following components:
 #'
 #' \item{D2}{A data frame with \code{x} and \code{y} coordinates of the created two dimensional point mesh.}
