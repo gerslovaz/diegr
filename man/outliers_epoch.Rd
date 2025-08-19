@@ -11,7 +11,10 @@ outliers_epoch(
   sensor = NULL,
   time = NULL,
   method,
-  p = 0.975
+  k_iqr = 1.5,
+  k_mad = 3,
+  p = 0.975,
+  print_tab = TRUE
 )
 }
 \arguments{
@@ -23,16 +26,23 @@ outliers_epoch(
 
 \item{sensor}{An integer or character ID of selected sensor.}
 
-\item{time}{A vector with time range for outliers detection. If not defined, the outliers are searching across all time points in the dataset.}
+\item{time}{A vector with time range for outliers detection. If not defined, the outliers are searched for all time points in the dataset.}
 
-\item{method}{A character denoting the method used for outlier detection. The options are: \code{"iqr"} for interquartile range criterion, \code{"percentile"} for percentile method and \code{"hampel"} for Hampel filter method. See details for further information about methods.}
+\item{method}{A character denoting the method used for outlier detection. The options are: \code{"iqr"} for interquartile range (IQR) criterion, \code{"percentile"} for percentile method and \code{"hampel"} for Hampel filter method. See details for further information about methods.}
+
+\item{k_iqr}{A positive numeric value denoting the scaling factor used in the IQR criterion. Default value is \code{k_iqr = 1.5}.}
+
+\item{k_mad}{A positive numeric value denoting the scaling factor used in the Hampel filter method. Default value is \code{k_mad = 3}.}
 
 \item{p}{A probability value from \code{[0,1]} interval determining percentile to the percentile method (according to \code{probs} argument in \code{quantile()} function). The default value is set to 0.975 for the interval formed by the 2.5 and 97.5 percentiles.}
+
+\item{print_tab}{Logical. Indicates, whether result table should be printed in console. Default is \code{TRUE}.}
 }
 \value{
 A list with following components:
-\item{epoch_table}{A data frame with epoch ID and the number of time points in which the epoch was evaluated as outlier. (Only epochs with occurrence of outliers in at least one time point are presented.)}
-\item{outliers_data}{A data frame with subset of data corresponding to the outliers found.}
+\item{epoch_table}{A data frame with epoch ID and the number of time points in which the epoch was evaluated as outlier. (Only epochs with occurrence of outliers in at least one time point are included.)}
+\item{outliers_data}{A data frame with subset of data corresponding to the outliers found. (The full record for each flagged point from \code{epoch_table}.)}
+With the setting \code{print_tab = TRUE}, the \code{epoch_table} is also printed to the console.
 }
 \description{
 Function for selecting outlier epochs for one subject and one sensor in chosen time points. Epochs are marked as outliers based on one of the following criteria: interquartile range criterion, percentile approach or Hampel filter method.
@@ -46,14 +56,16 @@ signal (or other name specified in \code{amplitude} parameter) - a column with m
 
 The outlier detection method is chosen through \code{method} argument. The possibilities are
 \itemize{
-\item \code{iqr} for the interquartile range criterion, values outside the interval \code{[lower quartile - 1.5 * IQR, upper quartile + 1.5 * IQR]}, where IQR denotes interquartile range, are considered as outliers
-\item \code{percentile} for the percentile method, values outside the interval defined by the chosen percentiles are considered as outliers
-\item \code{hampel} for the Hampel filter method, values outside the interval \code{[median - 3 * MAD, median + 3 * MAD]}, where MAD denotes median absolute deviation, are considered as outliers
+\item \code{iqr}: The interquartile range criterion, values outside the interval \code{[lower quartile - k_iqr * IQR, upper quartile + k_iqr * IQR]} are considered as outliers. IQR denotes interquartile range and \code{k_iqr} the scaling factor.
+\item \code{percentile}: The percentile method, values outside the interval defined by the chosen percentiles are considered as outliers. Note: chosing small \code{p}leads to marking too many (or all) values.
+\item \code{hampel}: The Hampel filter method, values outside the interval \code{[median - k_mad * MAD, median + k_mad * MAD]} are considered as outliers. MAD denotes median absolute deviation and \code{k_mad} the scaling factor.
+Each of the above methods operates independently per time point, not globally across time.
 }
 }
 \examples{
 # Outlier epoch detection for subject 2, electrode E45 for the whole time range with IQR method
 outliers_epoch(epochdata, amplitude = "signal", subject = 2, sensor = "E45", method = "iqr")
+# From the result table we see that epochs 14 and 15 were marked as outliers in 50 cases out of 50
 
 # Outlier epoch detection for subject 2, electrode E45 for the whole time range
 # using percentile method with 1 and 99 percentiles

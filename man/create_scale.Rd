@@ -9,21 +9,27 @@ create_scale(col_range, k = NULL)
 \arguments{
 \item{col_range}{A numeric vector with required range of the variable to be plotted in the colour scale.}
 
-\item{k}{A number from interval (0,1) indicating a sequence step for the colour palette. The smaller number, the finer division of the data range interval.}
+\item{k}{A number from interval (0,1) indicating a sequence step for the colour palette. The smaller number, the finer division of the data range interval. See Details for more information about auto-computing if \code{NULL}.}
 }
 \value{
 A list with two components:
 \item{colors}{A vector with hexadecimal codes of palette colours.}
 \item{breaks}{A vector with breaks for cutting the data range.}
+The list is intended for use in \code{\link[ggplot2]{scale_fill_gradientn}} or similar plotting calls.
 }
 \description{
 Create colour scale used in topographic figures
 }
 \details{
 The palette is created according to topographical colours: negative values correspond to shades of blue and purple and positive values to shades of green, yellow and red. The zero value of the variable is always at the border of blue and green shades.
-To compare results for different subjects or conditions, set the same \code{col_range} for all cases.
+To compare results for different subjects or conditions, set the same \code{col_range} for all cases. Otherwise, the colours are assigned separately in each plot and are not consistent with each other.
 
-The parameter \code{k} is set by default with respect to the range of \code{col_range} as follows: \code{k = 0.1} for range \eqn{\leq 30}, \code{k = 0.03} for range \eqn{\geq 70} and \code{k = 0.04} otherwise.
+The parameter \code{k} is set by default with respect to the range of \code{col_range} as follows:
+\itemize{
+\item \code{k = 0.1} for range \eqn{\leq 30},
+\item \code{k = 0.03} for range \eqn{\geq 70},
+\item \code{k = 0.04} otherwise.
+}
 }
 \examples{
 # Create scale on interval (-10,10) with default step number
