@@ -238,7 +238,7 @@ point_mesh <- function(dimension = c(2,3),
 #'
 #' # Plotting the same mesh with marking only midline electrodes
 #' midline <- HCGSN256$D2[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204),]
-#' names_vec <- HCGSN256$sensor[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204)]
+#' names_vec <- HCGSN256$D2$sensor[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204)]
 #' plot_point_mesh(M$D2, label_sensors = TRUE, names_vec = names_vec, own_coordinates = midline)
 #'
 plot_point_mesh <- function(mesh,
@@ -262,7 +262,7 @@ plot_point_mesh <- function(mesh,
   }
 
   if (label_sensors == TRUE && is.null(names_vec)) {
-    names_vec <- diegr::HCGSN256$sensor
+    names_vec <- diegr::HCGSN256$D2$sensor
   }
 
   stopifnot(is.data.frame(mesh))

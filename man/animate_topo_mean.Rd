@@ -2,7 +2,7 @@
 % Please edit documentation in R/animations.R
 \name{animate_topo_mean}
 \alias{animate_topo_mean}
-\title{Topographic map animation of the average signal with confidence interval bounds in time}
+\title{Animate EEG average topographic map with confidence bounds}
 \usage{
 animate_topo_mean(
   data,
@@ -35,7 +35,7 @@ animate_topo_mean(
 
 \item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.}
 
-\item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input signal is used.}
+\item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of the input signal is used.}
 
 \item{col_scale}{Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.}
 
@@ -49,10 +49,10 @@ animate_topo_mean(
 }
 \value{
 If \code{output_path} is \code{NULL}, the function prints the animation to the RStudio Viewer.
-If \code{output_path} is specified, the animation is saved to the given file path and not displayed.
+If \code{output_path} is specified, the animation is saved to the given file path and not displayed. The \code{gifski} and \code{magick} packages are required for animation export.
 }
 \description{
-An animation of the average signal time course as a topographic map along with the lower and upper bounds of the confidence interval, which are plotted as separate topographic maps alongside the average map.
+An animation of the average signal time course as a topographic map along with the lower and upper bounds of the confidence interval. In the output, three facets are plotted per frame: CI lower, average, CI upper.
 }
 \details{
 Note: When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
@@ -76,5 +76,5 @@ animate_topo_mean(data_mean, t_lim = c(1,50), t0 = 10)
 }
 }
 \seealso{
-\code{\link{animate_topo}}
+\code{\link{animate_topo}}, \code{\link{compute_mean}}, \code{\link{baseline_correction}}
 }

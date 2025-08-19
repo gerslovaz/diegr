@@ -146,7 +146,6 @@ compute_mean <- function(data,
 #' @return A tibble with average amplitude and confidence bounds.
 #'
 #' @import dplyr
-#' @import dbplyr
 #' @importFrom rlang .data
 #' @importFrom purrr map_dbl
 #' @noRd

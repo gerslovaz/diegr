@@ -27,7 +27,7 @@ plot_topo_mean(
 
 \item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input data (average and CI bounds) is used.}
 
-\item{col_scale}{Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.}
+\item{col_scale}{Optionally, a colour scale to be utilised for plotting. It should be a list with \code{colors} and \code{breaks} components (usually created via \code{\link{create_scale}}). If not defined, it is computed from \code{col_range}.}
 
 \item{contour}{Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.}
 
@@ -36,7 +36,7 @@ plot_topo_mean(
 \item{label_sensors}{A logical value indicating whether the sensor labels should also be plotted (default value is \code{FALSE}).}
 }
 \value{
-A \code{ggplot} object showing the topographic map of the signal for chosen time.
+A \code{ggplot} object showing the static topographic map of the signal divided into three panels: CI lower, mean, CI upper.
 }
 \description{
 Plot a topographic circle or polygon map of the average EEG signal amplitude and its lower and upper confidence interval bounds using topographic colour scale.
@@ -44,6 +44,8 @@ The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^2 \righta
 The output in the form of a \code{ggplot} object allows to easily edit the result image properties.
 }
 \details{
+The spline interpolation is done independently for each CI bound and average.
+
 Note: When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
 }
 \examples{
@@ -62,7 +64,7 @@ data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, tim
 
 
 # b) plotting the topographic map with legend
-plot_topo_mean(data = data_mean, template = "HCGSN256", legend = TRUE)
+plot_topo_mean(data = data_mean, template = "HCGSN256", show_legend = TRUE)
 }
 \seealso{
 \code{\link{animate_topo_mean}}: animated version of the plot; \code{\link{topo_plot}}
