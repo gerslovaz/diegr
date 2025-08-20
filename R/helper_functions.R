@@ -1,5 +1,3 @@
-## helper functions
-
 #' Check for required column names
 #'
 #' @description
@@ -225,7 +223,7 @@ IM <- function(X, Y, Xcp = X) {
   X_P <- XP_IM(X, X)
   condition_num <- kappa(X_P)
 
-  if (condition_num > 1e+10) { # Check ill-conditioned matrix
+  if (condition_num > 1e+12) { # Check ill-conditioned matrix
     warning(paste("The X_P matrix is ill-conditioned (kappa =",
                   format(condition_num, scientific = TRUE, digits = 3),
                   ") and the results from solve() could be inaccurate."))
@@ -398,7 +396,7 @@ GCV_score <- function(X, Y, lambda){
   k <- dim(as.matrix(X))[1]
   denom <- sum(rep(1,k) - model$diag_hat)
   if (denom == 0) {
-    stop("Degenerate model fit — denominator in GCV score is zero.")
+    stop("Degenerate model fit - denominator in GCV score is zero.")
   }
   GCV <- k * sum((model$Y_hat - Y)^2) / denom^2
   return(GCV)
@@ -433,7 +431,7 @@ DCV_score <- function(X, Y, lambda){
 #'
 #' @description
 #' Filters an input dataset by optional constraints on subject, sensor, time, and epoch.
-#' Filters are combined with logical AND, and exact value matching (%in%) is used.
+#' Filters are combined with logical AND, and exact value matching (\code{%in%}) is used.
 #'
 #' @param data A data frame, tibble or database table with input data. Required columns depend on the further parameters: setting `subject_rg` requires `subject` column etc.
 #' @param subject_rg Optional vector of subject identifiers to keep (character or numeric, matching \code{data$subject}). If `NULL` (default), no filtering is applied based on subject.
@@ -512,5 +510,3 @@ pick_data <- function(data,
   return(newdata)
 
 }
-
-

@@ -29,7 +29,7 @@ If all filters are \code{NULL}, the input is returned unmodified. If no rows mat
 }
 \description{
 Filters an input dataset by optional constraints on subject, sensor, time, and epoch.
-Filters are combined with logical AND, and exact value matching (\%in\%) is used.
+Filters are combined with logical AND, and exact value matching (\code{\%in\%}) is used.
 }
 \details{
 All filters are combined conjunctively (AND). Matching uses membership (\code{\%in\%}) with case-sensitive comparison for character columns.
