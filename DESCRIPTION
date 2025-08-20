@@ -1,13 +1,17 @@
 Package: diegr
 Title: Dynamic and Interactive EEG Graphics using R
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
     c(
-    person("Zdeňka", "Geršlová", , "gerslovaz@math.muni.cz", role = c("aut", "cre"),
+    person("Zdeňka", "Geršlová", email = "gerslovaz@math.muni.cz", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-1973-0479")),
-    person("Masaryk University, a public university", role = c("cph", "fnd")))
-Description: The package developed to display high-density electroencephalography (HD-EEG) data in different ways using interactive elements or animations for a comprehensive overview of data.
+    person("Stanislav", "Katina", email = "katina@math.muni.cz", role = c("rev"),
+               comment = c(ORCID = "0000-0002-3256-5482", "Reviewer and Supervisor"))       
+    )
+Description: diegr is an R package for visualizing high-density electroencephalography (HD-EEG) data through interactive plots and animations, enabling exploratory and communicative analysis of temporal-spatial brain signals.
 License: MIT + file LICENSE
+Funder: Masaryk University (Grant No. MUNI/A/1457/2023)
+Date: 2024-08-20
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2

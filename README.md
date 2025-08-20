@@ -10,27 +10,32 @@
 ## Overview
 
 The name diegr comes from **Dynamic and Interactive EEG Graphics using
-R**. The package is developed to display high-density
-electroencephalography (HD-EEG) data in different ways using interactive
-elements or animations for a comprehensive overview of data.
+R**. The `diegr` package enables researchers to visualize high-density
+electroencephalography (HD-EEG) data with animated and interactive
+graphics, supporting both exploratory and confirmatory analyses of
+sensor-level brain signals.
 
 The package `diegr` includes:
 
-- interactive boxplots
-- interactive epoch waveforms
-- topographic maps (2D projection)
-- scalp plots in 3D
+- interactive boxplots (`boxplot_epoch`, `boxplot_subject`,
+  `boxplot_rt`)
+- interactive epoch waveforms (`interactive_waveforms`)
+- topographic maps in 2D (`topo_plot`)
+- scalp plots in 3D (`scalp_plot`)
 - functions for computing baseline correction, pointwise and jackknife
-  mean
+  mean (`baseline_correction`, `compute_mean`)
 - functions for plotting the mean with pointwise confidence interval
+  (`plot_time_mean`, `plot_topo_mean`)
 - animations of time course of the raw signal or the average in 2D and
-  3D
+  3D (`animate_topo`, `animate_topo_mean`, `animate_scalp`)
 
 ## Installation
 
+You can install the development version of MyPackage from GitHub with:
+
 ``` r
-install.packages("diegr")
-# devtools::install_github("gerslovaz/diegr") development version will be available later
+# install.packages("devtools")
+devtools::install_github("gerslovaz/diegr") 
 ```
 
 ## Data
@@ -41,7 +46,7 @@ to common formats such as data frames or tibbles). Such a procedure is
 more efficient in terms of memory usage.
 
 The database you want to use as input to `diegr` functions must contain
-columns with the following names:
+columns with the following structure::
 
 - `subject` - ID of subjects,
 - `epoch` - epoch numbers
@@ -66,7 +71,7 @@ For more information about the structure of built-in data and conversion
 from Matlab hdf5 files to database tables using R see the package
 vignette `vignette("diegr", package = "diegr")`.
 
-## Examples of graphic functions
+## Quick examples
 
 #### Interactive boxplot
 
@@ -102,7 +107,7 @@ topo_plot(data_short, amplitude = "signal", mesh = M1)
 
 <img src="man/figures/README-topoplot-1.png" width="100%" />
 
-## Computing and displaying the average
+#### Computing and displaying the average
 
 Compute the average signal for subject 2 from the channel E65 (exclude
 the oulier epochs 14 and 15) and then display it along with CI bounds
@@ -122,8 +127,13 @@ plot_time_mean(data = data_mean, t0 = 10, color = "blue", fill = "lightblue")
 
 <img src="man/figures/README-timemean-1.png" width="100%" />
 
-For detailed examples and explanations, please see the package vignette:
-`vignette("diegr", package = "diegr")`.
+For detailed examples and usage explanation, please see the package
+vignette: `vignette("diegr", package = "diegr")`.
+
+**License** This package is distributed under the MIT license. See
+LICENSE file for details.
+
+**Citation** Use `citation("diegr")` to cite this package.
 
 <!-- You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. -->
 
