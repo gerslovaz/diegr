@@ -67,9 +67,8 @@ The package contains some included training datasets:
   pressing the button) from the experiment involving a simple visual
   motor task.
 
-For more information about the structure of built-in data and conversion
-from Matlab hdf5 files to database tables using R see the package
-vignette `vignette("diegr", package = "diegr")`.
+For more information about the structure of built-in data see the
+package vignette `vignette("diegr", package = "diegr")`.
 
 ## Quick examples
 

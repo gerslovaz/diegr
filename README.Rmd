@@ -59,7 +59,7 @@ The package contains some included training datasets:
 -   `HCGSN256`: a list with Cartesian coordinates of HD-EEG sensor positions in 3D space on the scalp surface and their projection into 2D space
 -   `rtdata`: response times (time between stimulus presentation and pressing the button) from the experiment involving a simple visual motor task.
 
-For more information about the structure of built-in data and conversion from Matlab hdf5 files to database tables using R see the package vignette `vignette("diegr", package = "diegr")`.
+For more information about the structure of built-in data see the package vignette `vignette("diegr", package = "diegr")`.
 
 ## Quick examples
 
