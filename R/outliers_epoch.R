@@ -58,6 +58,9 @@ outliers_epoch <- function(data,
                            p = 0.975,
                            print_tab = TRUE){
 
+  amp_value <- {{ amplitude }}
+  amp_name <- rlang::as_string(amp_value)
+
   if (!method %in% c("iqr", "percentile", "hampel")) {
     stop("Invalid method specified.")
   }
@@ -85,7 +88,7 @@ outliers_epoch <- function(data,
   newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ sensor }}, time_rg = {{ time }})
 
    newdata <- newdata |>
-     dplyr::select("subject", "time", "epoch", "sensor", amplitude)
+     dplyr::select(all_of(c("subject", "time", "epoch", "sensor", amplitude)))
    newdata <- dplyr::collect(newdata)
    newdata$epoch <- factor(newdata$epoch)
 
@@ -94,7 +97,7 @@ outliers_epoch <- function(data,
       dplyr::group_by(.data$time) |>
       dplyr::mutate(outliers = .data[[amplitude]] %in% boxplot.stats(.data[[amplitude]])$out) |>
       dplyr::filter(.data$outliers == TRUE) |>
-      dplyr::select("time", "epoch", "sensor", amplitude)
+      dplyr::select(all_of(c("time", "epoch", "sensor", amplitude)))
   }
 
   if (method == "percentile") {
@@ -106,7 +109,7 @@ outliers_epoch <- function(data,
       dplyr::group_by(.data$time) |>
       dplyr::mutate(outliers = .data[[amplitude]] < quantile(.data[[amplitude]], 1 - p) | .data[[amplitude]] > quantile(.data[[amplitude]], p)) |>
       dplyr::filter(.data$outliers == TRUE) |>
-      dplyr::select("time", "epoch", "sensor", amplitude)
+      dplyr::select(all_of(c("time", "epoch", "sensor", amplitude)))
   }
 
   if (method == "hampel") {
@@ -114,7 +117,7 @@ outliers_epoch <- function(data,
       dplyr::group_by(.data$time) |>
       dplyr::mutate(outliers = .data[[amplitude]] < median(.data[[amplitude]]) - 3 * mad(.data[[amplitude]], constant = 1) | .data[[amplitude]] > median(.data[[amplitude]]) + 3 * mad(.data[[amplitude]], constant = 1)) |>
       dplyr::filter(.data$outliers == TRUE) |>
-      dplyr::select("time", "epoch", "sensor", amplitude)
+      dplyr::select(all_of(c("time", "epoch", "sensor", amplitude)))
   }
 
   epoch_vec <- outdata$epoch
