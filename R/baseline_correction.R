@@ -15,6 +15,8 @@
 #' 2. If the whole `baseline_range` vector is out of the `time` range, the `baseline` and also the `signal_base` values of the output are `NA`'s.
 #' In both cases the function returns a warning message along with the output data frame or tibble.
 #'
+#' Note: If there are `NA` values in the `signal` column, matching rows are ignored in the baseline calculation (which may bias the results) and the function prints a warning message.
+#'
 #' @return A data frame/tibble with added columns:
 #' \item{signal_base}{Signal corrected by subtracting the baseline for each epoch.}
 #' \item{baseline}{A baseline value used for correction.}
@@ -63,6 +65,10 @@ baseline_correction <- function(data, baseline_range, type = "absolute") {
   newdata <- data |>
     dplyr::select("subject", "sensor", "epoch", "time", "signal")
   newdata <- collect(newdata)
+
+  if (any(is.na(newdata$signal))) {
+    warning("There are NA's in `signal` column, these values are ignored in baseline computation.")
+  }
 
   if (!all(baseline_range %in% newdata$time)) {
     warning("Some 'baseline_range' values are not present in the 'time' column.")

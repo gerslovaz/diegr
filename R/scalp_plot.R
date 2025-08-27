@@ -71,6 +71,10 @@ scalp_plot <- function(data,
     stop(paste0("There is no column '", amplitude, "' in the input data."))
   }
 
+  if (any(is.na(data[[amplitude]]))) {
+    stop("There are NA's in amplitude column.")
+  }
+
   if (!is.null(template) && !is.null(coords)) {
     warning("Both 'template' and 'coords' were specified. Using 'template' and ignoring 'coords'.")
   }

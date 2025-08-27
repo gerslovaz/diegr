@@ -58,14 +58,16 @@ columns with the following structure::
 
 The package contains some included training datasets:
 
-- `epochdata`: epoched HD-EEG data (short slice from big HD-EEG study)
-  arranged as mentioned above,
+- `epochdata`: epoched HD-EEG data (anonymized short slice from big
+  HD-EEG study presented in Madetko-Alster, 2025) arranged as mentioned
+  above,
 - `HCGSN256`: a list with Cartesian coordinates of HD-EEG sensor
   positions in 3D space on the scalp surface and their projection into
   2D space
 - `rtdata`: response times (time between stimulus presentation and
   pressing the button) from the experiment involving a simple visual
-  motor task.
+  motor task (anonymized short slice from big HD-EEG study presented in
+  Madetko-Alster, 2025).
 
 For more information about the structure of built-in data see the
 package vignette `vignette("diegr", package = "diegr")`.
@@ -128,6 +130,12 @@ plot_time_mean(data = data_mean, t0 = 10, color = "blue", fill = "lightblue")
 
 For detailed examples and usage explanation, please see the package
 vignette: `vignette("diegr", package = "diegr")`.
+
+**References** Madetko-Alster N., Alster P., Lamoš M., Šmahovská L.,
+Boušek T., Rektor I. and Bočková M. The role of the somatosensory cortex
+in self-paced movement impairment in Parkinson’s disease. *Clinical
+Neurophysiology.* 2025, vol. 171, 11-17.
+<https://doi.org/10.1016/j.clinph.2025.01.001.>
 
 **License** This package is distributed under the MIT license. See
 LICENSE file for details.

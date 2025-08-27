@@ -1,6 +1,6 @@
 #' @title Example response time data
 #'
-#' @description This dataset is a short slice of a high-density (HD-EEG) dataset from a study investigating the impact of deep brain stimulation on patients with advanced Parkinson's disease.
+#' @description This dataset is a short slice of a high-density (HD-EEG) dataset from a study investigating the impact of deep brain stimulation on patients with advanced Parkinson's disease (Madetko-Alster, 2025).
 #' The data contains response times (time between stimulus presentation and pressing the button) from the experiment involving a simple visual-motor task.
 #' The study was carried out by Central European Institute of Technology in Brno and was supported by Czech Health Research Council AZV NU21-04-00445.
 #'
@@ -22,6 +22,8 @@
 #'
 #'
 #' @keywords dataset
+#'
+#' @references Madetko-Alster N., Alster P., Lamoš M., Šmahovská L., Boušek T., Rektor I. and Bočková M. The role of the somatosensory cortex in self-paced movement impairment in Parkinson’s disease. Clinical Neurophysiology. 2025, vol. 171, 11-17. <https://doi.org/10.1016/j.clinph.2025.01.001.>
 #'
 #' @source Central European Institute of Technology, Masaryk University, Brno, Czech Republic.
 #'

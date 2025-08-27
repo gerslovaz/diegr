@@ -74,11 +74,12 @@ topo_plot <- function(data,
                       show_legend = TRUE,
                       label_sensors = FALSE) {
 
-  #amp_value <- {{ amplitude }}
-  #amp_name <- rlang::as_string(amp_value)
-
   if (!amplitude %in% colnames(data)) {
     stop(paste0("There is no column '", amplitude, "' in the input data."))
+  }
+
+  if (any(is.na(data[[amplitude]]))) {
+    stop("There are NA's in amplitude column.")
   }
 
   if (!(is.logical(contour))) {

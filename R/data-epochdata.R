@@ -1,6 +1,6 @@
 #' @title Example high-density (HD-EEG) epoched data
 #'
-#' @description This dataset is a short slice of a HD-EEG dataset from a study investigating the impact of deep brain stimulation on patients with advanced Parkinson's disease.
+#' @description This dataset is a short slice of a HD-EEG dataset from a study investigating the impact of deep brain stimulation on patients with advanced Parkinson's disease (Madetko-Alster, 2025).
 #' During the experiment subjects performed a simple visual motor task (pressing the response button in case of target visual stimulus presentation). The data was measured by 256-channel HydroCel Geodesic Sensor Net and sampling frequency is 250 Hz.
 #' The study was carried out by Central European Institute of Technology in Brno and was supported by Czech Health Research Council AZV NU21-04-00445.
 #'
@@ -22,6 +22,8 @@
 #' @keywords dataset
 #'
 #' @references EGI Geodesic Sensor Net Technical Manual (2024) <https://www.egi.com/knowledge-center>
+#'
+#' Madetko-Alster N., Alster P., Lamoš M., Šmahovská L., Boušek T., Rektor I. and Bočková M. The role of the somatosensory cortex in self-paced movement impairment in Parkinson’s disease. Clinical Neurophysiology. 2025, vol. 171, 11-17. <https://doi.org/10.1016/j.clinph.2025.01.001.>
 #'
 #' @source Central European Institute of Technology, Masaryk University, Brno, Czech Republic.
 #'

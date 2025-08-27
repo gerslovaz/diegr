@@ -33,6 +33,8 @@
 #' - Setting `type = "point"` without specifying `R`: the bounds are computed using standard error of the mean and approximation by the Student distribution.
 #' - Setting `type = "jack"`: the bounds are computed using jackknife standard error of the mean and approximation by the Student t-distribution. Note: used method assumes equal variance and symmetric distribution, which may be problematic for very small samples.
 #'
+#' Note: If there are NA's in `amplitude` column, corresponding rows are ignored in the average calculation and function prints a warning message.
+#'
 #'
 #' @return A tibble with resulting average and CI bounds according to the chosen `level`, `group` and `alpha` arguments. The statistics are saved in columns
 #' - \code{average} for computed average amplitude value,
@@ -96,9 +98,6 @@ compute_mean <- function(data,
                          R = NULL,
                          alpha = 0.95){
 
-  #amp_value <- {{ amplitude }}
-  #amp_name <- rlang::as_string(amp_value)
-
   if (!amplitude %in% colnames(data)) {
      stop(paste0("There is no column '", amplitude, "' in the input data."))
   }
@@ -111,6 +110,10 @@ compute_mean <- function(data,
 
   if (inherits(newdata, "tbl_sql") || inherits(newdata, "tbl_dbi")) {
     newdata <- dplyr::collect(newdata) # collect data for DB table
+  }
+
+  if (any(is.na(newdata[[amplitude]]))) {
+    warning("There are NA's in amplitude column, the resulting mean is computed without corresponding rows.")
   }
 
 
@@ -432,6 +435,17 @@ plot_time_mean <- function(data,
                paste(miss_data, collapse = ", ")))
   }
 
+  if (any(is.na(data[["average"]]))) {
+    warning("There are NA's in the 'average' column, these values are ignored in the plot.")
+  }
+
+  if (any(is.na(data[["ci_low"]]))) {
+    warning("There are NA's in the 'ci_low' column, these values are ignored in the plot.")
+  }
+  if (any(is.na(data[["ci_up"]]))) {
+    warning("There are NA's in the 'ci_up' column, these values are ignored in the plot.")
+  }
+
   if (!is.numeric(FS) || FS <= 0) {
     stop("'FS' must be a positive number.")
   }
@@ -542,6 +556,17 @@ plot_topo_mean <- function(data,
   if (length(miss_data) > 0) {
     stop(paste("The following required columns in 'data' are missing:",
                paste(miss_data, collapse = ", ")))
+  }
+
+  if (any(is.na(data[["average"]]))) {
+    stop("There are NA's in the 'average' column.")
+  }
+
+  if (any(is.na(data[["ci_low"]]))) {
+    stop("There are NA's in the 'ci_low' column.")
+  }
+  if (any(is.na(data[["ci_up"]]))) {
+    stop("There are NA's in the 'ci_up' column.")
   }
 
   if (!is.null(template) && !is.null(coords)) {

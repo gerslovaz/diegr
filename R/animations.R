@@ -67,11 +67,12 @@ animate_topo <- function(data,
                          output_path = NULL,
                          ...){
 
-  #amp_value <- {{ amplitude }}
-  #amp_name <- rlang::as_string(amp_value)
-
   if (!amplitude %in% colnames(data)) {
     stop(paste0("There is no column '", amplitude, "' in the input data."))
+  }
+
+  if (any(is.na(data[[amplitude]]))) {
+    stop("There are NA's in amplitude column.")
   }
 
   if (!(is.logical(contour))) {
@@ -278,10 +279,10 @@ prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
     df_t <- tib_split[[t]]
     y_values <- df_t |>
       pull(!!col_name)
-    interpolated_values <- IM(coords_df, y_values , mesh_mat)$Y_hat #df_t[[amp_name]]
+    interpolated_values <- IM(coords_df, y_values , mesh_mat)$Y_hat
 
     tibble(
-      time = as.numeric(df_t$time[1]),#as.numeric(t),
+      time = as.numeric(df_t$time[1]),
       mesh_coord = mesh_mat,
       amplitude_IM = interpolated_values[1:dim(mesh_mat)[1]]
     )
@@ -357,6 +358,10 @@ animate_scalp <- function(data,
 
   if (!amplitude %in% colnames(data)) {
     stop(paste0("There is no column '", amplitude, "' in the input data."))
+  }
+
+  if (any(is.na(data[[amplitude]]))) {
+    stop("There are NA's in amplitude column.")
   }
 
   if (!is.numeric(sec) || sec <= 0) {
@@ -585,6 +590,17 @@ prepare_anim_structure_CI <- function(data, coords, mesh_mat) {
   if (length(missing_cols) > 0) {
     stop(paste("The following required columns in 'data' are missing:",
                paste(missing_cols, collapse = ", ")))
+  }
+
+  if (any(is.na(data[["average"]]))) {
+    stop("There are NA's in the 'average' column.")
+  }
+
+  if (any(is.na(data[["ci_low"]]))) {
+    stop("There are NA's in the 'ci_low' column.")
+  }
+  if (any(is.na(data[["ci_up"]]))) {
+    stop("There are NA's in the 'ci_up' column.")
   }
 
   if (all(c("x", "y", "z") %in% names(coords))) {

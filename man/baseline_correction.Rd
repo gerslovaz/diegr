@@ -28,6 +28,8 @@ If the values from \code{baseline_range} vector are out of the range of the \cod
 \item If the whole \code{baseline_range} vector is out of the \code{time} range, the \code{baseline} and also the \code{signal_base} values of the output are \code{NA}'s.
 In both cases the function returns a warning message along with the output data frame or tibble.
 }
+
+Note: If there are \code{NA} values in the \code{signal} column, matching rows are ignored in the baseline calculation (which may bias the results) and the function prints a warning message.
 }
 \examples{
 # Computing baseline correction on first 10 points, sensor "E1"
