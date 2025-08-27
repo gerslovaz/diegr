@@ -35,6 +35,6 @@ head(epochdata)
 \references{
 EGI Geodesic Sensor Net Technical Manual (2024) \url{https://www.egi.com/knowledge-center}
 
-Madetko-Alster N., Alster P., Lamoš M., Šmahovská L., Boušek T., Rektor I. and Bočková M. The role of the somatosensory cortex in self-paced movement impairment in Parkinson’s disease. Clinical Neurophysiology. 2025, vol. 171, 11-17. \url{https://doi.org/10.1016/j.clinph.2025.01.001.}
+Madetko-Alster N., Alster P., Lamoš M., Šmahovská L., Boušek T., Rektor I. and Bočková M. The role of the somatosensory cortex in self-paced movement impairment in Parkinson’s disease. Clinical Neurophysiology. 2025, vol. 171, 11-17. \url{https://doi.org/10.1016/j.clinph.2025.01.001}
 }
 \keyword{dataset}

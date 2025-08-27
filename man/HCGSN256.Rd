@@ -27,9 +27,9 @@ The coordinates belong to 256-channel HydroCel Geodesic Sensor Net average templ
 \details{
 The axis orientation in the 3D case is as follows:
 \itemize{
-\item x-axis: left (−) to right (+),
-\item y-axis: posterior (−) to anterior (+),
-\item z-axis: inferior (−) to superior (+).
+\item x-axis: left (-) to right (+),
+\item y-axis: posterior (-) to anterior (+),
+\item z-axis: inferior (-) to superior (+).
 The reference electrode (Cz) is fixed at point (0, 0, Z), where Z is the positive height of Cz. The nasion is fixed at (0, Y, Z). Since both the nasion and Cz are always fixed at x = 0, they are assumed to be in the same y plane. The origin is the center of the head, defined as the center of a sphere fit to fiducial points above the plane made up of the Left Preauricular Point (LPA), the Right Preauricular Point (RPA), and the nasion.
 }
 

@@ -10,10 +10,9 @@ Authors@R:
     person("Martin", "Lamoš", role = c("ctb"),
     comment = "Provided anonymized data from the project AZV NU21-04-0044")
     )
-Description: diegr is an R package for visualizing high-density electroencephalography (HD-EEG) data through interactive plots and animations, enabling exploratory and communicative analysis of temporal-spatial brain signals.
+Description: Allows to visualize high-density electroencephalography (HD-EEG) data through interactive plots and animations, enabling exploratory and communicative analysis of temporal-spatial brain signals. Funder: Masaryk University (Grant No. MUNI/A/1457/2023).
 License: MIT + file LICENSE
-Funder: Masaryk University (Grant No. MUNI/A/1457/2023)
-Date: 2024-08-20
+Date: 2025-08-27
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2

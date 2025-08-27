@@ -18,9 +18,9 @@
 #'
 #' @details
 #' The axis orientation in the 3D case is as follows:
-#' - x-axis: left (−) to right (+),
-#' - y-axis: posterior (−) to anterior (+),
-#' - z-axis: inferior (−) to superior (+).
+#' - x-axis: left (-) to right (+),
+#' - y-axis: posterior (-) to anterior (+),
+#' - z-axis: inferior (-) to superior (+).
 #' The reference electrode (Cz) is fixed at point (0, 0, Z), where Z is the positive height of Cz. The nasion is fixed at (0, Y, Z). Since both the nasion and Cz are always fixed at x = 0, they are assumed to be in the same y plane. The origin is the center of the head, defined as the center of a sphere fit to fiducial points above the plane made up of the Left Preauricular Point (LPA), the Right Preauricular Point (RPA), and the nasion.
 #'
 #' The 2D coordinates were created by EGI team by positioning the channels to maximize use of screen space and to preserve the head shape as much as possible.

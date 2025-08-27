@@ -23,7 +23,7 @@
 #'
 #' @keywords dataset
 #'
-#' @references Madetko-Alster N., Alster P., Lamoš M., Šmahovská L., Boušek T., Rektor I. and Bočková M. The role of the somatosensory cortex in self-paced movement impairment in Parkinson’s disease. Clinical Neurophysiology. 2025, vol. 171, 11-17. <https://doi.org/10.1016/j.clinph.2025.01.001.>
+#' @references Madetko-Alster N., Alster P., Lamoš M., Šmahovská L., Boušek T., Rektor I. and Bočková M. The role of the somatosensory cortex in self-paced movement impairment in Parkinson’s disease. Clinical Neurophysiology. 2025, vol. 171, 11-17. <https://doi.org/10.1016/j.clinph.2025.01.001>
 #'
 #' @source Central European Institute of Technology, Masaryk University, Brno, Czech Republic.
 #'
