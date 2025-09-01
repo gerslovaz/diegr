@@ -85,7 +85,7 @@ data("epochdata")
 ```
 
 ``` r
-boxplot_epoch(epochdata, subject = 1, channel = "E3", time_lim = c(260:270))
+boxplot_epoch(epochdata, amplitude = "signal", subject = 1, channel = "E65", time_lim = c(10:20))
 ```
 
 <img src="./man/figures/README-boxplot.png" width="100%" />
