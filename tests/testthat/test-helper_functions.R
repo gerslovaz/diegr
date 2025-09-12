@@ -4,7 +4,9 @@ test_that("output create_scale", {
   expect_true(all(c("colors", "breaks") %in% names(result)))
 })
 
-X <- HCGSN256$D2[,1:2]
+sensors <- unique(epochdata$sensor)
+sensors_id <- which(HCGSN256$D2$sensor %in% sensors)
+X <- HCGSN256$D2[sensors_id,1:2]
 
 test_that("output spline_matrix", {
   result <- spline_matrix(X)
@@ -32,8 +34,8 @@ test_that("output IM", {
 
 
 test_that("recompute_3d", {
-  XX <- HCGSN256$D3[,1:3]
-  M <- point_mesh(dim = 2)
+  XX <- HCGSN256$D3[sensors_id,1:3]
+  M <- point_mesh(dimension = 2, sensor_select = sensors)
   result <- recompute_3d(X, XX, M)
 
   expect_s3_class(result, "data.frame")

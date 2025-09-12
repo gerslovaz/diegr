@@ -8,6 +8,7 @@ plot_point_mesh(
   mesh,
   sensors = TRUE,
   label_sensors = FALSE,
+  sensor_select = NULL,
   names_vec = NULL,
   col = "gray",
   cex = 0.4,
@@ -21,6 +22,8 @@ plot_point_mesh(
 \item{sensors}{A logical value indicating whether the sensor locations should also be plotted (default value is \code{TRUE}).}
 
 \item{label_sensors}{A logical value indicating whether the sensor labels should also be plotted (default value is \code{FALSE}).}
+
+\item{sensor_select}{Optionally, a vector with sensor labels selected from the template during a mesh building. It must be the same as the vector used to create the mesh that the function is supposed to draw, otherwise the final plot will be incorrect.}
 
 \item{names_vec}{A character vector of labels matching rows in \code{own_coordinates}. The argument is required when using \code{own_coordinates} together with setting \code{label_sensors = TRUE}, otherwise is optional.}
 
@@ -50,7 +53,8 @@ The order of elements in \code{names_vec} must be consistent with elements of \c
 When both \code{names_vec} and \code{own_coordinates} are provided, it is essential that the length of \code{names_vec} matches the number of rows in \code{own_coordinates}, otherwise the names are not plotted (despite the setting \code{label_sensors = TRUE}).
 }
 \examples{
-# 2D polygon point mesh with plotted sensors and default settings
+# 2D polygon point mesh with all sensors from the HCGSN256 template
+# and default settings
 # Note: for nice plot we recommend set par(mar = c(0,0,0,0))
 M <- point_mesh(n = 4000, template = "HCGSN256")
 plot_point_mesh(M$D2)
@@ -61,13 +65,18 @@ plot_point_mesh(M$D2)
 plot_point_mesh(M$D3)
 }
 
-# Plotting 2D circle point mesh with sensors as orange points
-M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256", type = "circle")
-plot_point_mesh(M$D2, col_sensors = "orange")
+# Plotting 2D circle point mesh with sensors from epochdata as orange points
+sensors <- unique(epochdata$sensor)
+M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256",
+sensor_select = sensors, type = "circle")
+plot_point_mesh(M$D2, sensor_select = sensors, col_sensors = "orange")
 
 # Plotting the same mesh with marking only midline electrodes
 midline <- HCGSN256$D2[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204),]
 names_vec <- HCGSN256$D2$sensor[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204)]
 plot_point_mesh(M$D2, label_sensors = TRUE, names_vec = names_vec, own_coordinates = midline)
 
+}
+\seealso{
+\code{\link[=point_mesh]{point_mesh()}}
 }

@@ -169,6 +169,7 @@ For simple created mesh plotting use the function `plot_point_mesh()`, which res
 
 Notes: 
 
+- Creating and plotting a mesh for subset from the whole template montage is available through `sensor_select` parameter. For consistency between created mesh and its plot use the same vector of sensor labels in both functions.
 - The input of `plot_point_mesh()` must be only the relevant part with coordinates - `$D2` for two dimensional and `$D3` for three dimensional plot.
 - If the number of mesh points is large, they are no longer visible in the plot and the mesh looks like a solid surface (as can be seen below in first plot).
 - Depending on the hardware used, the computational cost of default `n = 10000` can be high. In this case we recommend to reduce `n` and to reuse a precomputed mesh across plots for speed.
@@ -176,14 +177,17 @@ Notes:
 ```{r, fig.show='hold', fig.alt="A schematic representations of an HD-EEG sensor net, showing the arrangement of 204 labeled channels distributed across the entire scalp area together with denser point mesh created for interpolation."}
 #| eval: true
 # creating a mesh with default settings
-M1 <- point_mesh(template = "HCGSN256")
+sensors204 <- unique(epochdata$sensor)
+M1 <- point_mesh(template = "HCGSN256", sensor_select = sensors204)
 # plot output in 2D
-plot_point_mesh(M1$D2)
+plot_point_mesh(M1$D2, sensor_select = sensors204)
 
 # creating a circular mesh, only 2D coordinates
-M2 <- point_mesh(dimension = 2, n = 3000, template = "HCGSN256", type = "circle")
+M2 <- point_mesh(dimension = 2, n = 3000, template = "HCGSN256",
+                 sensor_select = sensors204, type = "circle")
 # plotting a mesh - function allows different options of the result plot
-plot_point_mesh(M2$D2, col_sensors = "purple", label_sensors = TRUE, cex = 0.1)
+plot_point_mesh(M2$D2, sensor_select = sensors204, col_sensors = "purple",
+                label_sensors = TRUE, cex = 0.1)
 ```
 
 
@@ -339,7 +343,8 @@ sub2mean <- compute_mean(sub2base, amplitude = "signal_base", time = 35,
 To maintain consistency between both subjects, we first construct a mesh and colour scale that we will use in both figures. For plotting, we will use the `plot_topo_mean()` function, which is directly adapted for rendering topographic map of the average EEG amplitude together with its lower and upper confidence interval (CI) bounds.
 ```{r}
 # prepare a mesh for plotting
-M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256", type = "polygon")
+M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256",
+                sensor_select = unique(sub1mean$sensor), type = "polygon")
 # compute consistent col_range across subjects
 # a) find the range of average amplitude
 c(min(sub1mean$average, sub2mean$average), max(sub1mean$average, sub2mean$average)) 

@@ -82,6 +82,10 @@ topo_plot <- function(data,
     stop("There are NA's in amplitude column.")
   }
 
+  if (!"sensor" %in% colnames(data)) {
+    stop("There is no 'sensor' column in input data.")
+  }
+
   if (!(is.logical(contour))) {
     stop("Argument 'contour' has to be logical.")
   }
@@ -103,11 +107,19 @@ topo_plot <- function(data,
     template <- "HCGSN256"
   }
 
+  if (inherits(data, "tbl_sql") || inherits(data, "tbl_dbi")) {
+    data <- dplyr::collect(data) # collect data for DB table
+  }
+
+  sensor_select <- unique(data$sensor)
+
   if (!is.null(template)) {
-    coords <- switch(template,
+    coords_full <- switch(template,
                      "HCGSN256" = diegr::HCGSN256$D2,
                      stop("Unknown template.")
     )
+    sensor_index <- which(coords_full$sensor %in% sensor_select)
+    coords <- coords_full[sensor_index,]
   }
 
   required_cols <- c("x", "y", "sensor")
@@ -119,7 +131,8 @@ topo_plot <- function(data,
   }
 
   if (missing(mesh)) {
-    mesh <- point_mesh(dimension = 2, template = "HCGSN256")
+    mesh <- point_mesh(dimension = 2, template = "HCGSN256",
+                       sensor_select = sensor_select)
   }
 
   if (control_D2(mesh)) {
@@ -131,9 +144,6 @@ topo_plot <- function(data,
 
   coords_df <- data.frame(x = coords[["x"]], y = coords[["y"]])
 
-  if (inherits(data, "tbl_sql") || inherits(data, "tbl_dbi")) {
-    data <- dplyr::collect(data) # collect data for DB table
-  }
 
   if (!all(unique(coords$sensor) %in% data$sensor)) {
     stop("Mismatch between sensors in data and coords.")

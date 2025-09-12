@@ -79,16 +79,35 @@ scalp_plot <- function(data,
     warning("Both 'template' and 'coords' were specified. Using 'template' and ignoring 'coords'.")
   }
 
+  if (!"sensor" %in% colnames(data)) {
+    stop("There is no 'sensor' column in input data.")
+  }
+
+  if (inherits(data, "tbl_sql") || inherits(data, "tbl_dbi")) {
+    data <- dplyr::collect(data) # collect data for DB table
+  }
+
   if (is.null(template) && is.null(coords)) {
     # use HCGSN256 template
     template <- "HCGSN256"
   }
 
+  sensor_select <- unique(data$sensor)
+
   if (!is.null(template)) {
-    coords <- switch(template,
-                     "HCGSN256" = diegr::HCGSN256$D3,
-                     stop("Unknown template."))
+    coords_full <- switch(template,
+                          "HCGSN256" = diegr::HCGSN256$D3,
+                          stop("Unknown template.")
+    )
+    sensor_index <- which(coords_full$sensor %in% sensor_select)
+    coords <- coords_full[sensor_index,]
   }
+
+  #if (!is.null(template)) {
+  #  coords <- switch(template,
+  #                   "HCGSN256" = diegr::HCGSN256$D3,
+  #                   stop("Unknown template."))
+  #}
 
   required_cols <- c("x", "y", "z", "sensor")
   missing_cols <- setdiff(required_cols, colnames(coords))
@@ -103,7 +122,8 @@ scalp_plot <- function(data,
     if (!is.null(tri)) {
       stop("The argument 'mesh' must be provided when argument 'tri' is specified.")
     }
-    mesh <- point_mesh(dimension = c(2,3), template = template, type = "polygon")
+    mesh <- point_mesh(dimension = c(2,3), template = template,
+                       sensor_select = sensor_select, type = "polygon")
   }
 
   if (control_D3(mesh)) {
@@ -119,10 +139,6 @@ scalp_plot <- function(data,
 
   coords_xyz <- coords |>
     dplyr::select("x", "y", "z")
-
-  if (inherits(data, "tbl_sql") || inherits(data, "tbl_dbi")) {
-    data <- dplyr::collect(data) # collect data for DB table
-  }
 
   if (!all(unique(coords$sensor) %in% data$sensor)) {
     stop("Mismatch between sensors in data and coords.")

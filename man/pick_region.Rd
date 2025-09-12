@@ -7,7 +7,7 @@
 pick_region(
   coords = NULL,
   hemisphere = c("left", "right", "midline"),
-  region = c("frontal", "central", "parietal", "occipital", "temporal"),
+  region = c("frontal", "central", "parietal", "occipital", "temporal", "face"),
   ROI = NULL,
   tol = 1e-06
 )
@@ -17,7 +17,7 @@ pick_region(
 
 \item{hemisphere}{A character vector denoting hemisphere to choose. Possible values: \code{"left"}, \code{"right"}, \code{"midline"} or any combination of them. If not defined, both hemispheres with midline are chosen.}
 
-\item{region}{A character vector denoting region to choose. Possible values: \code{"frontal"}, \code{"central"}, \code{"parietal"}, \code{"occipital"}, \code{"temporal"} or any combination of them. If not defined, all regions are chosen.}
+\item{region}{A character vector denoting region to choose. Possible values: \code{"frontal"}, \code{"central"}, \code{"parietal"}, \code{"occipital"}, \code{"temporal"}, \code{"face"} or any combination of them. If not defined, all regions are chosen.}
 
 \item{ROI}{A character or factor vector with labels of regions, aligned row-wise with \code{coords}. If not defined, the predefined vector (according to HCGSN256 template determined by an expert from Central European Institute of Technology, Masaryk University, Brno, Czech Republic) is used.}
 

@@ -26,7 +26,9 @@ If the input mesh has not regular grid spacing, the result triangulation may not
 \examples{
 
 # a) Create small mesh for triangulation example
-M <- point_mesh(n = 500, template = "HCGSN256")
+# using 204 electrodes from epochdata
+M <- point_mesh(n = 500, template = "HCGSN256",
+sensor_select = unique(epochdata$sensor))
 
 # b) Make triangulation on this mesh
 TRI <- make_triangulation(M$D2)

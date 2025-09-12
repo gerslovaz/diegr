@@ -9,6 +9,7 @@
 #' @param n Optionally, the required number of mesh points. Default setting is \code{n = 10 000}.
 #' @param r Optionally, desired radius of a circular mesh. If not defined, it is computed from the convex hull of sensor locations, based on maximum Euclidean distance from centroid.
 #' @param template A character denoting sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0.
+#' @param sensor_select Optionally, a vector with sensor labels to select from the template. If not defined, all sensors from the template montage are used to create a mesh.
 #' @param own_coordinates Optionally, a list with own sensor coordinates for mesh building. See Details for more information.
 #' @param type A character indicating the shape of the mesh with 2 possible values: \code{"circle"} for circular mesh, \code{"polygon"} for irregular polygon shape with boundaries defined by sensor locations (default).
 #'
@@ -46,6 +47,7 @@
 #'
 #' @examples
 #' # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template
+#' # using all electrodes
 #' M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256", type = "circle")
 #'
 #' # Computing polygon 3D mesh with starting number 2000 points and own coordinates
@@ -53,12 +55,17 @@
 #' ## just a mod example of using the own_coordinates parameter
 #' M <- point_mesh(dimension = 3, n = 2000, own_coordinates = HCGSN256)
 #'
-#' # Computing coordinates of a polygon mesh in 2D and 3D in one step (starting number 3000 points):
-#' M <- point_mesh(n = 3000, template = "HCGSN256")
+#' # Computing coordinates of a polygon mesh in 2D and 3D in one step (starting number 3000 points),
+#' # using 204 electrodes selected for epochdata
+#' # a) create vector with selected sensor labels
+#' sensors <- unique(epochdata$sensor)
+#' # b) create a mesh for selected sensors using sensor_select parameter
+#' M <- point_mesh(n = 3000, template = "HCGSN256", sensor_select = sensors)
 point_mesh <- function(dimension = c(2,3),
                        n = 10000,
                        r,
                        template = NULL,
+                       sensor_select = NULL,
                        own_coordinates = NULL,
                        type = "polygon") {
 
@@ -90,7 +97,13 @@ point_mesh <- function(dimension = c(2,3),
     }
   }
 
-  coords <- coordinates$D2
+  if (!is.null(sensor_select)) {
+    coords_full <- coordinates$D2
+    sensor_index <- which(coords_full$sensor %in% sensor_select)
+    coords <- coords_full[sensor_index,]
+  } else {
+    coords <- coordinates$D2
+  }
 
   if (!req_cols(coords, c("x", "y"))) {
     stop("Columns 'x', 'y' are required in 'D2' part of a list with coordinates.")
@@ -145,7 +158,14 @@ point_mesh <- function(dimension = c(2,3),
            stop("Invalid type argument.")
     )
   } else if (identical(dimension, 3)) {
-    coords_xyz <- coordinates$D3 |>
+    if (!is.null(sensor_select)) {
+      coords_full <- coordinates$D3
+      sensor_index <- which(coords_full$sensor %in% sensor_select)
+      coords_xyz <- coords_full[sensor_index,]
+    } else {
+      coords_xyz <- coordinates$D3
+    }
+    coords_xyz <- coords_xyz |>
       dplyr::select("x", "y", "z")
     switch(type,
            "circle" = {
@@ -159,7 +179,14 @@ point_mesh <- function(dimension = c(2,3),
            stop("Invalid type argument.")
     )
   } else if (identical(dimension, c(2, 3)) || identical(dimension, c(3, 2))) {
-    coords_xyz <- coordinates$D3 |>
+    if (!is.null(sensor_select)) {
+      coords_full <- coordinates$D3
+      sensor_index <- which(coords_full$sensor %in% sensor_select)
+      coords_xyz <- coords_full[sensor_index,]
+    } else {
+      coords_xyz <- coordinates$D3
+    }
+    coords_xyz <- coords_xyz |>
       dplyr::select("x", "y", "z")
     switch(type,
            "circle" = {
@@ -196,6 +223,7 @@ point_mesh <- function(dimension = c(2,3),
 #' @param mesh A data frame or tibble with cartesian coordinates of point mesh to plot. It could be \code{D2} or \code{D3} element of output from \code{\link{point_mesh}} function or any data frame (or tibble) with named x and y (x, y and z, respectively) columns. See Details for more information.
 #' @param sensors A logical value indicating whether the sensor locations should also be plotted (default value is \code{TRUE}).
 #' @param label_sensors A logical value indicating whether the sensor labels should also be plotted (default value is \code{FALSE}).
+#' @param sensor_select Optionally, a vector with sensor labels selected from the template during a mesh building. It must be the same as the vector used to create the mesh that the function is supposed to draw, otherwise the final plot will be incorrect.
 #' @param names_vec A character vector of labels matching rows in \code{own_coordinates}. The argument is required when using \code{own_coordinates} together with setting \code{label_sensors = TRUE}, otherwise is optional.
 #' @param col The colour of mesh points (default colour is gray).
 #' @param cex The \code{cex} (size) argument for points of the mesh.
@@ -214,6 +242,8 @@ point_mesh <- function(dimension = c(2,3),
 #'
 #' @return A `ggplot` object (for 2D mesh) or plots directly to `rgl` 3D viewer (for 3D mesh).
 #'
+#' @seealso [point_mesh()]
+#'
 #' @import rgl
 #' @import ggplot2
 #' @importFrom rlang .data
@@ -221,7 +251,8 @@ point_mesh <- function(dimension = c(2,3),
 #' @export
 #'
 #' @examples
-#' # 2D polygon point mesh with plotted sensors and default settings
+#' # 2D polygon point mesh with all sensors from the HCGSN256 template
+#' # and default settings
 #' # Note: for nice plot we recommend set par(mar = c(0,0,0,0))
 #' M <- point_mesh(n = 4000, template = "HCGSN256")
 #' plot_point_mesh(M$D2)
@@ -232,9 +263,11 @@ point_mesh <- function(dimension = c(2,3),
 #' plot_point_mesh(M$D3)
 #' }
 #'
-#' # Plotting 2D circle point mesh with sensors as orange points
-#' M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256", type = "circle")
-#' plot_point_mesh(M$D2, col_sensors = "orange")
+#' # Plotting 2D circle point mesh with sensors from epochdata as orange points
+#' sensors <- unique(epochdata$sensor)
+#' M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256",
+#' sensor_select = sensors, type = "circle")
+#' plot_point_mesh(M$D2, sensor_select = sensors, col_sensors = "orange")
 #'
 #' # Plotting the same mesh with marking only midline electrodes
 #' midline <- HCGSN256$D2[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204),]
@@ -244,6 +277,7 @@ point_mesh <- function(dimension = c(2,3),
 plot_point_mesh <- function(mesh,
                             sensors = TRUE,
                             label_sensors = FALSE,
+                            sensor_select = NULL,
                             names_vec = NULL,
                             col = "gray",
                             cex = 0.4,
@@ -261,9 +295,9 @@ plot_point_mesh <- function(mesh,
     stop("With using 'own_coordinates' please define the 'names_vec' or set 'label_sensors' to FALSE.")
   }
 
-  if (label_sensors == TRUE && is.null(names_vec)) {
-    names_vec <- diegr::HCGSN256$D2$sensor
-  }
+  #if (label_sensors == TRUE && is.null(names_vec)) {
+  #  names_vec <- diegr::HCGSN256$D2$sensor
+  #}
 
   stopifnot(is.data.frame(mesh))
 
@@ -271,7 +305,16 @@ plot_point_mesh <- function(mesh,
     rgl::points3d(mesh$x, mesh$y, mesh$z, col = col, cex = cex)
 
     if (is.null(own_coordinates)) {
-      own_coordinates <- diegr::HCGSN256$D3
+      #own_coordinates <- diegr::HCGSN256$D3
+      if (!is.null(sensor_select)) {
+        coords_full <- diegr::HCGSN256$D3
+        sensor_index <- which(coords_full$sensor %in% sensor_select)
+        own_coordinates <- coords_full[sensor_index,]
+        names_vec <- coords_full$sensor[sensor_index]
+      } else {
+        own_coordinates <- diegr::HCGSN256$D3
+        names_vec <- diegr::HCGSN256$D3$sensor
+      }
     }
 
     if (sensors == TRUE) {
@@ -292,7 +335,16 @@ plot_point_mesh <- function(mesh,
   else if (all(c("x", "y") %in% colnames(mesh))) {
 
     if (is.null(own_coordinates)) {
-      own_coordinates <- diegr::HCGSN256$D2
+      #own_coordinates <- diegr::HCGSN256$D2
+      if (!is.null(sensor_select)) {
+        coords_full <- diegr::HCGSN256$D2
+        sensor_index <- which(coords_full$sensor %in% sensor_select)
+        own_coordinates <- coords_full[sensor_index,]
+        names_vec <- coords_full$sensor[sensor_index]
+      } else {
+        own_coordinates <- diegr::HCGSN256$D2
+        names_vec <- diegr::HCGSN256$D2$sensor
+      }
     }
 
     M <- max(max(mesh[["y"]], na.rm = TRUE), max(own_coordinates[["y"]]))
@@ -364,7 +416,9 @@ plot_point_mesh <- function(mesh,
 #' @examples
 #'
 #' # a) Create small mesh for triangulation example
-#' M <- point_mesh(n = 500, template = "HCGSN256")
+#' # using 204 electrodes from epochdata
+#' M <- point_mesh(n = 500, template = "HCGSN256",
+#' sensor_select = unique(epochdata$sensor))
 #'
 #' # b) Make triangulation on this mesh
 #' TRI <- make_triangulation(M$D2)

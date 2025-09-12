@@ -9,6 +9,7 @@ point_mesh(
   n = 10000,
   r,
   template = NULL,
+  sensor_select = NULL,
   own_coordinates = NULL,
   type = "polygon"
 )
@@ -21,6 +22,8 @@ point_mesh(
 \item{r}{Optionally, desired radius of a circular mesh. If not defined, it is computed from the convex hull of sensor locations, based on maximum Euclidean distance from centroid.}
 
 \item{template}{A character denoting sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0.}
+
+\item{sensor_select}{Optionally, a vector with sensor labels to select from the template. If not defined, all sensors from the template montage are used to create a mesh.}
 
 \item{own_coordinates}{Optionally, a list with own sensor coordinates for mesh building. See Details for more information.}
 
@@ -57,6 +60,7 @@ Note: When specifying the \code{own_coordinates} and \code{template} at the same
 }
 \examples{
 # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template
+# using all electrodes
 M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256", type = "circle")
 
 # Computing polygon 3D mesh with starting number 2000 points and own coordinates
@@ -64,8 +68,12 @@ M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256", type = "circle")
 ## just a mod example of using the own_coordinates parameter
 M <- point_mesh(dimension = 3, n = 2000, own_coordinates = HCGSN256)
 
-# Computing coordinates of a polygon mesh in 2D and 3D in one step (starting number 3000 points):
-M <- point_mesh(n = 3000, template = "HCGSN256")
+# Computing coordinates of a polygon mesh in 2D and 3D in one step (starting number 3000 points),
+# using 204 electrodes selected for epochdata
+# a) create vector with selected sensor labels
+sensors <- unique(epochdata$sensor)
+# b) create a mesh for selected sensors using sensor_select parameter
+M <- point_mesh(n = 3000, template = "HCGSN256", sensor_select = sensors)
 }
 \references{
 EGI Geodesic Sensor Net Technical Manual (2024)

@@ -99,17 +99,32 @@ animate_topo <- function(data,
     warning("Both 'template' and 'coords' were specified. Using 'template' and ignoring 'coords'.")
   }
 
+  if (!"sensor" %in% colnames(data)) {
+    stop("There is no 'sensor' column in input data.")
+  }
+
   if (is.null(template) && is.null(coords)) {
     # use HCGSN256 template
     template <- "HCGSN256"
   }
 
+  sensor_select <- unique(data$sensor)
+
   if (!is.null(template)) {
-    coords <- switch(template,
-                     "HCGSN256" = diegr::HCGSN256$D2,
-                     stop("Unknown template.")
-                     )
+    coords_full <- switch(template,
+                          "HCGSN256" = diegr::HCGSN256$D2,
+                          stop("Unknown template.")
+    )
+    sensor_index <- which(coords_full$sensor %in% sensor_select)
+    coords <- coords_full[sensor_index,]
   }
+
+  #if (!is.null(template)) {
+  #  coords <- switch(template,
+  #                   "HCGSN256" = diegr::HCGSN256$D2,
+  #                   stop("Unknown template.")
+  #                   )
+  #}
 
   required_cols <- c("x", "y", "sensor")
   missing_cols <- setdiff(required_cols, colnames(coords))
@@ -120,7 +135,8 @@ animate_topo <- function(data,
   }
 
   if (missing(mesh)) {
-    mesh <- point_mesh(dimension = 2, template = template)
+    mesh <- point_mesh(dimension = 2, template = template,
+                       sensor_select = sensor_select)
   }
 
   if (control_D2(mesh)) {
@@ -364,6 +380,10 @@ animate_scalp <- function(data,
     stop("There are NA's in amplitude column.")
   }
 
+  if (!"sensor" %in% colnames(data)) {
+    stop("There is no 'sensor' column in input data.")
+  }
+
   if (!is.numeric(sec) || sec <= 0) {
     stop("'sec' must be a positive number.")
   }
@@ -385,12 +405,23 @@ animate_scalp <- function(data,
     template <- "HCGSN256"
   }
 
+  sensor_select <- unique(data$sensor)
+
   if (!is.null(template)) {
-    coords <- switch(template,
-                     "HCGSN256" = diegr::HCGSN256$D3,
-                     stop("Unknown template.")
+    coords_full <- switch(template,
+                          "HCGSN256" = diegr::HCGSN256$D3,
+                          stop("Unknown template.")
     )
+    sensor_index <- which(coords_full$sensor %in% sensor_select)
+    coords <- coords_full[sensor_index,]
   }
+
+  #if (!is.null(template)) {
+  #  coords <- switch(template,
+  #                   "HCGSN256" = diegr::HCGSN256$D3,
+  #                   stop("Unknown template.")
+  #  )
+  #}
 
   required_cols <- c("x", "y", "z", "sensor")
   missing_cols <- setdiff(required_cols, colnames(coords))
@@ -405,7 +436,8 @@ animate_scalp <- function(data,
     if (!missing(tri)) {
       stop("The argument 'mesh' must be provided when argument 'tri' is specified.")
     }
-     mesh <- point_mesh(dimension = c(2,3), template = template)
+     mesh <- point_mesh(dimension = c(2,3), template = template,
+                        sensor_select = sensor_select)
   }
 
   if (control_D3(mesh)) {
@@ -733,6 +765,10 @@ animate_topo_mean <- function(data,
     stop("'t0' must be a numeric value.")
   }
 
+  if (!"sensor" %in% names(data)) {
+    stop("The input data must include a 'sensor' column.")
+  }
+
   if (!is.null(template) && !is.null(coords)) {
     warning("Both 'template' and 'coords' were specified. Using 'template' and ignoring 'coords'.")
   }
@@ -742,12 +778,23 @@ animate_topo_mean <- function(data,
     template <- "HCGSN256"
   }
 
+  sensor_select <- unique(data$sensor)
+
   if (!is.null(template)) {
-    coords <- switch(template,
-                     "HCGSN256" = diegr::HCGSN256$D2,
-                     stop("Unknown template.")
+    coords_full <- switch(template,
+                          "HCGSN256" = diegr::HCGSN256$D2,
+                          stop("Unknown template.")
     )
+    sensor_index <- which(coords_full$sensor %in% sensor_select)
+    coords <- coords_full[sensor_index,]
   }
+
+  #if (!is.null(template)) {
+  #  coords <- switch(template,
+  #                   "HCGSN256" = diegr::HCGSN256$D2,
+  #                   stop("Unknown template.")
+  #  )
+  #}
 
   required_cols <- c("x", "y", "sensor")
   missing_cols <- setdiff(required_cols, colnames(coords))
@@ -758,7 +805,8 @@ animate_topo_mean <- function(data,
   }
 
   if (missing(mesh)) {
-    mesh <- point_mesh(dimension = 2, template = { template })
+    mesh <- point_mesh(dimension = 2, template = { template },
+                       sensor_select = sensor_select)
   }
 
   if (control_D2(mesh)) {

@@ -5,7 +5,7 @@
 #'
 #' @param coords A data frame, matrix or named tibble with numeric columns of "x" and "y" sensor coordinates. If not defined, HCGSN256 template is used. See details for more information about coordinate requirements.
 #' @param hemisphere A character vector denoting hemisphere to choose. Possible values: \code{"left"}, \code{"right"}, \code{"midline"} or any combination of them. If not defined, both hemispheres with midline are chosen.
-#' @param region A character vector denoting region to choose. Possible values: \code{"frontal"}, \code{"central"}, \code{"parietal"}, \code{"occipital"}, \code{"temporal"} or any combination of them. If not defined, all regions are chosen.
+#' @param region A character vector denoting region to choose. Possible values: \code{"frontal"}, \code{"central"}, \code{"parietal"}, \code{"occipital"}, \code{"temporal"}, \code{"face"} or any combination of them. If not defined, all regions are chosen.
 #' @param ROI A character or factor vector with labels of regions, aligned row-wise with \code{coords}. If not defined, the predefined vector (according to HCGSN256 template determined by an expert from Central European Institute of Technology, Masaryk University, Brno, Czech Republic) is used.
 #' @param tol A numeric value indicating tolerance for midline selection. (Values of x fulfilling abs(x) < tol are denoted as midline.) Default value is 1e-6.
 #'
@@ -39,7 +39,7 @@
 #' plot(hemi_lm$x, hemi_lm$y, pch = 16, asp = 1)
 pick_region <- function(coords = NULL,
                         hemisphere = c("left", "right", "midline"),
-                        region = c("frontal", "central", "parietal", "occipital", "temporal"),
+                        region = c("frontal", "central", "parietal", "occipital", "temporal", "face"),
                         ROI = NULL,
                         tol = 1e-6) {
 
@@ -48,7 +48,7 @@ pick_region <- function(coords = NULL,
   }
 
   allowed_hemis <- c("left", "right", "midline")
-  allowed_regions <- c("frontal", "central", "parietal", "occipital", "temporal")
+  allowed_regions <- c("frontal", "central", "parietal", "occipital", "temporal", "face")
 
   bad_h <- setdiff(hemisphere, allowed_hemis)
   if (length(bad_h) > 0) {

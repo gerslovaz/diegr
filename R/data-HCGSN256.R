@@ -1,7 +1,7 @@
 #' @title Coordinates of 256-channel HCGSN sensors
 #'
 #' @description A file containing the Cartesian coordinates of high-density EEG sensor positions in 3D space on the scalp surface and their positions in 2D space.
-#' The coordinates belong to 256-channel HydroCel Geodesic Sensor Net average template montage. This template contains 256 electrode positions.
+#' The coordinates belong to 256-channel HydroCel Geodesic Sensor Net (GSN) average template montage. This template contains 257 electrode positions (including reference).
 #'
 #' @docType data
 #'
@@ -12,8 +12,7 @@
 #'   \item{D2}{A tibble with 3 columns containing x and y coordinates and sensor labels (according to EGI GSN Technical Manual) in 2D.}
 #'   \item{D3}{A tibble with 4 columns containing x, y and z coordinates and sensor labels in 3D. See 'Details' for more information.}
 #'   \item{ROI}{Factor containing the name of the region to which the corresponding sensor belongs.
-#'   The levels are: "central", "frontal", "occipital", "parietal", "temporal".}
-#'   \item{pairedname}{Alternative sensor labels corresponding to left/right paired electrodes (with C for midline).}
+#'   The levels are: "central", "frontal", "occipital", "parietal", "temporal" and "face" for electrodes from the face area.}
 #' }
 #'
 #' @details

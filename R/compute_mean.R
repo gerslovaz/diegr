@@ -551,7 +551,7 @@ plot_topo_mean <- function(data,
     stop("Argument 'label_sensors' has to be logical.")
   }
 
-  miss_data <- setdiff(c("average", "ci_low", "ci_up"), colnames(data))
+  miss_data <- setdiff(c("average", "ci_low", "ci_up", "sensor"), colnames(data))
 
   if (length(miss_data) > 0) {
     stop(paste("The following required columns in 'data' are missing:",
@@ -578,12 +578,23 @@ plot_topo_mean <- function(data,
     template <- "HCGSN256"
   }
 
+  sensor_select <- unique(data$sensor)
+
   if (!is.null(template)) {
-    coords <- switch(template,
-                     "HCGSN256" = diegr::HCGSN256$D2,
-                     stop("Unknown template.")
-                     )
+    coords_full <- switch(template,
+                          "HCGSN256" = diegr::HCGSN256$D2,
+                          stop("Unknown template.")
+    )
+    sensor_index <- which(coords_full$sensor %in% sensor_select)
+    coords <- coords_full[sensor_index,]
   }
+
+  #if (!is.null(template)) {
+  #  coords <- switch(template,
+  #                   "HCGSN256" = diegr::HCGSN256$D2,
+  #                   stop("Unknown template.")
+  #                   )
+  #}
 
   required_cols <- c("x", "y", "sensor")
   missing_cols <- setdiff(required_cols, colnames(coords))
@@ -594,7 +605,8 @@ plot_topo_mean <- function(data,
   }
 
   if (missing(mesh)) {
-    mesh <- point_mesh(dimension = 2, template = { template })
+    mesh <- point_mesh(dimension = 2, template = { template },
+                       sensor_select = sensor_select)
   }
 
   if (control_D2(mesh)) {
