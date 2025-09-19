@@ -61,10 +61,12 @@ data_base <- baseline_correction(edata, baseline_range = 1:10)
 # a3) average computing
 data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, time = 10,
  type = "jack", group = "space")
+# a4) prepare a mesh for plotting
+M <- point_mesh(dimension = 2, n = 3000, template = "HCGSN256",
+sensor_select = unique(epochdata$sensor))
 
-
-# b) plotting the topographic map with legend
-plot_topo_mean(data = data_mean, template = "HCGSN256", show_legend = TRUE)
+# b) plot the topographic map with legend
+plot_topo_mean(data = data_mean, mesh = M, template = "HCGSN256", show_legend = TRUE)
 }
 \seealso{
 \code{\link{animate_topo_mean}}: animated version of the plot; \code{\link{topo_plot}}

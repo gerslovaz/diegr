@@ -36,7 +36,7 @@
 #' xlab = "time point", ylab = "amplitude")
 #' lines(epoch1$signal_base, col = "red")
 #'
-#' \dontrun{
+#' \donttest{
 #' # Set baseline_range outside of time range
 #' # results in NA's in baseline and signal_base columns
 #' # also returns a warning message

@@ -58,7 +58,7 @@ Displaying the rotated scalp map using the \code{view} argument requires previou
 When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
 }
 \examples{
-\dontrun{
+\donttest{
 ## Note: The example opens a rgl 3D viewer.
 # Plot average scalp map of signal for subject 2 from the time point 10 (the time of the stimulus)
 # the outliers (epoch 14 and 15) are extracted before computing

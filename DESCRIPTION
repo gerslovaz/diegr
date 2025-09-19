@@ -1,5 +1,5 @@
 Package: diegr
-Title: Dynamic and Interactive EEG Graphics using R
+Title: Dynamic and Interactive EEG Graphics
 Version: 0.1.0
 Authors@R: 
     c(

@@ -58,7 +58,7 @@ An animation of the average signal time course as a topographic map along with t
 Note: When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
 }
 \examples{
-\dontrun{
+\donttest{
 # This example may take a few seconds to render.
 # Run only if you want to generate the full animation.
 
@@ -72,7 +72,6 @@ data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2,
 # b) render the animation
 # (t0 = 10 because the time of the stimulus in epochdata is in time point 10)
 animate_topo_mean(data_mean, t_lim = c(1,50), t0 = 10)
-
 }
 }
 \seealso{

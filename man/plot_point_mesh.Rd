@@ -59,11 +59,10 @@ When both \code{names_vec} and \code{own_coordinates} are provided, it is essent
 M <- point_mesh(n = 4000, template = "HCGSN256")
 plot_point_mesh(M$D2)
 
-\dontrun{
 ## Note: the example opens a rgl 3D viewer
 # Plotting 3D polygon point mesh with default settings
+rgl::open3d()
 plot_point_mesh(M$D3)
-}
 
 # Plotting 2D circle point mesh with sensors from epochdata as orange points
 sensors <- unique(epochdata$sensor)
@@ -75,7 +74,6 @@ plot_point_mesh(M$D2, sensor_select = sensors, col_sensors = "orange")
 midline <- HCGSN256$D2[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204),]
 names_vec <- HCGSN256$D2$sensor[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204)]
 plot_point_mesh(M$D2, label_sensors = TRUE, names_vec = names_vec, own_coordinates = midline)
-
 }
 \seealso{
 \code{\link[=point_mesh]{point_mesh()}}

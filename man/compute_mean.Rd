@@ -84,7 +84,7 @@ Note: If there are NA's in \code{amplitude} column, corresponding rows are ignor
 avg_data <- compute_mean(epochdata, amplitude = "signal", subject = 1, channel = "E1",
 level = "epoch", ex_epoch = 14)
 str(avg_data)
-\dontrun{
+\donttest{
 # plot the result using interactive plot with pointwise CI
 interactive_waveforms(data = avg_data, amplitude = "average", subject = 1, t0 = 10,
 level = "sensor", avg = FALSE, CI = TRUE)
@@ -103,7 +103,6 @@ str(avg_data)
 # c) plot the result with topo_plot()
 topo_plot(data = avg_data, amplitude = "average")
 
-\dontrun{
 # Space average on subject level (average for all included subjects in time point 11)
 # a) filter time point 11
 data02 <- epochdata |> dplyr::filter(.data$time == 11)
@@ -114,7 +113,6 @@ group = "space", type = "point", ex_epoch = c(14,15))
 mean_subjects <- compute_mean(mean_epoch, amplitude = "average", level = "subject",
 group = "space", type = "point")
 head(mean_subjects)
-}
 }
 \references{
 Efron B., Tibshirani RJ. \emph{An Introduction to the Bootstrap.} Chapman & Hall/CRC; 1994.

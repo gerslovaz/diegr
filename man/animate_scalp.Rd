@@ -69,7 +69,7 @@ For exporting the video, setting \code{frames_dir} together with \code{output_pa
 When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
 }
 \examples{
-\dontrun{
+\donttest{
 # This example may take a few seconds to render.
 # Run only if you want to generate the full animation.
 # Note: The example opens a rgl 3D viewer.

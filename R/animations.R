@@ -41,7 +41,7 @@
 #' @importFrom rlang .data
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # This example may take a few seconds to render.
 #' # Run only if you want to generate the full animation.
 #' # Prepare a data structure:
@@ -118,13 +118,6 @@ animate_topo <- function(data,
     sensor_index <- which(coords_full$sensor %in% sensor_select)
     coords <- coords_full[sensor_index,]
   }
-
-  #if (!is.null(template)) {
-  #  coords <- switch(template,
-  #                   "HCGSN256" = diegr::HCGSN256$D2,
-  #                   stop("Unknown template.")
-  #                   )
-  #}
 
   required_cols <- c("x", "y", "sensor")
   missing_cols <- setdiff(required_cols, colnames(coords))
@@ -349,7 +342,7 @@ prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
 #'
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # This example may take a few seconds to render.
 #' # Run only if you want to generate the full animation.
 #' # Note: The example opens a rgl 3D viewer.
@@ -415,13 +408,6 @@ animate_scalp <- function(data,
     sensor_index <- which(coords_full$sensor %in% sensor_select)
     coords <- coords_full[sensor_index,]
   }
-
-  #if (!is.null(template)) {
-  #  coords <- switch(template,
-  #                   "HCGSN256" = diegr::HCGSN256$D3,
-  #                   stop("Unknown template.")
-  #  )
-  #}
 
   required_cols <- c("x", "y", "z", "sensor")
   missing_cols <- setdiff(required_cols, colnames(coords))
@@ -714,7 +700,7 @@ prepare_anim_structure_CI <- function(data, coords, mesh_mat) {
 #' @importFrom scales rescale
 #' @importFrom rlang .data
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # This example may take a few seconds to render.
 #' # Run only if you want to generate the full animation.
 #'
@@ -728,9 +714,7 @@ prepare_anim_structure_CI <- function(data, coords, mesh_mat) {
 #' # b) render the animation
 #' # (t0 = 10 because the time of the stimulus in epochdata is in time point 10)
 #' animate_topo_mean(data_mean, t_lim = c(1,50), t0 = 10)
-#'
 #' }
-
 animate_topo_mean <- function(data,
                               t_lim,
                               FS = 250,
@@ -788,13 +772,6 @@ animate_topo_mean <- function(data,
     sensor_index <- which(coords_full$sensor %in% sensor_select)
     coords <- coords_full[sensor_index,]
   }
-
-  #if (!is.null(template)) {
-  #  coords <- switch(template,
-  #                   "HCGSN256" = diegr::HCGSN256$D2,
-  #                   stop("Unknown template.")
-  #  )
-  #}
 
   required_cols <- c("x", "y", "sensor")
   missing_cols <- setdiff(required_cols, colnames(coords))

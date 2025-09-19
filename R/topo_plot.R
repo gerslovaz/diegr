@@ -57,12 +57,9 @@
 #' topo_plot(data = data_mean, amplitude = "average", template = "HCGSN256",
 #' col_range = c(-30, 15), contour = TRUE)
 #'
-#' \dontrun{
 #' # c) plotting the same map without contours but with sensor labels
 #' topo_plot(data = data_mean, amplitude = "average", template = "HCGSN256",
 #'  col_range = c(-30, 15), label_sensors = TRUE)
-#' }
-#'
 topo_plot <- function(data,
                       amplitude,
                       mesh,

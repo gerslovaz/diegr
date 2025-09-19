@@ -257,11 +257,10 @@ point_mesh <- function(dimension = c(2,3),
 #' M <- point_mesh(n = 4000, template = "HCGSN256")
 #' plot_point_mesh(M$D2)
 #'
-#' \dontrun{
 #' ## Note: the example opens a rgl 3D viewer
 #' # Plotting 3D polygon point mesh with default settings
+#' rgl::open3d()
 #' plot_point_mesh(M$D3)
-#' }
 #'
 #' # Plotting 2D circle point mesh with sensors from epochdata as orange points
 #' sensors <- unique(epochdata$sensor)
@@ -273,7 +272,6 @@ point_mesh <- function(dimension = c(2,3),
 #' midline <- HCGSN256$D2[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204),]
 #' names_vec <- HCGSN256$D2$sensor[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204)]
 #' plot_point_mesh(M$D2, label_sensors = TRUE, names_vec = names_vec, own_coordinates = midline)
-#'
 plot_point_mesh <- function(mesh,
                             sensors = TRUE,
                             label_sensors = FALSE,
@@ -294,10 +292,6 @@ plot_point_mesh <- function(mesh,
   if (label_sensors == TRUE && !is.null(own_coordinates) && is.null(names_vec)) {
     stop("With using 'own_coordinates' please define the 'names_vec' or set 'label_sensors' to FALSE.")
   }
-
-  #if (label_sensors == TRUE && is.null(names_vec)) {
-  #  names_vec <- diegr::HCGSN256$D2$sensor
-  #}
 
   stopifnot(is.data.frame(mesh))
 
@@ -414,7 +408,6 @@ plot_point_mesh <- function(mesh,
 #' @export
 #'
 #' @examples
-#'
 #' # a) Create small mesh for triangulation example
 #' # using 204 electrodes from epochdata
 #' M <- point_mesh(n = 500, template = "HCGSN256",
@@ -444,11 +437,10 @@ plot_point_mesh <- function(mesh,
 #' # plot triangulation using segments
 #' segments(x0, y0, x1, y1)
 #'
-#' \dontrun{
 #' ## Note: this code opens a rgl 3D viewer
 #' # d) Plot the result triangulation as 3D wire model using rgl
-#'  rgl::wire3d(mesh3d(M$D3$x, M$D3$y, M$D3$z, triangles = t(TRI)))
-#'  }
+#'  rgl::open3d()
+#'  rgl::wire3d(rgl::mesh3d(M$D3$x, M$D3$y, M$D3$z, triangles = t(TRI)))
 make_triangulation <- function(mesh) {
 
   required_cols <- c("x", "y")

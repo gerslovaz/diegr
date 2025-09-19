@@ -95,14 +95,10 @@ pick_region <- function(coords = NULL,
     stop("No coordinates match the requested region(s): ",
          paste(region, collapse = ", "))
   }
-  #idxreg <- grep(paste(region, collapse = "|"), ROI)
-  new_coords <- coords[idxreg, , drop = FALSE]
 
-  #if (!"x" %in% colnames(new_coords)) {
-  #  x <- new_coords[[1]]
-  #} else {
+  new_coords <- coords[idxreg, , drop = FALSE]
   x <- new_coords$x
-  #}
+
 
   idxl <- c()
   idxr <- c()

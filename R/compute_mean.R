@@ -55,7 +55,7 @@
 #' avg_data <- compute_mean(epochdata, amplitude = "signal", subject = 1, channel = "E1",
 #' level = "epoch", ex_epoch = 14)
 #' str(avg_data)
-#' \dontrun{
+#' \donttest{
 #' # plot the result using interactive plot with pointwise CI
 #' interactive_waveforms(data = avg_data, amplitude = "average", subject = 1, t0 = 10,
 #' level = "sensor", avg = FALSE, CI = TRUE)
@@ -74,7 +74,6 @@
 #' # c) plot the result with topo_plot()
 #' topo_plot(data = avg_data, amplitude = "average")
 #'
-#' \dontrun{
 #' # Space average on subject level (average for all included subjects in time point 11)
 #' # a) filter time point 11
 #' data02 <- epochdata |> dplyr::filter(.data$time == 11)
@@ -85,7 +84,6 @@
 #' mean_subjects <- compute_mean(mean_epoch, amplitude = "average", level = "subject",
 #' group = "space", type = "point")
 #' head(mean_subjects)
-#' }
 compute_mean <- function(data,
                          amplitude = "signal_base",
                          subject = NULL,
@@ -152,7 +150,6 @@ compute_mean <- function(data,
 #' @importFrom rlang .data
 #' @importFrom purrr map_dbl
 #' @noRd
-
 pointwise_mean <- function(data,
                            amp_name,
                            group = c("time", "space"),
@@ -199,8 +196,8 @@ pointwise_mean <- function(data,
     avg_data <- avg_data |>
       mutate(average = .data$average_col,
              sd = .data$sd_col) |>
-      select(-"average_col", -"sd_col") #|>
-      #collect()
+      select(-"average_col", -"sd_col")
+
   return(avg_data)
 }
 
@@ -338,8 +335,7 @@ jackknife_mean <- function(data,
       ci_low = purrr::map_dbl(.data$jack_stats, "ci_low"),
       ci_up = purrr::map_dbl(.data$jack_stats, "ci_up")
     ) |>
-    select(-"jack_stats") #|>
-    #collect()
+    select(-"jack_stats")
 
   return(avg_data)
 }
@@ -417,7 +413,6 @@ compute_CI_boot <- function(x,
 #'  type = "point")
 #' # b) plotting the average line with default settings
 #' plot_time_mean(data = data_mean, t0 = 10)
-
 plot_time_mean <- function(data,
                            FS = 250,
                            t0 = 1,
@@ -525,10 +520,12 @@ plot_time_mean <- function(data,
 #' # a3) average computing
 #' data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, time = 10,
 #'  type = "jack", group = "space")
+#' # a4) prepare a mesh for plotting
+#' M <- point_mesh(dimension = 2, n = 3000, template = "HCGSN256",
+#' sensor_select = unique(epochdata$sensor))
 #'
-#'
-#' # b) plotting the topographic map with legend
-#' plot_topo_mean(data = data_mean, template = "HCGSN256", show_legend = TRUE)
+#' # b) plot the topographic map with legend
+#' plot_topo_mean(data = data_mean, mesh = M, template = "HCGSN256", show_legend = TRUE)
 plot_topo_mean <- function(data,
                            mesh,
                            coords = NULL,
@@ -588,13 +585,6 @@ plot_topo_mean <- function(data,
     sensor_index <- which(coords_full$sensor %in% sensor_select)
     coords <- coords_full[sensor_index,]
   }
-
-  #if (!is.null(template)) {
-  #  coords <- switch(template,
-  #                   "HCGSN256" = diegr::HCGSN256$D2,
-  #                   stop("Unknown template.")
-  #                   )
-  #}
 
   required_cols <- c("x", "y", "sensor")
   missing_cols <- setdiff(required_cols, colnames(coords))

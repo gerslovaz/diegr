@@ -24,7 +24,6 @@ The order of the vertices is chosen to maintain a consistent orientation of the 
 If the input mesh has not regular grid spacing, the result triangulation may not be meaningful and will not meet the Delaunay triangulation criteria.
 }
 \examples{
-
 # a) Create small mesh for triangulation example
 # using 204 electrodes from epochdata
 M <- point_mesh(n = 500, template = "HCGSN256",
@@ -54,11 +53,10 @@ for (i in 1:nrow(TRI)) {
 # plot triangulation using segments
 segments(x0, y0, x1, y1)
 
-\dontrun{
 ## Note: this code opens a rgl 3D viewer
 # d) Plot the result triangulation as 3D wire model using rgl
- rgl::wire3d(mesh3d(M$D3$x, M$D3$y, M$D3$z, triangles = t(TRI)))
- }
+ rgl::open3d()
+ rgl::wire3d(rgl::mesh3d(M$D3$x, M$D3$y, M$D3$z, triangles = t(TRI)))
 }
 \references{
 Lai M-J, Schumaker LL. \emph{Spline functions on triangulations.} Cambridge University Press; 2007.

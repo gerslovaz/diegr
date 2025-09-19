@@ -38,7 +38,7 @@
 #' @importFrom rlang .data
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' ## Note: The example opens a rgl 3D viewer.
 #' # Plot average scalp map of signal for subject 2 from the time point 10 (the time of the stimulus)
 #' # the outliers (epoch 14 and 15) are extracted before computing
@@ -56,7 +56,6 @@
 #' # b) plotting the scalp polygon map
 #' scalp_plot(data_mean, amplitude = "average", col_range = c(-30, 15))
 #' }
-
 scalp_plot <- function(data,
                        amplitude,
                        mesh,
@@ -102,12 +101,6 @@ scalp_plot <- function(data,
     sensor_index <- which(coords_full$sensor %in% sensor_select)
     coords <- coords_full[sensor_index,]
   }
-
-  #if (!is.null(template)) {
-  #  coords <- switch(template,
-  #                   "HCGSN256" = diegr::HCGSN256$D3,
-  #                   stop("Unknown template."))
-  #}
 
   required_cols <- c("x", "y", "z", "sensor")
   missing_cols <- setdiff(required_cols, colnames(coords))
