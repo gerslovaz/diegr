@@ -31,7 +31,13 @@ The package `diegr` includes:
 
 ## Installation
 
-You can install the development version of MyPackage from GitHub with:
+You can install the current version of `diegr` from CRAN with:
+
+``` r
+install.packages("diegr")
+```
+
+or the latest development version from GitHub with:
 
 ``` r
 # install.packages("devtools")

@@ -35,7 +35,13 @@ The package `diegr` includes:
 -   animations of time course of the raw signal or the average in 2D and 3D (`animate_topo`, `animate_topo_mean`, `animate_scalp`)
 
 ## Installation
-You can install the development version of MyPackage from GitHub with:
+You can install the current version of `diegr` from CRAN with:
+
+```{r, eval = FALSE}
+install.packages("diegr")
+```
+
+or the latest development version from GitHub with:
 ``` {r, eval = FALSE}
 # install.packages("devtools")
 devtools::install_github("gerslovaz/diegr") 

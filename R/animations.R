@@ -275,8 +275,17 @@ prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
     coords_df <- data.frame(x = coords[["x"]], y = coords[["y"]])
   }
 
+  if (!all(unique(coords$sensor) %in% data$sensor)) {
+    stop("Mismatch between sensors in data and coords.")
+  }
+
+  sensor_order <- as.factor(coords$sensor) # reorder data according to sensor
+  data_order <- data |>
+    mutate(sensor = factor(.data$sensor, levels = sensor_order)) |>
+    arrange(.data$sensor)
+
   # add coordinates of sensors to the tibble with time and signal data
-  tib_signal <- data |>
+  tib_signal <- data_order |>
     left_join(coords, by = "sensor")
 
   col_name <- enquo(amp_name)
@@ -627,8 +636,17 @@ prepare_anim_structure_CI <- function(data, coords, mesh_mat) {
     coords_df <- data.frame(x = coords[["x"]], y = coords[["y"]])
   }
 
+  if (!all(unique(coords$sensor) %in% data$sensor)) {
+    stop("Mismatch between sensors in data and coords.")
+  }
+
+  sensor_order <- as.factor(coords$sensor) # reorder data according to sensor
+  data_order <- data |>
+    mutate(sensor = factor(.data$sensor, levels = sensor_order)) |>
+    arrange(.data$sensor)
+
   # add coordinates of sensors to the tibble with time and signal data
-  tib_signal <- data |>
+  tib_signal <- data_order |>
     left_join(coords, by = "sensor")
 
 

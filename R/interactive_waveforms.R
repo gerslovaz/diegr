@@ -149,6 +149,13 @@ interactive_waveforms <- function(data,
       )
   }
 
+  if (avg == TRUE) {
+    p <- p |>
+      add_trace(data = avgdata, x = ~time * k - k0, y = ~.data$avg, type = 'scatter', mode = 'lines',
+                line = list(color = 'black'),
+                name = 'Average')
+  }
+
   if (use_latex) {
     y_label <- TeX("\\mu V")
     mathjax_config <- 'cdn'
