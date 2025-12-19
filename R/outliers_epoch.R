@@ -58,9 +58,6 @@ outliers_epoch <- function(data,
                            p = 0.975,
                            print_tab = TRUE){
 
-  amp_value <- {{ amplitude }}
-  amp_name <- rlang::as_string(amp_value)
-
   if (!method %in% c("iqr", "percentile", "hampel")) {
     stop("Invalid method specified.")
   }

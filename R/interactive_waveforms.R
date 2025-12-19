@@ -60,9 +60,6 @@ interactive_waveforms <- function(data,
                                   CI = FALSE,
                                   use_latex = TRUE) {
 
-  #amp_value <- {{ amplitude }}
-  #amp_name <- rlang::as_string(amp_value)
-
   if (!amplitude %in% colnames(data)) {
     stop(paste0("There is no column '", amplitude, "' in the input data."))
   }

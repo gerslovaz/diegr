@@ -156,8 +156,7 @@ topo_plot <- function(data,
   interp_data <- data.frame(x = mesh_mat[,1], y = mesh_mat[,2], ycp_IM = ycp_IM)
 
   if (is.null(col_range)) {
-    #padding <- 0.05 * diff(range(interp_data$ycp_IM)) ## expanded by a padding value equal to 5%
-    col_range <- range(interp_data$ycp_IM) # + c(-1, 1) * padding
+     col_range <- range(interp_data$ycp_IM)
   }
   if (is.null(col_scale)) {
     col_scale <- create_scale(col_range)
@@ -165,7 +164,7 @@ topo_plot <- function(data,
 
 
   g <- ggplot(interp_data, aes(x = .data$x, y = .data$y)) +
-    geom_raster(aes(fill = ycp_IM)) +  #, interpolate = TRUE
+    geom_raster(aes(fill = ycp_IM)) +
     scale_fill_gradientn(
       colors = col_scale$colors,
       breaks = col_scale$breaks,

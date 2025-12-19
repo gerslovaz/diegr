@@ -82,7 +82,6 @@ point_mesh <- function(dimension = c(2,3),
     }
     coordinates <- own_coordinates
   } else if (is.null(template) && is.null(own_coordinates)) {
-    #coordinates <- diegr::HCGSN256
     template <- "HCGSN256"
    }
 
@@ -299,7 +298,6 @@ plot_point_mesh <- function(mesh,
     rgl::points3d(mesh$x, mesh$y, mesh$z, col = col, cex = cex)
 
     if (is.null(own_coordinates)) {
-      #own_coordinates <- diegr::HCGSN256$D3
       if (!is.null(sensor_select)) {
         coords_full <- diegr::HCGSN256$D3
         sensor_index <- which(coords_full$sensor %in% sensor_select)
@@ -329,7 +327,6 @@ plot_point_mesh <- function(mesh,
   else if (all(c("x", "y") %in% colnames(mesh))) {
 
     if (is.null(own_coordinates)) {
-      #own_coordinates <- diegr::HCGSN256$D2
       if (!is.null(sensor_select)) {
         coords_full <- diegr::HCGSN256$D2
         sensor_index <- which(coords_full$sensor %in% sensor_select)

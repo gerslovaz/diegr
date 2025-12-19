@@ -147,8 +147,7 @@ scalp_plot <- function(data,
   ycp_IM <- y_hat[1:nrow(mesh3)]
 
   if (is.null(col_range)) {
-    #padding <- 0.05 * diff(range(ycp_IM))
-    col_range <- range(ycp_IM) #+ c(-1, 1) * padding
+    col_range <- range(ycp_IM)
   }
   if (is.null(col_scale)) {
     col_scale <- create_scale(col_range)

@@ -160,8 +160,7 @@ animate_topo <- function(data,
       if (all(is.na(newdata$amplitude_IM))) {
         stop("No valid values in amplitude_IM to create color scale.")
       }
-      #padding <- 0.05 * diff(range(newdata$amplitude_IM))
-      col_range <- range(newdata$amplitude_IM) #+ c(-1, 1) * padding
+      col_range <- range(newdata$amplitude_IM)
     }
 
     col_scale <- create_scale(col_range)
@@ -454,8 +453,7 @@ animate_scalp <- function(data,
       if (all(is.na(newdata$amplitude_IM))) {
         stop("No valid values in amplitude_IM to create color scale.")
       }
-      #padding <- 0.05 * diff(range(newdata$amplitude_IM))
-      col_range <- range(newdata$amplitude_IM) #+ c(-1, 1) * padding
+      col_range <- range(newdata$amplitude_IM)
     }
 
     col_scale <- create_scale(col_range)
