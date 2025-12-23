@@ -15,6 +15,36 @@ req_cols <- function(obj, required_cols) {
 }
 # in: animate_topo, control_D3, control_D2
 
+#' Check missing columns in data
+#'
+#' @description
+#' Verifies that all required columns are present in a data object.
+#' If any required columns are missing, the function stops with an informative error message.
+#'
+#' @param data A data frame, tibble, or database table.
+#' @param required_cols A character vector of required column names.
+#' @param obj_name Name of the object used in the error message. Defaults to the name of \code{data}.
+#'
+#' @return Invisibly returns \code{TRUE} if all required columns are present.
+#' @keywords internal
+#' @noRd
+stop_if_missing_cols <- function(data,
+                                 required_cols,
+                                 obj_name = deparse(substitute(data))) {
+
+  cols <- dplyr::tbl_vars(data)
+  miss_req <- setdiff(required_cols, cols)
+  if (length(miss_req) > 0) {
+    stop(
+      "Columns missing in ", obj_name, ": ", paste(miss_req, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+  invisible(TRUE)
+}
+
+
 #' Validate D3 part of mesh object
 #'
 #' @description

@@ -8,12 +8,11 @@ plot_time_mean(
   data,
   FS = 250,
   t0 = 1,
-  color = "red",
-  fill = "lightsalmon",
   transp = 0.4,
   y_limits = NULL,
   label_0ms = "stimulus",
-  label_offset = c(0, 0)
+  label_offset = c(0, 0),
+  legend_title = "Condition"
 )
 }
 \arguments{
@@ -23,10 +22,6 @@ plot_time_mean(
 
 \item{t0}{Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).}
 
-\item{color}{The color of line. Default value is \code{red}. The argument accepts standard R color names or hex codes.}
-
-\item{fill}{The color of CI bound, default value is \code{lightsalmon}. The argument accepts standard R color names or hex codes.}
-
 \item{transp}{A numeric value between 0 and 1 controlling the transparency of the confidence ribbon (corresponding to \code{alpha} parameter in \link[ggplot2]{geom_ribbon} function).}
 
 \item{y_limits}{A numeric vector of length two, specifying the minimum and maximum y-axis limits. Defaults to \code{NULL}for plot limits determined according to input data.}
@@ -34,29 +29,39 @@ plot_time_mean(
 \item{label_0ms}{Character string for the annotation label at the 0ms mark. Default is \code{"stimulus"}.}
 
 \item{label_offset}{A numeric vector of length two to offset the stimulus label. The first value indicates a horizontal shift, the second a vertical one. Default is \code{c(0,0)} for no shift.}
+
+\item{legend_title}{Character string specifying the legend title shown in the plot. Default is \code{"Condition"}. If the condition column is missing, all observations are treated as a single condition and no legend is plotted.}
 }
 \value{
 A \code{ggplot} object showing the time course of the average EEG signal with pointwise confidence intervals for chosen sensor.
 }
 \description{
-Plot a time curve of the average EEG signal amplitude together with pointwise confidence intervals (CIs).
+Plot a time course of the average EEG signal amplitude with pointwise confidence intervals (CIs), colour-coded by condition. If the \code{condition} column is missing, all observations are treated as a single condition.
 }
 \details{
 The output in the form of a ggplot object allows to easily edit the result image properties. For interactive version of plot see \link{interactive_waveforms} function.
 }
 \examples{
 # Plot average signal with CI bounds for subject 2 from the sensor E65
-# excluding outlier epochs 14 and 15
+# excluding outlier epochs 14 and 15 and for the both subjects treated as conditions
 
 # a) preparing data
 # a1) extract required data
 edata <- epochdata |>
-dplyr::filter(subject == 2 & sensor == "E65" & epoch \%in\% 1:13)
+dplyr::filter(sensor == "E65" & epoch \%in\% 1:13)
 # a2) baseline correction
 data_base <- baseline_correction(edata, baseline_range = 1:10)
 # a3) average computing
-data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, channel = "E65",
+data_mean <- compute_mean(data_base, amplitude = "signal_base", channel = "E65",
  type = "point")
-# b) plotting the average line with default settings
-plot_time_mean(data = data_mean, t0 = 10)
+
+# b) filter subject 2 and plot the average line with default settings
+# (the whole dataset treated as one condition, no legend plotted)
+data_mean2 <- data_mean |>
+dplyr::filter(subject == 2)
+plot_time_mean(data = data_mean2, t0 = 10)
+
+# c) add condition column and plot time course by condition (subject)
+data_mean$condition <- data_mean$subject
+plot_time_mean(data = data_mean, t0 = 10, legend_title = "Subject")
 }

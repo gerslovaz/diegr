@@ -54,13 +54,7 @@ baseline_correction <- function(data, baseline_range, type = "absolute") {
     stop("Only 'absolute' baseline correction is implemented now.")
   }
 
-  required_cols <- c("time", "signal", "epoch", "subject", "sensor")
-  missing_cols <- setdiff(required_cols, colnames(data))
-
-  if (length(missing_cols) > 0) {
-    stop(paste("The following required columns in 'data' are missing:",
-               paste(missing_cols, collapse = ", ")))
-  }
+  stop_if_missing_cols(data, required_cols = c("time", "signal", "epoch", "subject", "sensor"))
 
   newdata <- data |>
     dplyr::select("subject", "sensor", "epoch", "time", "signal")
