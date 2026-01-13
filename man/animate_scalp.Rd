@@ -80,5 +80,5 @@ animate_scalp(s1e05, amplitude = "signal")
 }
 }
 \seealso{
-\code{\link{scalp_plot}}
+Static version: \code{\link{scalp_plot}}, animated 2D topo map: \code{\link{animate_topo}}
 }

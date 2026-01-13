@@ -31,7 +31,7 @@
 #'
 #' @export
 #'
-#' @seealso \code{\link{topo_plot}}
+#' @seealso Static version: \code{\link{topo_plot}}, animated 3D scalp map: \code{\link{animate_scalp}}
 #'
 #' @import ggplot2
 #' @import dplyr
@@ -341,7 +341,7 @@ prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
 #' - If also `output_path` is specified, a video (MP4) is created and saved using the `av` package.
 #' - Otherwise, the animation is displayed in an interactive rgl window.
 #'
-#' @seealso \code{\link{scalp_plot}}
+#' @seealso Static version: \code{\link{scalp_plot}}, animated 2D topo map: \code{\link{animate_topo}}
 #'
 #' @export
 #'
@@ -705,7 +705,7 @@ prepare_anim_structure_CI <- function(data, coords, mesh_mat) {
 #' If `output_path` is `NULL`, the function prints the animation to the RStudio Viewer.
 #' If `output_path` is specified, the animation is saved to the given file path and not displayed. The `gifski` and `magick` packages are required for animation export.
 #'
-#' @seealso \code{\link{animate_topo}}, \code{\link{compute_mean}}, \code{\link{baseline_correction}}
+#' @seealso \code{\link{animate_topo}}, \code{\link{compute_mean}}, \code{\link{baseline_correction}}, static version: \code{\link{plot_topo_mean}}
 #'
 #' @export
 #'

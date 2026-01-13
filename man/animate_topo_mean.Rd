@@ -75,5 +75,5 @@ animate_topo_mean(data_mean, t_lim = c(1,50), t0 = 10)
 }
 }
 \seealso{
-\code{\link{animate_topo}}, \code{\link{compute_mean}}, \code{\link{baseline_correction}}
+\code{\link{animate_topo}}, \code{\link{compute_mean}}, \code{\link{baseline_correction}}, static version: \code{\link{plot_topo_mean}}
 }

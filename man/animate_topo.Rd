@@ -79,5 +79,5 @@ animate_topo(s1e05, amplitude = "signal", t_lim = c(1,50), t0 = 10)
 
 }
 \seealso{
-\code{\link{topo_plot}}
+Static version: \code{\link{topo_plot}}, animated 3D scalp map: \code{\link{animate_scalp}}
 }

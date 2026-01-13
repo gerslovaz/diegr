@@ -170,5 +170,132 @@ interactive_waveforms <- function(data,
 }
 
 
+#' Plot time curve of average EEG signal with confidence interval
+#'
+#' @description
+#' Plot a time course of the average EEG signal amplitude with pointwise confidence intervals (CIs), colour-coded by condition. If the `condition` column is missing, all observations are treated as a single condition.
+#'
+#'
+#' @param data A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: \code{time} with labels of time points and \code{average, ci_low, ci_up} with values of average signal and lower and upper CI bounds.
+#' @param FS The sampling frequency. Default value is 250 Hz.
+#' @param t0 Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).
+#' @param transp A numeric value between 0 and 1 controlling the transparency of the confidence ribbon (corresponding to \code{alpha} parameter in \link[ggplot2]{geom_ribbon} function).
+#' @param y_limits A numeric vector of length two, specifying the minimum and maximum y-axis limits. Defaults to `NULL`for plot limits determined according to input data.
+#' @param label_0ms Character string for the annotation label at the 0ms mark. Default is `"stimulus"`.
+#' @param label_offset A numeric vector of length two to offset the stimulus label. The first value indicates a horizontal shift, the second a vertical one. Default is `c(0,0)` for no shift.
+#' @param legend_title Character string specifying the legend title shown in the plot. Default is `"Condition"`. If the condition column is missing, all observations are treated as a single condition and no legend is plotted.
+#'
+#' @details
+#' The output in the form of a ggplot object allows to easily edit the result image properties. For interactive version of plot see \link{interactive_waveforms} function.
+#'
+#'
+#' @returns A \code{ggplot} object showing the time course of the average EEG signal with pointwise confidence intervals for chosen sensor.
+#' @export
+#'
+#' @import ggplot2
+#' @importFrom rlang .data
+#'
+#' @examples
+#' # Plot average signal with CI bounds for subject 2 from the sensor E65
+#' # excluding outlier epochs 14 and 15 and for the both subjects treated as conditions
+#'
+#' # a) preparing data
+#' # a1) extract required data
+#' edata <- epochdata |>
+#' dplyr::filter(sensor == "E65" & epoch %in% 1:13)
+#' # a2) baseline correction
+#' data_base <- baseline_correction(edata, baseline_range = 1:10)
+#' # a3) average computing
+#' data_mean <- compute_mean(data_base, amplitude = "signal_base", channel = "E65",
+#'  type = "point")
+#'
+#' # b) filter subject 2 and plot the average line with default settings
+#' # (the whole dataset treated as one condition, no legend plotted)
+#' data_mean2 <- data_mean |>
+#' dplyr::filter(subject == 2)
+#' plot_time_mean(data = data_mean2, t0 = 10)
+#'
+#' # c) add condition column and plot time course by condition (subject)
+#' data_mean$condition <- data_mean$subject
+#' plot_time_mean(data = data_mean, t0 = 10, legend_title = "Subject")
+plot_time_mean <- function(data,
+                           FS = 250,
+                           t0 = 1,
+                           transp = 0.4,
+                           y_limits = NULL,
+                           label_0ms = "stimulus",
+                           label_offset = c(0,0),
+                           legend_title = "Condition") {
 
+  stop_if_missing_cols(data, required_cols = c("time", "average", "ci_low", "ci_up"))
+
+  if (inherits(data, "tbl_sql")) {
+    data <- dplyr::collect(data)
+  }
+
+  if (any(is.na(data[["average"]]))) {
+    warning("There are NA's in the 'average' column, these values are ignored in the plot.")
+  }
+
+  if (any(is.na(data[["average"]]))) {
+    warning("There are NA's in the 'average' column, these values are ignored in the plot.")
+  }
+
+  if (any(is.na(data[["ci_low"]]))) {
+    warning("There are NA's in the 'ci_low' column, these values are ignored in the plot.")
+  }
+  if (any(is.na(data[["ci_up"]]))) {
+    warning("There are NA's in the 'ci_up' column, these values are ignored in the plot.")
+  }
+
+  if (!is.numeric(FS) || FS <= 0) {
+    stop("'FS' must be a positive number.")
+  }
+
+  if (!is.numeric(t0) || length(t0) != 1) {
+    stop("'t0' must be a numeric value.")
+  }
+
+  stopifnot(length(label_offset) == 2)
+
+  if (!"condition" %in% names(data)) {
+    data$condition <- factor("all")
+  } else {
+    data$condition <- factor(data$condition)
+  }
+
+  k <- 1000 / FS
+  k0 <- t0 * k
+  y0 <- min(data$ci_low)
+  n_cond <- dplyr::n_distinct(data$condition)
+
+  if (n_cond > 1) {
+    leg_pos <- "right"
+  } else  {
+    leg_pos <- "none"
+  }
+
+  g <- ggplot(data, aes(x = .data$time * k - k0, y = .data$average, colour = .data$condition, fill = .data$condition)) +
+    geom_ribbon(aes(ymin = .data$ci_low, ymax = .data$ci_up), alpha = transp) +
+    geom_line(linewidth = 1) +
+    geom_vline(xintercept =  t0 * k - k0, linetype = "dashed", color = "black") +
+    annotate("text", x = t0 * k - k0 + label_offset[1], y = y0 + label_offset[2],
+             label = label_0ms, vjust = -0.5, color = "black") +
+    labs(
+      x = "Time (ms)",
+      y = expression(paste("Average amplitude (", mu, "V)")),
+      colour = legend_title,
+      fill = legend_title
+    ) +
+    theme_minimal() +
+    theme(
+      legend.position = leg_pos
+    )
+
+  if (!is.null(y_limits)) { # expand the limits
+    g <- g + coord_cartesian(ylim = y_limits)
+  }
+
+  return(g)
+}
 
