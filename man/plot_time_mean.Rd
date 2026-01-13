@@ -6,6 +6,7 @@
 \usage{
 plot_time_mean(
   data,
+  condition_column = NULL,
   FS = 250,
   t0 = 1,
   transp = 0.4,
@@ -17,6 +18,8 @@ plot_time_mean(
 }
 \arguments{
 \item{data}{A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: \code{time} with labels of time points and \code{average, ci_low, ci_up} with values of average signal and lower and upper CI bounds.}
+
+\item{condition_column}{Character string specifying the name of the column used to define conditions for plotting. If \code{NULL}, all observations are treated as a single condition.}
 
 \item{FS}{The sampling frequency. Default value is 250 Hz.}
 
@@ -30,20 +33,20 @@ plot_time_mean(
 
 \item{label_offset}{A numeric vector of length two to offset the stimulus label. The first value indicates a horizontal shift, the second a vertical one. Default is \code{c(0,0)} for no shift.}
 
-\item{legend_title}{Character string specifying the legend title shown in the plot. Default is \code{"Condition"}. If the condition column is missing, all observations are treated as a single condition and no legend is plotted.}
+\item{legend_title}{Character string specifying the legend title shown in the plot. Default is \code{"Condition"}. For all observations treated as a single condition (\code{condition_column = NULL}) is plotted no legend.}
 }
 \value{
-A \code{ggplot} object showing the time course of the average EEG signal with pointwise confidence intervals for chosen sensor.
+A \code{ggplot} object showing the time course of the average EEG signal with pointwise confidence intervals.
 }
 \description{
-Plot a time course of the average EEG signal amplitude with pointwise confidence intervals (CIs), colour-coded by condition. If the \code{condition} column is missing, all observations are treated as a single condition.
+Plot a time course of the average EEG signal amplitude with pointwise confidence intervals (CIs), colour-coded by a user-defined grouping variable such as experimental condition, subject or group. If the \code{condition_column} is \code{NULL}, all observations are treated as a single condition.
 }
 \details{
-The output in the form of a ggplot object allows to easily edit the result image properties. For interactive version of plot see \link{interactive_waveforms} function.
+The output in the form of a ggplot object allows to easily edit the result image properties.
 }
 \examples{
-# Plot average signal with CI bounds for subject 2 from the sensor E65
-# excluding outlier epochs 14 and 15 and for the both subjects treated as conditions
+# Plot average signal with CI bounds from the sensor E65 excluding outlier epochs (14 and 15)
+# for subject 2 - part b) and for the both subjects treated as conditions - part c)
 
 # a) preparing data
 # a1) extract required data
@@ -61,7 +64,18 @@ data_mean2 <- data_mean |>
 dplyr::filter(subject == 2)
 plot_time_mean(data = data_mean2, t0 = 10)
 
-# c) add condition column and plot time course by condition (subject)
-data_mean$condition <- data_mean$subject
-plot_time_mean(data = data_mean, t0 = 10, legend_title = "Subject")
+# c) plot the time course by subject (treated as a condition)
+plot_time_mean(data = data_mean, condition_column = "subject", t0 = 10, legend_title = "Subject")
+
+# Plot average signal with CI bounds for subject 1 from three chosen sensors
+# preparing data
+edata <- epochdata |>
+dplyr::filter(subject == 1 & sensor \%in\% c("E5", "E35" ,"E65") & epoch \%in\% 1:13)
+data_base <- baseline_correction(edata, baseline_range = 1:10)
+data_mean <- compute_mean(data_base, amplitude = "signal_base", type = "point")
+# plot the time course by electrode
+plot_time_mean(data = data_mean, condition_column = "sensor", t0 = 10, legend_title = "Electrode")
+}
+\seealso{
+\code{\link{compute_mean}}, interactive version of time plot: \code{\link{interactive_waveforms}}
 }

@@ -38,6 +38,8 @@
 #' summary_stats_rt(data_cond)
 summary_stats_rt <- function(data) {
 
+  stop_if_missing_cols(data, required_cols = c("subject", "epoch", "RT"))
+
   group_vars <- intersect(c("subject", "condition"), names(data))
 
   results <- data |>

@@ -77,5 +77,5 @@ scalp_plot(data_mean, amplitude = "average", col_range = c(-30, 15))
 }
 }
 \seealso{
-\code{\link{animate_scalp}}, \code{\link{point_mesh}}, \code{\link{make_triangulation}}, \code{\link{create_scale}}
+\code{\link{point_mesh}}, \code{\link{make_triangulation}}, \code{\link{create_scale}}, animated version: \code{\link{animate_scalp}}
 }

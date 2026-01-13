@@ -2,23 +2,23 @@
 % Please edit documentation in R/boxplots.R
 \name{boxplot_epoch}
 \alias{boxplot_epoch}
-\title{Plot interactive boxplots of epochs}
+\title{Plot interactive boxplots of EEG amplitude on epoch level}
 \usage{
 boxplot_epoch(
   data,
   amplitude = "signal",
-  subject,
+  subject = NULL,
   channel,
   time_lim,
   use_latex = TRUE
 )
 }
 \arguments{
-\item{data}{A data frame or a database table with EEG dataset. Required columns: subject, sensor, epoch, time and the column with EEG amplitude named as in \code{amplitude} parameter.}
+\item{data}{A data frame or a database table with EEG dataset. Required columns: \code{sensor}, \code{epoch}, \code{time} and the column with EEG amplitude named as in \code{amplitude} parameter.}
 
 \item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal"}.}
 
-\item{subject}{An integer or character ID of selected subject to plot.}
+\item{subject}{An integer or character ID of selected subject to plot. If missing, a single subject input data are expected.}
 
 \item{channel}{An integer or character ID of channel to plot.}
 
@@ -34,11 +34,11 @@ Function for plotting interactive boxplots of EEG amplitude in individual epochs
 }
 \details{
 The input data frame or database table must contain at least following columns:
-subject - a column with subject IDs,
-sensor - a column with sensor labels,
-epoch - a column with epoch numbers,
-time - a column with time point numbers,
+\code{sensor} - a column with sensor labels,
+\code{epoch} - a column with epoch numbers,
+\code{time} - a column with time point numbers,
 and a column with measured EEG signal values (or their averages) called as in \code{amplitude}.
+If the \code{subject} parameter is specified, the \code{subject} column with subject IDs is also required.
 }
 \examples{
 # Interactive boxplots of signal from channel E34 for subject 1 (health control)
@@ -46,4 +46,7 @@ and a column with measured EEG signal values (or their averages) called as in \c
 boxplot_epoch(epochdata, amplitude = "signal", subject = 1, channel = "E34",
  time_lim = c(10:20))
 
+}
+\seealso{
+\code{\link{boxplot_subject}}
 }

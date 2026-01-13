@@ -32,7 +32,7 @@
 #' @return A 3D scalp map rendered via `rgl::shade3d()` in an interactive window.
 #' @export
 #'
-#' @seealso \code{\link{animate_scalp}}, \code{\link{point_mesh}}, \code{\link{make_triangulation}}, \code{\link{create_scale}}
+#' @seealso \code{\link{point_mesh}}, \code{\link{make_triangulation}}, \code{\link{create_scale}}, animated version: \code{\link{animate_scalp}}
 #'
 #' @import rgl
 #' @importFrom rlang .data

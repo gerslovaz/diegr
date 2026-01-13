@@ -7,7 +7,8 @@
 boxplot_rt(data, subject = NULL)
 }
 \arguments{
-\item{data}{A data frame or a database table with response times dataset. Required columns: subject, epoch, RT (value of response time in ms).}
+\item{data}{A data frame or a database table containing response time data. Required columns: \code{subject}, \code{epoch}, \code{RT} (value of response time in ms). An optional \code{condition} column may be used to
+colour-code the boxplots.}
 
 \item{subject}{A vector with IDs of subjects to plot. If missing, boxplots are drawn for all available subjects in \code{data}.}
 }
@@ -15,9 +16,16 @@ boxplot_rt(data, subject = NULL)
 A \code{plotly} object with boxplots of response times.
 }
 \description{
-Function for plotting interactive boxplots of response time in individual epochs for selected subjects. The interactive plotly output enables to easily determine the epoch number from which outliers come and also allows to easily edit the image layout.
+Function for plotting interactive boxplots of response time in individual epochs for selected subjects. If the \code{condition} column is present in the input data, the boxplots are color-coded by condition. The interactive plotly output enables to easily determine the epoch number from which outliers come and also allows to easily edit the image layout.
 }
 \examples{
 # Display interactive boxplots for both example subjects
 boxplot_rt(rtdata)
+
+# Interactive boxplots per subject divided by condition
+# a) add condition column to data (just for example)
+data_cond <- rtdata
+data_cond$condition <- c(rep("a", 7), rep("b", 7), rep("a", 8), rep("b",7))
+# b) plot boxplots (colour-coded by condition)
+boxplot_rt(data_cond)
 }

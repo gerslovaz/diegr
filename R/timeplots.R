@@ -173,31 +173,34 @@ interactive_waveforms <- function(data,
 #' Plot time curve of average EEG signal with confidence interval
 #'
 #' @description
-#' Plot a time course of the average EEG signal amplitude with pointwise confidence intervals (CIs), colour-coded by condition. If the `condition` column is missing, all observations are treated as a single condition.
+#' Plot a time course of the average EEG signal amplitude with pointwise confidence intervals (CIs), colour-coded by a user-defined grouping variable such as experimental condition, subject or group. If the `condition_column` is `NULL`, all observations are treated as a single condition.
 #'
 #'
 #' @param data A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: \code{time} with labels of time points and \code{average, ci_low, ci_up} with values of average signal and lower and upper CI bounds.
+#' @param condition_column Character string specifying the name of the column used to define conditions for plotting. If \code{NULL}, all observations are treated as a single condition.
 #' @param FS The sampling frequency. Default value is 250 Hz.
 #' @param t0 Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).
 #' @param transp A numeric value between 0 and 1 controlling the transparency of the confidence ribbon (corresponding to \code{alpha} parameter in \link[ggplot2]{geom_ribbon} function).
 #' @param y_limits A numeric vector of length two, specifying the minimum and maximum y-axis limits. Defaults to `NULL`for plot limits determined according to input data.
 #' @param label_0ms Character string for the annotation label at the 0ms mark. Default is `"stimulus"`.
 #' @param label_offset A numeric vector of length two to offset the stimulus label. The first value indicates a horizontal shift, the second a vertical one. Default is `c(0,0)` for no shift.
-#' @param legend_title Character string specifying the legend title shown in the plot. Default is `"Condition"`. If the condition column is missing, all observations are treated as a single condition and no legend is plotted.
+#' @param legend_title Character string specifying the legend title shown in the plot. Default is `"Condition"`. For all observations treated as a single condition (`condition_column = NULL`) is plotted no legend.
 #'
 #' @details
-#' The output in the form of a ggplot object allows to easily edit the result image properties. For interactive version of plot see \link{interactive_waveforms} function.
+#' The output in the form of a ggplot object allows to easily edit the result image properties.
+#'
+#' @seealso \code{\link{compute_mean}}, interactive version of time plot: \code{\link{interactive_waveforms}}
 #'
 #'
-#' @returns A \code{ggplot} object showing the time course of the average EEG signal with pointwise confidence intervals for chosen sensor.
+#' @returns A \code{ggplot} object showing the time course of the average EEG signal with pointwise confidence intervals.
 #' @export
 #'
 #' @import ggplot2
 #' @importFrom rlang .data
 #'
 #' @examples
-#' # Plot average signal with CI bounds for subject 2 from the sensor E65
-#' # excluding outlier epochs 14 and 15 and for the both subjects treated as conditions
+#' # Plot average signal with CI bounds from the sensor E65 excluding outlier epochs (14 and 15)
+#' # for subject 2 - part b) and for the both subjects treated as conditions - part c)
 #'
 #' # a) preparing data
 #' # a1) extract required data
@@ -215,10 +218,19 @@ interactive_waveforms <- function(data,
 #' dplyr::filter(subject == 2)
 #' plot_time_mean(data = data_mean2, t0 = 10)
 #'
-#' # c) add condition column and plot time course by condition (subject)
-#' data_mean$condition <- data_mean$subject
-#' plot_time_mean(data = data_mean, t0 = 10, legend_title = "Subject")
+#' # c) plot the time course by subject (treated as a condition)
+#' plot_time_mean(data = data_mean, condition_column = "subject", t0 = 10, legend_title = "Subject")
+#'
+#' # Plot average signal with CI bounds for subject 1 from three chosen sensors
+#' # preparing data
+#' edata <- epochdata |>
+#' dplyr::filter(subject == 1 & sensor %in% c("E5", "E35" ,"E65") & epoch %in% 1:13)
+#' data_base <- baseline_correction(edata, baseline_range = 1:10)
+#' data_mean <- compute_mean(data_base, amplitude = "signal_base", type = "point")
+#' # plot the time course by electrode
+#' plot_time_mean(data = data_mean, condition_column = "sensor", t0 = 10, legend_title = "Electrode")
 plot_time_mean <- function(data,
+                           condition_column = NULL,
                            FS = 250,
                            t0 = 1,
                            transp = 0.4,
@@ -231,6 +243,15 @@ plot_time_mean <- function(data,
 
   if (inherits(data, "tbl_sql")) {
     data <- dplyr::collect(data)
+  }
+
+  if (is.null(condition_column)) {
+    data$condition <- factor("all")
+  } else {
+    if (!condition_column %in% names(data)) {
+      stop(sprintf("Column '%s' does not exist in the data.", condition_column))
+    }
+    data$condition <- factor(data[[condition_column]])
   }
 
   if (any(is.na(data[["average"]]))) {
@@ -257,12 +278,6 @@ plot_time_mean <- function(data,
   }
 
   stopifnot(length(label_offset) == 2)
-
-  if (!"condition" %in% names(data)) {
-    data$condition <- factor("all")
-  } else {
-    data$condition <- factor(data$condition)
-  }
 
   k <- 1000 / FS
   k0 <- t0 * k
