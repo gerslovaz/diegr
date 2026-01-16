@@ -17,7 +17,7 @@ plot_topo_mean(
 )
 }
 \arguments{
-\item{data}{A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: \code{sensor} with sensor labels and \code{average, ci_low, ci_up} with values of average signal and its lower and upper CI bounds in one time point (or precomputed average of multiple time points).}
+\item{data}{A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: \code{sensor} with sensor labels and \code{average}, \code{ci_low}, \code{ci_up} with values of average signal and its lower and upper CI bounds in one time point (or precomputed average of multiple time points).}
 
 \item{mesh}{A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.}
 
@@ -33,7 +33,7 @@ plot_topo_mean(
 
 \item{show_legend}{Logical. Indicates, whether legend should be displayed below the graph. Default value is \code{TRUE}.}
 
-\item{label_sensors}{A logical value indicating whether the sensor labels should also be plotted (default value is \code{FALSE}).}
+\item{label_sensors}{A logical value indicating whether the sensor labels should also be plotted. Default value is \code{FALSE}.}
 }
 \value{
 A \code{ggplot} object showing the static topographic map of the signal divided into three panels: CI lower, mean, CI upper.
@@ -54,8 +54,7 @@ Note: When specifying the \code{coords} and \code{template} at the same time, th
 
 # a) preparing data
 # a1) extract required data
-edata <- epochdata |>
-dplyr::filter(subject == 2 & time \%in\% 1:10 & epoch \%in\% 1:13)
+edata <- pick_data(epochdata, subject_rg = 2, epoch_rg = 1:13, time_rg = 1:10)
 # a2) baseline correction (needed for suitable topographic map)
 data_base <- baseline_correction(edata, baseline_range = 1:10)
 # a3) average computing

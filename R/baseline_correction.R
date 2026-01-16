@@ -2,20 +2,29 @@
 #' Baseline correction
 #'
 #' @description
-#' Function for computing amplitude corrected to the selected baseline.
+#' Compute amplitude values corrected to the selected baseline.
+#'
+#' The function computes a baseline value within each epoch and subtracts it from the signal.
 #'
 #'
-#' @param data A data frame, tibble or a database table with input data, required columns: subject, sensor, time, signal, epoch.
+#' @param data A data frame, tibble or a database table with input data, required columns: `time` and `signal`. Optional columns: `group`, `subject`, `sensor`, `condition` and `epoch`, if present, are included in the grouping structure.
 #' @param baseline_range A numeric vector of time points used as the baseline (e.g., \code{baseline_range = 125:250}).
-#' @param type A character indicating the type of baseline correction. Only the value \code{"absolute"} is allowed at this moment (other values will trigger an error).
+#' @param type A character specifying the type of baseline correction. Currently, only \code{"absolute"} is supported, any other value results in an error.
 #'
 #' @details
-#' If the values from `baseline_range` vector are out of the range of the `time` column, the baseline calculation proceeds as follows:
+#' If the values from `baseline_range` vector extend beyond the range of the `time` column, the baseline computation proceeds as follows:
 #' 1. If a part of the `baseline_range` vector is in the `time` column and part is outside its range, the baseline correction is computed only from the part inside a `time` range.
 #' 2. If the whole `baseline_range` vector is out of the `time` range, the `baseline` and also the `signal_base` values of the output are `NA`'s.
-#' In both cases the function returns a warning message along with the output data frame or tibble.
+#' In both cases, the function returns the output data along with a warning.
 #'
-#' Note: If there are `NA` values in the `signal` column, matching rows are ignored in the baseline calculation (which may bias the results) and the function prints a warning message.
+#' Notes:
+#' \itemize{
+#'   \item Rows with \code{NA} values in the \code{signal} column are ignored
+#'   when computing the baseline, and a warning is issued.
+#'   \item If any grouping variable present in the data contains only
+#'   \code{NA} values, a warning is issued, as this may lead to invalid or
+#'   uninformative grouping.
+#' }
 #'
 #' @return A data frame/tibble with added columns:
 #' \item{signal_base}{Signal corrected by subtracting the baseline for each epoch.}
@@ -25,10 +34,14 @@
 #' @importFrom rlang .data
 #'
 #' @examples
-#' # Computing baseline correction on first 10 points, sensor "E1"
+#' # Computing baseline correction for subject 1 on first 10 points, sensor "E1"
 #' # a) Prepare data and compute
 #' data01 <- epochdata |> dplyr::filter(.data$subject == 1 & .data$sensor == "E1")
 #' basedata <- baseline_correction(data01, baseline_range = 1:10, type = "absolute")
+#'
+#' ## Note: You can also use baseline_correction() on the whole epochdata
+#' ## and then filter selected subject and sensor, the results are the same,
+#' ## the procedure above was chosen only for the speed of the example.
 #'
 #' # b) Plot raw (black line) and corrected (red line) signal for epoch 1
 #' epoch1 <- basedata |> dplyr::filter(.data$epoch == 1)
@@ -38,13 +51,15 @@
 #'
 #' \donttest{
 #' # Set baseline_range outside of time range
-#' # results in NA's in baseline and signal_base columns
+#' # results in NA's in baseline and signal_base columns,
 #' # also returns a warning message
 #' basedata <- baseline_correction(data01, baseline_range = 70:80, type = "absolute")
 #' head(basedata)
 #' }
 
-baseline_correction <- function(data, baseline_range, type = "absolute") {
+baseline_correction <- function(data,
+                                 baseline_range,
+                                 type = "absolute") {
 
   if (!is.numeric(baseline_range)) {
     stop("'baseline_range' must be a numeric vector of time points.")
@@ -54,31 +69,43 @@ baseline_correction <- function(data, baseline_range, type = "absolute") {
     stop("Only 'absolute' baseline correction is implemented now.")
   }
 
-  stop_if_missing_cols(data, required_cols = c("time", "signal", "epoch", "subject", "sensor"))
+  stop_if_missing_cols(data, required_cols = c("time", "signal"))
 
-  newdata <- data |>
-    dplyr::select("subject", "sensor", "epoch", "time", "signal")
-  newdata <- collect(newdata)
+  # check NA's in signal column
+  na_check <- data |>
+    dplyr::summarise(has_na = any(is.na(.data$signal))) |>
+    dplyr::collect()
 
-  if (any(is.na(newdata$signal))) {
+  if (na_check$has_na) {
     warning("There are NA's in `signal` column, these values are ignored in baseline computation.")
   }
 
-  if (!all(baseline_range %in% newdata$time)) {
+  # check baseline time range
+  existing_times <- data |>
+    dplyr::filter(.data$time %in% !!baseline_range) |>
+    dplyr::distinct(.data$time) |>
+    dplyr::collect() |>
+    dplyr::pull(.data$time)
+
+  if (!all(baseline_range %in% existing_times)) {
     warning("Some 'baseline_range' values are not present in the 'time' column.")
   }
 
-  basel_data <- newdata |>
-    dplyr::filter(.data$time %in% baseline_range) |>
-    dplyr::group_by(.data$subject, .data$sensor, .data$epoch) |>
+  potential_hierarchy <- c("group", "subject", "sensor", "condition", "epoch")
+  group_vars <- intersect(potential_hierarchy, colnames(data))
+
+  check_grouping_vars(data, vars = group_vars, action = "warn")
+
+  basel_data <- data |>
+    dplyr::filter(.data$time >= !!min(baseline_range, na.rm = TRUE),
+                  .data$time <= !!max(baseline_range, na.rm = TRUE)) |>
+    dplyr::group_by(across(all_of(group_vars))) |>
     dplyr::summarise(baseline = mean(.data$signal, na.rm = TRUE), .groups = "drop")
 
-  newdata <- newdata |>
-    dplyr::left_join(basel_data, by = c("subject", "sensor", "epoch")) |>
-    dplyr::mutate(signal_base = .data$signal - .data$baseline) |>
-    dplyr::ungroup()
+  newdata <- data |>
+    dplyr::left_join(basel_data, by = group_vars) |>
+    dplyr::mutate(signal_base = .data$signal - .data$baseline)
 
-
-  return(newdata)
+  return(dplyr::collect(newdata))
 
 }

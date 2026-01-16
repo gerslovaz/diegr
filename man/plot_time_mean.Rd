@@ -17,7 +17,7 @@ plot_time_mean(
 )
 }
 \arguments{
-\item{data}{A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: \code{time} with labels of time points and \code{average, ci_low, ci_up} with values of average signal and lower and upper CI bounds.}
+\item{data}{A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: \code{time} with labels of time points and \code{average}, \code{ci_low}, \code{ci_up} with values of average signal and lower and upper CI bounds.}
 
 \item{condition_column}{Character string specifying the name of the column used to define conditions for plotting. If \code{NULL}, all observations are treated as a single condition.}
 
@@ -50,8 +50,7 @@ The output in the form of a ggplot object allows to easily edit the result image
 
 # a) preparing data
 # a1) extract required data
-edata <- epochdata |>
-dplyr::filter(sensor == "E65" & epoch \%in\% 1:13)
+edata <- pick_data(epochdata, sensor_rg = c("E65"), epoch_rg = 1:13)
 # a2) baseline correction
 data_base <- baseline_correction(edata, baseline_range = 1:10)
 # a3) average computing
@@ -61,7 +60,7 @@ data_mean <- compute_mean(data_base, amplitude = "signal_base", channel = "E65",
 # b) filter subject 2 and plot the average line with default settings
 # (the whole dataset treated as one condition, no legend plotted)
 data_mean2 <- data_mean |>
-dplyr::filter(subject == 2)
+dplyr::filter(subject == 2) # or use pick_data(data_mean, subject_rg = 2)
 plot_time_mean(data = data_mean2, t0 = 10)
 
 # c) plot the time course by subject (treated as a condition)
@@ -69,12 +68,12 @@ plot_time_mean(data = data_mean, condition_column = "subject", t0 = 10, legend_t
 
 # Plot average signal with CI bounds for subject 1 from three chosen sensors
 # preparing data
-edata <- epochdata |>
-dplyr::filter(subject == 1 & sensor \%in\% c("E5", "E35" ,"E65") & epoch \%in\% 1:13)
+edata <- pick_data(epochdata, subject_rg = 1, sensor_rg = c("E5", "E35" ,"E65"),
+                 epoch_rg = 1:13)
 data_base <- baseline_correction(edata, baseline_range = 1:10)
 data_mean <- compute_mean(data_base, amplitude = "signal_base", type = "point")
-# plot the time course by electrode
-plot_time_mean(data = data_mean, condition_column = "sensor", t0 = 10, legend_title = "Electrode")
+# plot the time course by sensor (channel)
+plot_time_mean(data = data_mean, condition_column = "sensor", t0 = 10, legend_title = "Channel")
 }
 \seealso{
 \code{\link{compute_mean}}, interactive version of time plot: \code{\link{interactive_waveforms}}

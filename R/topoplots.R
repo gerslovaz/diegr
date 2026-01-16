@@ -4,26 +4,30 @@
 #' Plot a topographic circle or polygon map of the EEG signal amplitude using topographic colour scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^2 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations.
 #' The output in the form of a ggplot object allows to easily edit the result image properties.
 #'
+#' The function assumes that the input data have already been filtered to the desired subset (e.g., group, subject, time point).
 #'
-#' @param data A data frame, tibble or a database table with input data to plot with at least two columns: \code{sensor} with sensor labels and the column with the EEG amplitude specified in the argument \code{amplitude}.
+#' @param data A data frame, tibble or a database table with input data to plot with at least two columns: `sensor` with sensor labels and the column with the EEG amplitude specified in the argument `amplitude`.
 #' @param amplitude A character string naming the column with EEG amplitude values.
-#' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
-#' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the HCGSN256 template is used.
-#' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
+#' @param mesh A `"mesh"` object (or a named list with the same structure) containing at least `D2` element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
+#' @param coords Sensor coordinates as a tibble or data frame with named `x`, `y` and `sensor` columns. The `sensor` labels must match the labels in sensor column in `data`. If not defined, the HCGSN256 template is used.
+#' @param template The kind of sensor template montage used. Currently the only available option is `"HCGSN256"` denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of interpolated signal is used.
-#' @param col_scale Optionally, a colour scale to be utilised for plotting. It should be a list with \code{colors} and \code{breaks} components (usually created via \code{\link{create_scale}}). If not defined, it is computed from \code{col_range}.
-#' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.
-#' @param show_legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.
-#' @param label_sensors A logical value indicating whether the sensor labels should also be plotted (default value is \code{FALSE}).
+#' @param col_scale Optionally, a colour scale to be utilised for plotting. It should be a list with `colors` and `breaks` components (usually created via \code{\link{create_scale}}). If not defined, it is computed from `col_range`.
+#' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is `FALSE`.
+#' @param show_legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is `TRUE`.
+#' @param label_sensors A logical value indicating whether the sensor labels should also be plotted. Default value is `FALSE`.
 #'
 #' @details
-#' For more details about required mesh structure see \code{\link{point_mesh}} function. If the input \code{mesh} structure does not match this format, an error or incorrect function behavior may occur.
+#' For more details about required mesh structure see \code{\link{point_mesh}} function. If the input `mesh` structure does not match this format, an error or incorrect function behavior may occur.
 #'
-#' Be careful when choosing the argument \code{col_range}. If the amplitude in input data contains values outside the chosen range, this will cause "holes" in the resulting plot.
-#' To compare results for different subjects or conditions, set the same values of \code{col_range} and \code{col_scale} arguments in all cases.
+#' Be careful when choosing the argument `col_range`. If the amplitude in input data contains values outside the chosen range, this will cause "holes" in the resulting plot.
+#' To compare results for different subjects or conditions, set the same values of `col_range` and `col_scale` arguments in all cases.
 #' The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
 #'
-#' Note: When specifying the `coords` and `template` at the same time, the `template` parameter takes precedence and the `coords` parameter is ignored.
+#' Notes:
+#' When specifying the `coords` and `template` at the same time, the `template` parameter takes precedence and the `coords` parameter is ignored.
+#'
+#' This function focuses on visualization and does not perform any data subsetting. Users are expected to filter the data beforehand using standard dplyr verbs or \code{\link{pick_data}} function.
 #'
 #' @return A `ggplot` object showing an interpolated topographic map of EEG amplitude.
 #' @export
@@ -43,8 +47,7 @@
 #'
 #' # a) preparing data
 #' # a1) extract required data
-#' edata <- epochdata |>
-#' dplyr::filter(subject == 2 & time %in% 1:10 & epoch %in% 1:13)
+#' edata <- pick_data(epochdata, subject_rg = 2, epoch_rg = 1:13, time_rg = 1:10)
 #' # a2) baseline correction (needed for suitable topographic map)
 #' data_base <- baseline_correction(edata, baseline_range = 1:10)
 #' # a3) average computing
@@ -71,16 +74,10 @@ topo_plot <- function(data,
                       show_legend = TRUE,
                       label_sensors = FALSE) {
 
-  if (!amplitude %in% colnames(data)) {
-    stop(paste0("There is no column '", amplitude, "' in the input data."))
-  }
+  stop_if_missing_cols(data, required_cols = c(amplitude, "sensor"))
 
   if (any(is.na(data[[amplitude]]))) {
     stop("There are NA's in amplitude column.")
-  }
-
-  if (!"sensor" %in% colnames(data)) {
-    stop("There is no 'sensor' column in input data.")
   }
 
   if (!(is.logical(contour))) {
@@ -119,13 +116,7 @@ topo_plot <- function(data,
     coords <- coords_full[sensor_index,]
   }
 
-  required_cols <- c("x", "y", "sensor")
-  missing_cols <- setdiff(required_cols, colnames(coords))
-
-  if (length(missing_cols) > 0) {
-    stop(paste("The following required columns in 'coords' are missing:",
-               paste(missing_cols, collapse = ", ")))
-  }
+  stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
 
   if (missing(mesh)) {
     mesh <- point_mesh(dimension = 2, template = "HCGSN256",
@@ -222,15 +213,15 @@ topo_plot <- function(data,
 #' The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^2 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations.
 #' The output in the form of a `ggplot` object allows to easily edit the result image properties.
 #'
-#' @param data A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: \code{sensor} with sensor labels and \code{average, ci_low, ci_up} with values of average signal and its lower and upper CI bounds in one time point (or precomputed average of multiple time points).
-#' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
-#' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the HCGSN256 template is used.
-#' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
+#' @param data A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: `sensor` with sensor labels and `average`, `ci_low`, `ci_up` with values of average signal and its lower and upper CI bounds in one time point (or precomputed average of multiple time points).
+#' @param mesh A `"mesh"` object (or a named list with the same structure) containing at least `D2` element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
+#' @param coords Sensor coordinates as a tibble or data frame with named `x`, `y` and `sensor` columns. The `sensor` labels must match the labels in sensor column in `data`. If not defined, the HCGSN256 template is used.
+#' @param template The kind of sensor template montage used. Currently the only available option is `"HCGSN256"` denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input data (average and CI bounds) is used.
-#' @param col_scale Optionally, a colour scale to be utilised for plotting. It should be a list with \code{colors} and \code{breaks} components (usually created via \code{\link{create_scale}}). If not defined, it is computed from \code{col_range}.
-#' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.
-#' @param show_legend Logical. Indicates, whether legend should be displayed below the graph. Default value is \code{TRUE}.
-#' @param label_sensors A logical value indicating whether the sensor labels should also be plotted (default value is \code{FALSE}).
+#' @param col_scale Optionally, a colour scale to be utilised for plotting. It should be a list with `colors` and `breaks` components (usually created via \code{\link{create_scale}}). If not defined, it is computed from `col_range`.
+#' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is `FALSE`.
+#' @param show_legend Logical. Indicates, whether legend should be displayed below the graph. Default value is `TRUE`.
+#' @param label_sensors A logical value indicating whether the sensor labels should also be plotted. Default value is `FALSE`.
 #'
 #' @details
 #' The spline interpolation is done independently for each CI bound and average.
@@ -256,8 +247,7 @@ topo_plot <- function(data,
 #'
 #' # a) preparing data
 #' # a1) extract required data
-#' edata <- epochdata |>
-#' dplyr::filter(subject == 2 & time %in% 1:10 & epoch %in% 1:13)
+#' edata <- pick_data(epochdata, subject_rg = 2, epoch_rg = 1:13, time_rg = 1:10)
 #' # a2) baseline correction (needed for suitable topographic map)
 #' data_base <- baseline_correction(edata, baseline_range = 1:10)
 #' # a3) average computing
@@ -291,12 +281,7 @@ plot_topo_mean <- function(data,
     stop("Argument 'label_sensors' has to be logical.")
   }
 
-  miss_data <- setdiff(c("average", "ci_low", "ci_up", "sensor"), colnames(data))
-
-  if (length(miss_data) > 0) {
-    stop(paste("The following required columns in 'data' are missing:",
-               paste(miss_data, collapse = ", ")))
-  }
+  stop_if_missing_cols(data, required_cols = c("average", "ci_low", "ci_up", "sensor"))
 
   if (any(is.na(data[["average"]]))) {
     stop("There are NA's in the 'average' column.")
@@ -329,13 +314,7 @@ plot_topo_mean <- function(data,
     coords <- coords_full[sensor_index,]
   }
 
-  required_cols <- c("x", "y", "sensor")
-  missing_cols <- setdiff(required_cols, colnames(coords))
-
-  if (length(missing_cols) > 0) {
-    stop(paste("The following required columns in 'coords' are missing:",
-               paste(missing_cols, collapse = ", ")))
-  }
+  stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
 
   if (missing(mesh)) {
     mesh <- point_mesh(dimension = 2, template = { template },

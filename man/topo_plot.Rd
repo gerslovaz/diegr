@@ -36,7 +36,7 @@ topo_plot(
 
 \item{show_legend}{Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.}
 
-\item{label_sensors}{A logical value indicating whether the sensor labels should also be plotted (default value is \code{FALSE}).}
+\item{label_sensors}{A logical value indicating whether the sensor labels should also be plotted. Default value is \code{FALSE}.}
 }
 \value{
 A \code{ggplot} object showing an interpolated topographic map of EEG amplitude.
@@ -44,6 +44,8 @@ A \code{ggplot} object showing an interpolated topographic map of EEG amplitude.
 \description{
 Plot a topographic circle or polygon map of the EEG signal amplitude using topographic colour scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^2 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations.
 The output in the form of a ggplot object allows to easily edit the result image properties.
+
+The function assumes that the input data have already been filtered to the desired subset (e.g., group, subject, time point).
 }
 \details{
 For more details about required mesh structure see \code{\link{point_mesh}} function. If the input \code{mesh} structure does not match this format, an error or incorrect function behavior may occur.
@@ -52,7 +54,10 @@ Be careful when choosing the argument \code{col_range}. If the amplitude in inpu
 To compare results for different subjects or conditions, set the same values of \code{col_range} and \code{col_scale} arguments in all cases.
 The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
 
-Note: When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
+Notes:
+When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
+
+This function focuses on visualization and does not perform any data subsetting. Users are expected to filter the data beforehand using standard dplyr verbs or \code{\link{pick_data}} function.
 }
 \examples{
 # Plot average topographic map of signal for subject 2 from the time point 10
@@ -60,8 +65,7 @@ Note: When specifying the \code{coords} and \code{template} at the same time, th
 
 # a) preparing data
 # a1) extract required data
-edata <- epochdata |>
-dplyr::filter(subject == 2 & time \%in\% 1:10 & epoch \%in\% 1:13)
+edata <- pick_data(epochdata, subject_rg = 2, epoch_rg = 1:13, time_rg = 1:10)
 # a2) baseline correction (needed for suitable topographic map)
 data_base <- baseline_correction(edata, baseline_range = 1:10)
 # a3) average computing

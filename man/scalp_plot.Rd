@@ -40,6 +40,8 @@ A 3D scalp map rendered via \code{rgl::shade3d()} in an interactive window.
 }
 \description{
 Plot a scalp polygon map of the EEG signal amplitude using topographic colour scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^3 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations. The \code{\link[rgl]{shape3d}} function is used for plotting.
+
+The function assumes that the input data have already been filtered to the desired subset (e.g., group, subject, time point).
 }
 \details{
 The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure:
@@ -53,6 +55,8 @@ To compare results for different subjects or conditions, set the same values of 
 The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
 
 Notes:
+This function focuses on visualization and does not perform any data subsetting. Users are expected to filter the data beforehand using standard dplyr verbs or \code{\link{pick_data}} function.
+
 For correct rendering of a plot, the function requires an openGL-capable device.
 Displaying the rotated scalp map using the \code{view} argument requires previous call \code{open3d()}.
 When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
@@ -64,8 +68,7 @@ When specifying the \code{coords} and \code{template} at the same time, the \cod
 # the outliers (epoch 14 and 15) are extracted before computing
 
 # a) preparing data
-edata <- epochdata |>
-dplyr::filter(subject == 2 & time \%in\% 1:10 & epoch \%in\% 1:13)
+edata <- pick_data(epochdata, subject_rg = 2, epoch_rg = 1:13, time_rg = 1:10)
 # a2) baseline correction (needed for suitable topographic map)
 data_base <- baseline_correction(edata, baseline_range = 1:10)
 # a3) average computing

@@ -1,32 +1,33 @@
 #' Plot interactive waveform graph
 #'
-#' @description Function for plotting time series of EEG signal colour-coded by epoch, channel or subject (depending on selected level) in an interactive `plotly` graph. When using the function for plotting the average, there is an option to add a confidence band using the `CI` argument. The output in \link[plotly]{plotly} format enables to easily edit the image layout.
+#' @description Function for plotting time series of EEG signal colour-coded by epoch, condition, channel, subject or group (depending on selected `level` parameter) an interactive `plotly` graph. The function assumes that the input data have already been filtered to the desired subset according to the `level`.
+#' When using the function for plotting the average, there is an option to add a confidence band using the `CI` argument.
+#' The output in \link[plotly]{plotly} format enables to easily edit the image layout.
 #'
-#' @param data A data frame, tibble or a database table with input data containing a `time` column and columns corresponding to the selected `level` and `amplitude` parameter (see Details).
-#' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal"}.
-#' @param subject A subject(s) chosen to plot.
-#' @param channel A channel(s) to plot.
+#' @param data A data frame, tibble or a database table with input data containing a `time` column and columns corresponding to the selected `amplitude` and `level` parameter (see Details).
+#' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values. Default is `"signal"`.
 #' @param FS The sampling frequency. Default value is 250 Hz.
 #' @param t0 Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).
 #' @param col_palette Optionally, a colour palette for plotting lines. If missing, the rainbow palette is used. The expected length is the same (or higher) as the number of unique levels (e.g. number of epochs for `level = "epoch"`).
-#' @param level A character specifying the level of the time curves. The possible values are \code{"epoch"} (default option), \code{"sensor"} and \code{"subject"}. See details for more information.
+#' @param level A character specifying the level of the time curves. The possible values are `"epoch"` (default option), `"condition"`, `"sensor"`, `"subject"` and `"group"`. See details for more information.
 #' @param avg A logical value indicating, if the average black curve should be plotted. Default is `TRUE`.
 #' @param CI A logical value indicating, if the confidence ribbon should be plotted. Default is `FALSE`. See Details for more information.
 #' @param use_latex A logical value indicating whether to use LaTeX formatting for the y-axis title. The default is `TRUE`.
 #'
 #' @details
-#' The input data frame or database table must contain at least some of the following columns (according to the `level` parameter - for \code{"sensor"} level no epoch column is needed etc.):
-#' subject - a column with subject IDs,
-#' sensor - a column with sensor labels,
-#' time - a column with time point numbers,
-#' epoch - a column with epoch numbers,
-#' signal (or other name specified in `amplitude` parameter) - a column with measured EEG signal values.
+#' The input data frame or database table must contain column `time` (a column with time point numbers) and a column with the EEG amplitude (or average amplitude) specified in the argument `amplitude`.<br>
+#' It must also contain at least one of the optional columns (according to the `level` parameter - for `"sensor"` level the column `sensor` is required etc.):<br>
+#' `group` - a column with group identifiers,<br>
+#' `subject` - a column with subject IDs,<br>
+#' `sensor` - a column with sensor labels,<br>
+#' `epoch` - a column with epoch numbers.
+#'
 #' Note: The average signals must be pre-aggregated before plotting at higher grouping levels, for example `sensor` level assumes a mean sensor signal in the `amplitude` column (the input data for individual epochs together with sensor level setting will result in a mess output).
 #'
 #' Plotting confidence ribbon:
-#' To plot the confidence bands around the average lines (`CI = TRUE`), the input data must include the `ci_up` and `ci_low` columns (as in the output tibble from \link{compute_mean} function).
+#' To plot the confidence bands around the average lines (`CI = TRUE`), the input data must include the `ci_up` and `ci_low` columns (as in the output tibble from \code{\link{compute_mean}} function).
 #'
-#' @return A \code{plotly} object showing an interactive time series of the signal according to the chosen level.
+#' @return A `plotly` object showing an interactive time series of the signal according to the chosen level.
 #'
 #' @import ggplot2
 #' @rawNamespace import(plotly, except = last_plot)
@@ -39,19 +40,19 @@
 #' @examples
 #' # 1) Plot epoch waveforms with average curve for subject 1 and electrode "E65"
 #' # with 250 sampling frequency rate (default) and 10 as zero time point
-#' interactive_waveforms(epochdata, amplitude = "signal", subject = 1, channel = "E65",
-#' t0 = 10, level = "epoch")
+#' epochdata |>
+#' pick_data(subject_rg = 1, sensor_rg = "E65") |>
+#' interactive_waveforms(amplitude = "signal", t0 = 10, level = "epoch")
+#'
 #' # 2) Plot sensor level waveforms with confidence bands for subject 1 and electrodes "E65" and "E182"
 #' # a) preparing data
 #' sendata <- compute_mean(epochdata, amplitude = "signal", subject = 1, channel = c("E65", "E182"),
 #'  group = "time", level = "epoch")
 #' # b) plot the waveforms without the average
-#' interactive_waveforms(sendata, amplitude = "average", subject = 1, t0 = 10,
+#' interactive_waveforms(sendata, amplitude = "average", t0 = 10,
 #' level = "sensor", avg = FALSE, CI = TRUE)
 interactive_waveforms <- function(data,
                                   amplitude = "signal",
-                                  subject = NULL,
-                                  channel = NULL,
                                   FS = 250,
                                   t0 = NULL,
                                   col_palette,
@@ -60,10 +61,6 @@ interactive_waveforms <- function(data,
                                   CI = FALSE,
                                   use_latex = TRUE) {
 
-  if (!amplitude %in% colnames(data)) {
-    stop(paste0("There is no column '", amplitude, "' in the input data."))
-  }
-
   if (CI && (!all(c("ci_low", "ci_up") %in% colnames(data)))) {
     stop("To plot confidence bands, the data must include 'ci_low' and 'ci_up' columns.")
   }
@@ -71,31 +68,28 @@ interactive_waveforms <- function(data,
   group_arg <- switch(
     level,
     "epoch" = sym("epoch"),
+    "condition" = sym("condition"),
     "sensor" = sym("sensor"),
     "subject" = sym("subject"),
+    "group" = sym("group"),
     stop("Invalid level argument.")
   )
 
-  group_name <- rlang::as_string(group_arg)
+  stop_if_missing_cols(data, required_cols = c(amplitude, level, "time"))
 
-  if (!group_name %in% colnames(data)) {
-    stop(paste0("There is no column '", level, "' required for chosen level."))
-  }
-
-  newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ channel }})
 
   if (avg == TRUE) {
-    avgdata <- newdata |>
+    avgdata <- data |>
       group_by(.data$time) |>
       summarise(avg = mean(.data[[amplitude]], na.rm = TRUE), .groups = "drop")
   }
 
 
-  if (!is.factor(newdata[[group_name]])) { # convert to factor
-    newdata[[group_name]] <- factor(newdata[[group_name]])
+  if (!is.factor(data[[level]])) { # convert to factor
+    data[[level]] <- factor(data[[level]])
   }
 
-  group_levels <- unique(newdata[[group_name]])
+  group_levels <- unique(data[[level]])
 
   if (missing(col_palette)) {
     n <- length(group_levels)
@@ -107,7 +101,7 @@ interactive_waveforms <- function(data,
   ribbon_colors <- setNames(alpha(col_palette, 0.4), group_levels)
 
   if (is.null(t0)) {
-    t0 <- min(newdata$time)
+    t0 <- min(data$time)
     warning("The argument t0 was not specified. The minimal value of time was chosen as 0 ms time point.")
   }
 
@@ -118,7 +112,8 @@ interactive_waveforms <- function(data,
   p <- plot_ly()
 
   for (grp in group_levels) {
-    data_grp <- newdata %>% filter(.data[[group_name]] == grp)
+    data_grp <- data |>
+      filter(.data[[level]] == grp)
 
     if (CI == TRUE) { # add ribbons
       p <- p |>
@@ -176,11 +171,11 @@ interactive_waveforms <- function(data,
 #' Plot a time course of the average EEG signal amplitude with pointwise confidence intervals (CIs), colour-coded by a user-defined grouping variable such as experimental condition, subject or group. If the `condition_column` is `NULL`, all observations are treated as a single condition.
 #'
 #'
-#' @param data A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: \code{time} with labels of time points and \code{average, ci_low, ci_up} with values of average signal and lower and upper CI bounds.
-#' @param condition_column Character string specifying the name of the column used to define conditions for plotting. If \code{NULL}, all observations are treated as a single condition.
+#' @param data A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: `time` with labels of time points and `average`, `ci_low`, `ci_up` with values of average signal and lower and upper CI bounds.
+#' @param condition_column Character string specifying the name of the column used to define conditions for plotting. If `NULL`, all observations are treated as a single condition.
 #' @param FS The sampling frequency. Default value is 250 Hz.
 #' @param t0 Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).
-#' @param transp A numeric value between 0 and 1 controlling the transparency of the confidence ribbon (corresponding to \code{alpha} parameter in \link[ggplot2]{geom_ribbon} function).
+#' @param transp A numeric value between 0 and 1 controlling the transparency of the confidence ribbon (corresponding to `alpha` parameter in \link[ggplot2]{geom_ribbon} function).
 #' @param y_limits A numeric vector of length two, specifying the minimum and maximum y-axis limits. Defaults to `NULL`for plot limits determined according to input data.
 #' @param label_0ms Character string for the annotation label at the 0ms mark. Default is `"stimulus"`.
 #' @param label_offset A numeric vector of length two to offset the stimulus label. The first value indicates a horizontal shift, the second a vertical one. Default is `c(0,0)` for no shift.
@@ -192,7 +187,7 @@ interactive_waveforms <- function(data,
 #' @seealso \code{\link{compute_mean}}, interactive version of time plot: \code{\link{interactive_waveforms}}
 #'
 #'
-#' @returns A \code{ggplot} object showing the time course of the average EEG signal with pointwise confidence intervals.
+#' @returns A `ggplot` object showing the time course of the average EEG signal with pointwise confidence intervals.
 #' @export
 #'
 #' @import ggplot2
@@ -204,8 +199,7 @@ interactive_waveforms <- function(data,
 #'
 #' # a) preparing data
 #' # a1) extract required data
-#' edata <- epochdata |>
-#' dplyr::filter(sensor == "E65" & epoch %in% 1:13)
+#' edata <- pick_data(epochdata, sensor_rg = c("E65"), epoch_rg = 1:13)
 #' # a2) baseline correction
 #' data_base <- baseline_correction(edata, baseline_range = 1:10)
 #' # a3) average computing
@@ -215,7 +209,7 @@ interactive_waveforms <- function(data,
 #' # b) filter subject 2 and plot the average line with default settings
 #' # (the whole dataset treated as one condition, no legend plotted)
 #' data_mean2 <- data_mean |>
-#' dplyr::filter(subject == 2)
+#' dplyr::filter(subject == 2) # or use pick_data(data_mean, subject_rg = 2)
 #' plot_time_mean(data = data_mean2, t0 = 10)
 #'
 #' # c) plot the time course by subject (treated as a condition)
@@ -223,12 +217,12 @@ interactive_waveforms <- function(data,
 #'
 #' # Plot average signal with CI bounds for subject 1 from three chosen sensors
 #' # preparing data
-#' edata <- epochdata |>
-#' dplyr::filter(subject == 1 & sensor %in% c("E5", "E35" ,"E65") & epoch %in% 1:13)
+#' edata <- pick_data(epochdata, subject_rg = 1, sensor_rg = c("E5", "E35" ,"E65"),
+#'                  epoch_rg = 1:13)
 #' data_base <- baseline_correction(edata, baseline_range = 1:10)
 #' data_mean <- compute_mean(data_base, amplitude = "signal_base", type = "point")
-#' # plot the time course by electrode
-#' plot_time_mean(data = data_mean, condition_column = "sensor", t0 = 10, legend_title = "Electrode")
+#' # plot the time course by sensor (channel)
+#' plot_time_mean(data = data_mean, condition_column = "sensor", t0 = 10, legend_title = "Channel")
 plot_time_mean <- function(data,
                            condition_column = NULL,
                            FS = 250,

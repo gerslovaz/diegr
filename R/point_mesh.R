@@ -440,13 +440,7 @@ plot_point_mesh <- function(mesh,
 #'  rgl::wire3d(rgl::mesh3d(M$D3$x, M$D3$y, M$D3$z, triangles = t(TRI)))
 make_triangulation <- function(mesh) {
 
-  required_cols <- c("x", "y")
-  missing_cols <- setdiff(required_cols, colnames(mesh))
-
-  if (length(missing_cols) > 0) {
-    stop(paste("The following required columns in mesh are missing:",
-               paste(missing_cols, collapse = ", ")))
-  }
+  stop_if_missing_cols(mesh, required_cols = c("x", "y"))
 
   if (!is.numeric(mesh$x) || !is.numeric(mesh$y)) {
     stop("Columns 'x' and 'y' must be numeric.")

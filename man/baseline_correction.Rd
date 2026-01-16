@@ -7,11 +7,11 @@
 baseline_correction(data, baseline_range, type = "absolute")
 }
 \arguments{
-\item{data}{A data frame, tibble or a database table with input data, required columns: subject, sensor, time, signal, epoch.}
+\item{data}{A data frame, tibble or a database table with input data, required columns: \code{time} and \code{signal}. Optional columns: \code{group}, \code{subject}, \code{sensor}, \code{condition} and \code{epoch}, if present, are included in the grouping structure.}
 
 \item{baseline_range}{A numeric vector of time points used as the baseline (e.g., \code{baseline_range = 125:250}).}
 
-\item{type}{A character indicating the type of baseline correction. Only the value \code{"absolute"} is allowed at this moment (other values will trigger an error).}
+\item{type}{A character specifying the type of baseline correction. Currently, only \code{"absolute"} is supported, any other value results in an error.}
 }
 \value{
 A data frame/tibble with added columns:
@@ -19,23 +19,36 @@ A data frame/tibble with added columns:
 \item{baseline}{A baseline value used for correction.}
 }
 \description{
-Function for computing amplitude corrected to the selected baseline.
+Compute amplitude values corrected to the selected baseline.
+
+The function computes a baseline value within each epoch and subtracts it from the signal.
 }
 \details{
-If the values from \code{baseline_range} vector are out of the range of the \code{time} column, the baseline calculation proceeds as follows:
+If the values from \code{baseline_range} vector extend beyond the range of the \code{time} column, the baseline computation proceeds as follows:
 \enumerate{
 \item If a part of the \code{baseline_range} vector is in the \code{time} column and part is outside its range, the baseline correction is computed only from the part inside a \code{time} range.
 \item If the whole \code{baseline_range} vector is out of the \code{time} range, the \code{baseline} and also the \code{signal_base} values of the output are \code{NA}'s.
-In both cases the function returns a warning message along with the output data frame or tibble.
+In both cases, the function returns the output data along with a warning.
 }
 
-Note: If there are \code{NA} values in the \code{signal} column, matching rows are ignored in the baseline calculation (which may bias the results) and the function prints a warning message.
+Notes:
+\itemize{
+\item Rows with \code{NA} values in the \code{signal} column are ignored
+when computing the baseline, and a warning is issued.
+\item If any grouping variable present in the data contains only
+\code{NA} values, a warning is issued, as this may lead to invalid or
+uninformative grouping.
+}
 }
 \examples{
-# Computing baseline correction on first 10 points, sensor "E1"
+# Computing baseline correction for subject 1 on first 10 points, sensor "E1"
 # a) Prepare data and compute
 data01 <- epochdata |> dplyr::filter(.data$subject == 1 & .data$sensor == "E1")
 basedata <- baseline_correction(data01, baseline_range = 1:10, type = "absolute")
+
+## Note: You can also use baseline_correction() on the whole epochdata
+## and then filter selected subject and sensor, the results are the same,
+## the procedure above was chosen only for the speed of the example.
 
 # b) Plot raw (black line) and corrected (red line) signal for epoch 1
 epoch1 <- basedata |> dplyr::filter(.data$epoch == 1)
@@ -45,7 +58,7 @@ lines(epoch1$signal_base, col = "red")
 
 \donttest{
 # Set baseline_range outside of time range
-# results in NA's in baseline and signal_base columns
+# results in NA's in baseline and signal_base columns,
 # also returns a warning message
 basedata <- baseline_correction(data01, baseline_range = 70:80, type = "absolute")
 head(basedata)

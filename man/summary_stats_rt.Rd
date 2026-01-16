@@ -2,18 +2,19 @@
 % Please edit documentation in R/summary_stats.R
 \name{summary_stats_rt}
 \alias{summary_stats_rt}
-\title{Compute summary statistics of reaction times by subject}
+\title{Compute summary statistics of reaction times}
 \usage{
 summary_stats_rt(data)
 }
 \arguments{
-\item{data}{A data frame or a database table with response times dataset. Required columns: \code{subject}, \code{epoch}, \code{RT} (value of response time in ms).
-Optional column: \code{condition} for computing summary statistics per condition.}
+\item{data}{A data frame or a database table with reaction times dataset. Required columns are \code{epoch} and \code{RT} (value of reaction time in ms).
+Optional columns: \code{group}, \code{subject}, \code{condition} for computing summary statistics per group/subject/condition.}
 }
 \value{
-A tibble with summary statistics of response times by subject and, if present, by condition, consisting of the following columns:
+A tibble with summary statistics of reaction times consisting of the following columns:
 \describe{
-\item{subject}{Subject identifier.}
+\item{group}{Group identifier (only if present in the input data).}
+\item{subject}{Subject identifier (only if present in the input data).}
 \item{condition}{Experimental condition (only if present in the input data).}
 \item{n_epoch}{Number of epochs.}
 \item{min_rt}{Minimum reaction time.}
@@ -24,18 +25,23 @@ A tibble with summary statistics of response times by subject and, if present, b
 }
 }
 \description{
-Calculates basic descriptive statistics of reaction time (RT) for each
-subject in the input data. If condition is present, results are computed per subject and condition. Computed statistics include: the number of epochs, minimum,
-maximum, median, mean, and standard deviation of RT.
+Calculates basic descriptive statistics of reaction time (RT).
+Statistics are computed separately for each combination of grouping variables present in the data (e.g., group, subject, condition).
+
+Computed statistics include: the number of epochs, minimum, maximum, median, mean, and standard deviation of RT.
 }
 \examples{
-# Summary statistics for rtdata (two different subjects, no conditions)
+# 1. Summary statistics for rtdata
+# two different subjects, no group or conditions - results are computed per subject
 summary_stats_rt(rtdata)
 
-# Summary statistics for data with conditions
-# 1. create data
+# 2. Summary statistics for data with conditions
+# a) create example data
 data_cond <- rtdata
 data_cond$condition <- c(rep("a", 7), rep("b", 7), rep("a", 8), rep("b",7))
-# 2. compute statistics
+# b) compute statistics per subject and condition
 summary_stats_rt(data_cond)
+# c) compute statistics per conditions regardless of subjects
+# exclude "subject" column from computing
+summary_stats_rt(data_cond[,-1])
 }

@@ -9,7 +9,8 @@
 #' @return Logical value indicating whether all required columns are present.
 #' @keywords internal
 #' @noRd
-req_cols <- function(obj, required_cols) {
+req_cols <- function(obj,
+                     required_cols) {
 
   is.atomic(names(obj)) && all(required_cols %in% colnames(obj))
 }
@@ -43,6 +44,79 @@ stop_if_missing_cols <- function(data,
 
   invisible(TRUE)
 }
+
+#' Validate grouping variables for NA-only columns
+#'
+#' Checks whether specified grouping variables present in the data contain only \code{NA} values.
+#' Works with both in-memory data frames and database tables (via \pkg{dbplyr}).
+#'
+#' @param data A data frame or a database table (e.g. a \code{tbl_sql}).
+#' @param vars Character vector of grouping variable names to check. Variables that are not present in \code{data} are silently ignored.
+#' @param action Character string specifying how to handle grouping variables that contain only \code{NA} values. One of:
+#'   \describe{
+#'     \item{\code{"warn"}}{Issue a warning (default).}
+#'     \item{\code{"stop"}}{Throw an error and stop execution.}
+#'     \item{\code{"none"}}{Do nothing.}
+#'   }
+#'
+#' @details
+#' A grouping variable is considered invalid if it contains zero non-missing
+#' values (i.e. all entries are \code{NA}). This condition is detected using a
+#' database-safe check based on counting non-\code{NA} values.
+#'
+#' Variables with a single unique non-\code{NA} value are allowed and do not
+#' trigger any message.
+#'
+#' @return Invisibly returns \code{NULL}. The function is used for its side effects
+#' (warnings or errors).
+#' @keywords internal
+#' @noRd
+check_grouping_vars <- function(data,
+                                vars,
+                                action = c("warn", "stop", "none")) {
+  action <- match.arg(action)
+
+  vars <- intersect(vars, colnames(data))
+  if (length(vars) == 0) {
+    return(invisible(NULL))
+  }
+
+  summary <- data |>
+    dplyr::summarise(
+      dplyr::across(
+        dplyr::all_of(vars),
+        ~ sum(!is.na(.)),
+        .names = "{.col}__n_non_na"
+      )
+    ) |>
+    dplyr::collect()
+
+  bad_vars <- vars[
+    vapply(
+      vars,
+      function(v) summary[[paste0(v, "__n_non_na")]] == 0,
+      logical(1)
+    )
+  ]
+
+  if (length(bad_vars) > 0 && action != "none") {
+    msg <- paste0(
+      "Grouping variable(s) ",
+      paste(sprintf("`%s`", bad_vars), collapse = ", "),
+      " are present but contain only NA values. ",
+      "This will likely lead to invalid grouping results."
+    )
+
+    if (action == "warn") {
+      warning(msg, call. = FALSE)
+    } else if (action == "stop") {
+      stop(msg, call. = FALSE)
+    }
+  }
+
+  invisible(NULL)
+}
+
 
 
 #' Validate D3 part of mesh object
@@ -108,7 +182,8 @@ control_D2 <- function(mesh){
 #' @return Filtered data frame without the specified epochs.
 #' @keywords internal
 #' @noRd
-exclude_epoch <- function(data, ex_epoch){
+exclude_epoch <- function(data,
+                          ex_epoch){
 
   if (!"epoch" %in% colnames(data)) {
     stop("There is no 'epoch' column in data.")
@@ -132,7 +207,8 @@ exclude_epoch <- function(data, ex_epoch){
 #' @return A numeric matrix encoding pairwise spline distances.
 #' @keywords internal
 #' @noRd
-spline_matrix <- function(X, Xcp = X) {
+spline_matrix <- function(X,
+                          Xcp = X) {
 
   if (!is.matrix(X)) {
     X <- as.matrix(X)
@@ -181,7 +257,8 @@ spline_matrix <- function(X, Xcp = X) {
 #' @return A matrix of appropriate structure for spline interpolation estimation.
 #' @keywords internal
 #' @noRd
-XP_IM <- function(X, Xcp) {
+XP_IM <- function(X,
+                  Xcp) {
 
   if (!is.matrix(X)) {
     X <- as.matrix(X)
@@ -225,7 +302,9 @@ XP_IM <- function(X, Xcp) {
 #'
 #' @keywords internal
 #' @noRd
-IM <- function(X, Y, Xcp = X) {
+IM <- function(X,
+               Y,
+               Xcp = X) {
 
   if (!is.matrix(X)) {
     X <- as.matrix(X)
@@ -284,7 +363,9 @@ IM <- function(X, Y, Xcp = X) {
 #' @return A data frame with columns `x`, `y`, and `z`.
 #' @keywords internal
 #' @noRd
-recompute_3d <- function(X2D, X3D, mesh) {
+recompute_3d <- function(X2D,
+                         X3D,
+                         mesh) {
 
   if (!is.matrix(X2D)) {
     X2D <- as.matrix(X2D)
@@ -321,7 +402,8 @@ recompute_3d <- function(X2D, X3D, mesh) {
 #' @return Design matrix for penalized regression.
 #' @keywords internal
 #' @noRd
-XP_PRM <- function(X, lambda) {
+XP_PRM <- function(X,
+                   lambda) {
   if (!is.matrix(X)) {
     X <- as.matrix(X)
   }
@@ -368,7 +450,9 @@ XP_PRM <- function(X, lambda) {
 #'
 #' @keywords internal
 #' @noRd
-PRM <- function(X, Y, lambda) {
+PRM <- function(X,
+                Y,
+                lambda) {
 
   if (!is.matrix(X)) {
     X <- as.matrix(X)
@@ -416,7 +500,10 @@ PRM <- function(X, Y, lambda) {
 #' @return Numeric scalar with GCV score.
 #' @keywords internal
 #' @noRd
-GCV_score <- function(X, Y, lambda){
+GCV_score <- function(X,
+                      Y,
+                      lambda){
+
   model <- PRM(X, Y, lambda)
 
   if (length(model$diag_hat) == 0 || any(is.na(model$diag_hat))) {
@@ -445,7 +532,10 @@ GCV_score <- function(X, Y, lambda){
 #' @return Numeric scalar with DCV score.
 #' @keywords internal
 #' @noRd
-DCV_score <- function(X, Y, lambda){
+DCV_score <- function(X,
+                      Y,
+                      lambda){
+
   k <- dim(as.matrix(X))[1]
   model <- PRM(X, Y, lambda)
 
@@ -457,86 +547,3 @@ DCV_score <- function(X, Y, lambda){
 }
 
 
-#' Subsets EEG data by subject, sensor, time, or epoch
-#'
-#' @description
-#' Filters an input dataset by optional constraints on subject, sensor, time, and epoch.
-#' Filters are combined with logical AND, and exact value matching (\code{%in%}) is used.
-#'
-#' @param data A data frame, tibble or database table with input data. Required columns depend on the further parameters: setting `subject_rg` requires `subject` column etc.
-#' @param subject_rg Optional vector of subject identifiers to keep (character or numeric, matching \code{data$subject}). If `NULL` (default), no filtering is applied based on subject.
-#' @param sensor_rg Optional vector of sensor identifiers to keep (character or numeric, matching \code{data$sensor}). If `NULL` (default), no filtering is applied based on sensor.
-#' @param time_rg Optional vector of time points to keep (numeric, matching \code{data$time}). If `NULL` (default), no filtering is applied based on time.
-#' @param epoch_rg Optional vector of epoch identifiers to keep (character or numeric, matching \code{data$epoch}). If `NULL` (default), no filtering is applied based on epoch.
-#'
-#' @return An object of the same class as \code{data} with rows filtered by the provided criteria; columns are unchanged.
-#' If all filters are \code{NULL}, the input is returned unmodified. If no rows match, the function ends with error message.
-#'
-#' @details
-#' All filters are combined conjunctively (AND). Matching uses membership (\code{%in%}) with case-sensitive comparison for character columns.
-#' On database backends, very long *_rg vectors may not translate efficiently; consider pre-filtering or semi-joins.
-#'
-#' @importFrom dplyr filter
-#' @importFrom rlang .data expr
-#'
-#' @seealso \code{\link{compute_mean}}, \code{\link{baseline_correction}}, \code{\link{pick_region}}
-#'
-#' @export
-#' @examples
-#' # Filtering epochs 1:5 and time points 1:10 for all subjects and sensor "E45"
-#' data_subset <- pick_data(epochdata, sensor_rg = "E45",
-#'  time_rg = 1:10, epoch_rg = 1:5)
-#' head(data_subset)
-pick_data <- function(data,
-                      subject_rg = NULL,
-                      sensor_rg = NULL,
-                      time_rg = NULL,
-                      epoch_rg = NULL) {
-
-  conditions <- list()
-
-  if (!is.null(subject_rg)) {
-    if (!"subject" %in% colnames(data)) {
-      stop(paste0("There is no column 'subject' in the input data."))
-    }
-    conditions <- append(conditions, expr(.data$subject %in% {{ subject_rg }}))
-  }
-  if (!is.null(sensor_rg)) {
-    if (!"sensor" %in% colnames(data)) {
-      stop(paste0("There is no column 'sensor' in the input data."))
-    }
-    conditions <- append(conditions, expr(.data$sensor %in% {{ sensor_rg }}))
-  }
-
-  if (!is.null(time_rg)) {
-    if (!"time" %in% colnames(data)) {
-      stop(paste0("There is no column 'time' in the input data."))
-    }
-    conditions <- append(conditions, expr(.data$time %in% {{ time_rg }}))
-  }
-
-  if (!is.null(epoch_rg)) {
-    if (!"epoch" %in% colnames(data)) {
-      stop(paste0("There is no column 'epoch' in the input data."))
-    }
-    conditions <- append(conditions, expr(.data$epoch %in% {{ epoch_rg }}))
-  }
-
-  newdata <- data |>
-    dplyr::filter(!!!conditions)
-
-  if (inherits(newdata, "tbl_sql") || inherits(newdata, "tbl_dbi")) {
-    check_zero <- newdata |>
-             dplyr::tally() |>
-             dplyr::pull() == 0
-  } else {
-    check_zero <- nrow(newdata) == 0
-  }
-
-  if (check_zero == TRUE) {
-    stop("The subset of original data is empty.")
-  }
-
-  return(newdata)
-
-}

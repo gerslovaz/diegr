@@ -22,7 +22,7 @@ animate_topo(
 )
 }
 \arguments{
-\item{data}{An input data frame or tibble with at least this required columns: \code{time} - the number of time point, \code{sensor} - the sensor label and the column with the EEG amplitude to plot specified in the argument \code{amplitude}.}
+\item{data}{An input data frame or tibble with at least this required columns: \code{time} - the number of time point,\code{sensor} - the sensor label and the column with the EEG amplitude to plot specified in the argument \code{amplitude}.}
 
 \item{amplitude}{A character specifying the name of the column from input data with EEG amplitude values.}
 
@@ -70,7 +70,7 @@ Note: When specifying the \code{coords} and \code{template} at the same time, th
 # This example may take a few seconds to render.
 # Run only if you want to generate the full animation.
 # Prepare a data structure:
-s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time \%in\% c(10:20))
+s1e05 <- pick_data(epochdata, subject_rg = 1, epoch_rg = 5, time_rg = 10:20)
 # Plot animation
 # t0 = 10 indicates the time point of stimulus in epochdata,
 # t_lim is the whole range of epochdata, we animate only a short period

@@ -21,7 +21,7 @@ animate_topo_mean(
 )
 }
 \arguments{
-\item{data}{A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: \code{sensor} with sensor labels and \code{average, ci_low, ci_up} with values of average signal and lower and upper CI bounds.}
+\item{data}{A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure. Required columns: \code{sensor} - sensor labels, \code{time} - numbers of time points, \code{average} - average signal values, \code{ci_low} and \code{ci_up} - lower and upper CI bounds.}
 
 \item{t_lim}{Limits of time points (i.e., the length of the timeline displayed below the animation).}
 
@@ -64,8 +64,7 @@ Note: When specifying the \code{coords} and \code{template} at the same time, th
 
 # a) prepare data: compute the mean from baseline corrected signal for subject 2,
 # first 10 points and only 13 epochs (epochs 14 and 15 are outliers)
-edata <- epochdata |>
-dplyr::filter(subject == 2 & time \%in\% 1:10 & epoch \%in\% 1:13)
+edata <- pick_data(epochdata, subject_rg = 2, epoch_rg = 1:13, time_rg = 1:10)
 data_base <- baseline_correction(edata, baseline_range = 1:10) # baseline correction
 data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2,
  type = "jack", group = "space") # compute mean

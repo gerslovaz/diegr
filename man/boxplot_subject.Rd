@@ -7,10 +7,9 @@
 boxplot_subject(
   data,
   amplitude = "signal",
-  epoch = NULL,
   subject = NULL,
-  channel,
   time_lim,
+  title_label = NULL,
   use_latex = TRUE
 )
 }
@@ -19,13 +18,11 @@ boxplot_subject(
 
 \item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal"}.}
 
-\item{epoch}{An integer or character ID of epoch to plot. If missing, a single epoch input data are expected.}
-
 \item{subject}{A vector with IDs of subjects to plot. If missing, boxplots are drawn for all avaliable subjects in \code{data}.}
 
-\item{channel}{An integer or character ID of channel to plot.}
-
 \item{time_lim}{A numeric vector with time range to plot.}
+
+\item{title_label}{A character string specifying the title of the plot. Defaults to \code{NULL} for plot without title.}
 
 \item{use_latex}{A logical value indicating whether to use LaTeX formatting for the y-axis title. The default is \code{TRUE}.}
 }
@@ -33,23 +30,26 @@ boxplot_subject(
 A \code{plotly} object with boxplots of EEG amplitude across subjects.
 }
 \description{
-Function for plotting interactive boxplots of EEG amplitude across subjects for a selected single epoch and channel, within a specified time interval. The interactive plotly output enables to easily determine the subjects with outlier amplitude and also allows to easily edit the image layout.
+Function for plotting interactive boxplots of EEG amplitude across subjects for a single epoch and channel, within a specified time interval. The function assumes data from a single epoch and a single sensor.
+The interactive plotly output enables to easily determine the subjects with outlier amplitude and also allows to easily edit the image layout.
 }
 \details{
 The input data frame or database table must contain at least following columns:
 \code{subject} - a column with subject IDs,
-\code{sensor} - a column with sensor labels,
 \code{time} - a column with time point numbers,
 and a column with measured EEG signal values (or their averages) called as in \code{amplitude}.
-If the \code{epoch} parameter is specified, the \code{epoch} column with epoch number or ID is also required.
+
+Note: The function assumes that subject IDs are unique across the entire dataset. Using the same subject IDs in multiple groups may result in incorrect or misleading visualizations.
 }
 \examples{
 # Interactive boxplots of signal from channel E34 in epoch 1
 # for both subjects in chosen time points
 ## Note: it has no statistical sense to make boxplot from only 2 observations, but
 ## larger example dataset is not possible due to size limit of the package
-boxplot_subject(epochdata, amplitude = "signal",
-epoch = 1, channel = "E34", time_lim = c(10:20))
+epochdata |>
+pick_data(sensor_rg = "E34", epoch_rg = 1) |>
+boxplot_subject(amplitude = "signal", time_lim = c(10:20),
+title_label = "Sensor E34, epoch 1")
 
 }
 \seealso{

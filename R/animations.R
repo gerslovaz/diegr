@@ -2,26 +2,26 @@
 #'
 #' @description Display a topographic animation of the change in amplitude over time. The function enables direct rendering in Rstudio Viewer or saving the animation in gif format to the chosen location.
 #'
-#' @param data An input data frame or tibble with at least this required columns: \code{time} - the number of time point, \code{sensor} - the sensor label and the column with the EEG amplitude to plot specified in the argument \code{amplitude}.
+#' @param data An input data frame or tibble with at least this required columns: `time` - the number of time point,`sensor` - the sensor label and the column with the EEG amplitude to plot specified in the argument `amplitude`.
 #' @param amplitude A character specifying the name of the column from input data with EEG amplitude values.
 #' @param t_lim A numeric vector of length 2 with limits of time points (i.e., the length of the timeline displayed below the animation).
 #' @param FS The sampling frequency. Default value is 250 Hz.
 #' @param t0 Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).
-#' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
-#' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.
-#' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
+#' @param mesh A `"mesh"` object (or a named list with the same structure) containing at least `D2` element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
+#' @param coords Sensor coordinates as a tibble or data frame with named `x`, `y` columns of sensor coordinates and `sensor` column with sensor names. If not defined, the HCGSN256 template is used.
+#' @param template The kind of sensor template montage used. Currently the only available option is `"HCGSN256"` denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of interpolated signal is used.
-#' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
-#' @param show_legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is \code{TRUE}.
-#' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.
+#' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from `col_range`.
+#' @param show_legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is `TRUE`.
+#' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is `FALSE`.
 #' @param output_path File path where the animation will be saved using `gifski` renderer (optional). If not defined, the animation is plotted in the RStudio Viewer.
 #' @param ... Additional parameters for animation according to [gganimate::animate].
 #'
 #' @details
-#' For more details about required mesh structure see \code{\link{point_mesh}} function. If the input \code{mesh} structure does not match this format, an error or incorrect function behavior may occur.
+#' For more details about required mesh structure see \code{\link{point_mesh}} function. If the input `mesh` structure does not match this format, an error or incorrect function behavior may occur.
 #'
 #' The time part of input data is assumed to be in numbers of time points, conversion to ms takes place inside the function for drawing the timeline labels.
-#' Due to the flexibility of the function (e.g. to mark and animate only a short section from the entire time course or to compare different data in the same time interval), it allows to enter and plot user-defined time ranges. If some values of the time are outside the \code{t_lim} range, the function writes a warning message - in that case the animation is still rendered, but the timeline will not match reality.
+#' Due to the flexibility of the function (e.g. to mark and animate only a short section from the entire time course or to compare different data in the same time interval), it allows to enter and plot user-defined time ranges. If some values of the time are outside the `t_lim` range, the function writes a warning message - in that case the animation is still rendered, but the timeline will not match reality.
 #'
 #' Note: When specifying the `coords` and `template` at the same time, the `template` parameter takes precedence and the `coords` parameter is ignored.
 #'
@@ -45,7 +45,7 @@
 #' # This example may take a few seconds to render.
 #' # Run only if you want to generate the full animation.
 #' # Prepare a data structure:
-#' s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time %in% c(10:20))
+#' s1e05 <- pick_data(epochdata, subject_rg = 1, epoch_rg = 5, time_rg = 10:20)
 #' # Plot animation
 #' # t0 = 10 indicates the time point of stimulus in epochdata,
 #' # t_lim is the whole range of epochdata, we animate only a short period
@@ -67,9 +67,7 @@ animate_topo <- function(data,
                          output_path = NULL,
                          ...){
 
-  if (!amplitude %in% colnames(data)) {
-    stop(paste0("There is no column '", amplitude, "' in the input data."))
-  }
+  stop_if_missing_cols(data, required_cols = c(amplitude, "time", "sensor"))
 
   if (any(is.na(data[[amplitude]]))) {
     stop("There are NA's in amplitude column.")
@@ -99,10 +97,6 @@ animate_topo <- function(data,
     warning("Both 'template' and 'coords' were specified. Using 'template' and ignoring 'coords'.")
   }
 
-  if (!"sensor" %in% colnames(data)) {
-    stop("There is no 'sensor' column in input data.")
-  }
-
   if (is.null(template) && is.null(coords)) {
     # use HCGSN256 template
     template <- "HCGSN256"
@@ -119,13 +113,7 @@ animate_topo <- function(data,
     coords <- coords_full[sensor_index,]
   }
 
-  required_cols <- c("x", "y", "sensor")
-  missing_cols <- setdiff(required_cols, colnames(coords))
-
-  if (length(missing_cols) > 0) {
-    stop(paste("The following required columns in 'coords' are missing:",
-               paste(missing_cols, collapse = ", ")))
-  }
+  stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
 
   if (missing(mesh)) {
     mesh <- point_mesh(dimension = 2, template = template,
@@ -258,14 +246,13 @@ animate_topo <- function(data,
 #' @importFrom purrr map_dfr
 #'
 #' @noRd
-prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
+prepare_anim_structure <- function(data,
+                                   amp_name,
+                                   coords,
+                                   mesh_mat) {
 
   if (inherits(data, "tbl_sql") || inherits(data, "tbl_dbi")) {
     data <- dplyr::collect(data)
-  }
-
-  if (!"sensor" %in% names(coords)) {
-    stop("The 'coords' data frame must include a 'sensor' column.")
   }
 
   if (all(c("x", "y", "z") %in% names(coords))) {
@@ -311,14 +298,16 @@ prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
 
 #' 3D scalp plot animation in time
 #'
-#' @param data An input data frame or tibble with at least this required columns: \code{time} - the number of time point, \code{sensor} - the sensor label and the column with the EEG amplitude to plot specified in the argument \code{amplitude}.
+#' @description Display a topographic 3D scalp animation of the change in amplitude over time. The function enables direct rendering in Rstudio Viewer or saving the animation in MP4 format or individual frames in PNG format to the chosen location.
+#'
+#' @param data An input data frame or tibble with at least this required columns: `time` - the number of time point, `sensor` - the sensor label and the column with the EEG amplitude to plot specified in the argument `amplitude`.
 #' @param amplitude A character string naming the column with EEG amplitude values.
-#' @param mesh An object of class \code{"mesh"} (or a named list with the same structure) used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. See \code{\link{scalp_plot}} for details about the structure.
-#' @param tri A matrix with indices of the triangles. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the mesh.
-#' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{z} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.
-#' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
+#' @param mesh An object of class `"mesh"` (or a named list with the same structure) used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. See \code{\link{scalp_plot}} for details about the structure.
+#' @param tri A matrix with indices of the triangles. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from `D2` element of the mesh.
+#' @param coords Sensor coordinates as a tibble or data frame with named `x`, `y` and `z` columns of sensor coordinates and `sensor` column with sensor names. If not defined, the HCGSN256 template is used.
+#' @param template The kind of sensor template montage used. Currently the only available option is `"HCGSN256"` denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of interpolated signal is used.
-#' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
+#' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from `col_range`.
 #' @param sec The time interval used between individual animation frames, in seconds (default: 0.3).
 #' @param frames_dir Directory where the individual frames will be saved. If NULL, the video is only displayed in viewer and the frames are not saved.
 #' @param output_path Optional path to the output mp4 video file (".mp4" extension is required for correct rendering). If NULL, no video is created.
@@ -327,8 +316,8 @@ prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
 #'
 #' @details
 #' Setting the parameter `tri` requires defining a `mesh` parameter.
-#' The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
-#' If the input \code{mesh} contains only 3D coordinates of a point mesh in \code{D3} element, the use of previously created triangulation (through \code{tri} argument) is required.
+#' The parameter `mesh` should optimally be a `"mesh"` object (output from \code{\link{point_mesh}} function) or a list with the same structure (see \code{\link{point_mesh}} for more information). In that case, setting the argument `tri` is optional, and if it is absent, a triangulation based on the `D2` element of the mesh is calculated and used in the plot.
+#' If the input `mesh` contains only 3D coordinates of a point mesh in `D3` element, the use of previously created triangulation (through `tri` argument) is required.
 #'
 #' Notes:
 #' For exporting the video, setting `frames_dir` together with `output_path` is required.
@@ -355,7 +344,7 @@ prepare_anim_structure <- function(data, amp_name, coords, mesh_mat) {
 #' # Run only if you want to generate the full animation.
 #' # Note: The example opens a rgl 3D viewer.
 #' # Prepare a data structure:
-#' s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time %in% c(10:20))
+#' s1e05 <- pick_data(epochdata, subject_rg = 1, epoch_rg = 5, time_rg = 10:20)
 #' # Plot animation with default mesh and triangulation:
 #' animate_scalp(s1e05, amplitude = "signal")
 #' }
@@ -373,16 +362,10 @@ animate_scalp <- function(data,
                           framerate = 3,
                           cleanup = TRUE) {
 
-  if (!amplitude %in% colnames(data)) {
-    stop(paste0("There is no column '", amplitude, "' in the input data."))
-  }
+  stop_if_missing_cols(data, required_cols = c(amplitude, "time", "sensor"))
 
   if (any(is.na(data[[amplitude]]))) {
     stop("There are NA's in amplitude column.")
-  }
-
-  if (!"sensor" %in% colnames(data)) {
-    stop("There is no 'sensor' column in input data.")
   }
 
   if (!is.numeric(sec) || sec <= 0) {
@@ -417,14 +400,7 @@ animate_scalp <- function(data,
     coords <- coords_full[sensor_index,]
   }
 
-  required_cols <- c("x", "y", "z", "sensor")
-  missing_cols <- setdiff(required_cols, colnames(coords))
-
-  if (length(missing_cols) > 0) {
-    stop(paste("The following required columns in 'coords' are missing:",
-               paste(missing_cols, collapse = ", ")))
-  }
-
+  stop_if_missing_cols(coords, required_cols = c("x", "y", "z", "sensor"))
 
   if (missing(mesh)) {
     if (!missing(tri)) {
@@ -599,33 +575,12 @@ export_video <- function(frames_dir,
 #' }
 #'
 #' @noRd
-prepare_anim_structure_CI <- function(data, coords, mesh_mat) {
+prepare_anim_structure_CI <- function(data,
+                                      coords,
+                                      mesh_mat) {
 
   if (inherits(data, "tbl_sql")) {
     data <- dplyr::collect(data)
-  }
-
-  if (!"sensor" %in% names(coords)) {
-    stop("The 'coords' data frame must include a 'sensor' column.")
-  }
-
-  required_cols <- c("average", "ci_low", "ci_up")
-  missing_cols <- setdiff(required_cols, colnames(data))
-
-  if (length(missing_cols) > 0) {
-    stop(paste("The following required columns in 'data' are missing:",
-               paste(missing_cols, collapse = ", ")))
-  }
-
-  if (any(is.na(data[["average"]]))) {
-    stop("There are NA's in the 'average' column.")
-  }
-
-  if (any(is.na(data[["ci_low"]]))) {
-    stop("There are NA's in the 'ci_low' column.")
-  }
-  if (any(is.na(data[["ci_up"]]))) {
-    stop("There are NA's in the 'ci_up' column.")
   }
 
   if (all(c("x", "y", "z") %in% names(coords))) {
@@ -684,17 +639,17 @@ prepare_anim_structure_CI <- function(data, coords, mesh_mat) {
 #' An animation of the average signal time course as a topographic map along with the lower and upper bounds of the confidence interval. In the output, three facets are plotted per frame: CI lower, average, CI upper.
 #'
 #'
-#' @param data A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: \code{sensor} with sensor labels and \code{average, ci_low, ci_up} with values of average signal and lower and upper CI bounds.
+#' @param data A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure. Required columns: `sensor` - sensor labels, `time` - numbers of time points, `average` - average signal values, `ci_low` and `ci_up` - lower and upper CI bounds.
 #' @param t_lim Limits of time points (i.e., the length of the timeline displayed below the animation).
 #' @param FS The sampling frequency. Default value is 250 Hz.
 #' @param t0 Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).
-#' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
-#' @param coords Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.
-#' @param template The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
+#' @param mesh A `"mesh"` object (or a named list with the same structure) containing at least `D2` element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
+#' @param coords Sensor coordinates as a tibble or data frame with named `x`, `y` columns of sensor coordinates and `sensor` column with sensor names. If not defined, the HCGSN256 template is used.
+#' @param template The kind of sensor template montage used. Currently the only available option is `"HCGSN256"` denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of the input signal is used.
-#' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from \code{col_range}.
-#' @param show_legend Logical. Indicates, whether legend should be displayed below the graph. Default value is \code{TRUE}.
-#' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is \code{FALSE}.
+#' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from `col_range`.
+#' @param show_legend Logical. Indicates, whether legend should be displayed below the graph. Default value is `TRUE`.
+#' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is `FALSE`.
 #' @param output_path File path where the animation will be saved using `gifski` renderer (optional). If not defined, the animation is plotted in the RStudio Viewer.
 #' @param ... Additional parameters for animation according to [gganimate::animate].
 #'
@@ -722,8 +677,7 @@ prepare_anim_structure_CI <- function(data, coords, mesh_mat) {
 #'
 #' # a) prepare data: compute the mean from baseline corrected signal for subject 2,
 #' # first 10 points and only 13 epochs (epochs 14 and 15 are outliers)
-#' edata <- epochdata |>
-#' dplyr::filter(subject == 2 & time %in% 1:10 & epoch %in% 1:13)
+#' edata <- pick_data(epochdata, subject_rg = 2, epoch_rg = 1:13, time_rg = 1:10)
 #' data_base <- baseline_correction(edata, baseline_range = 1:10) # baseline correction
 #' data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2,
 #'  type = "jack", group = "space") # compute mean
@@ -749,7 +703,7 @@ animate_topo_mean <- function(data,
     stop("To render the animation, the 'magick' package is required.")
   }
 
-    if (!(is.logical(contour))) {
+  if (!(is.logical(contour))) {
     stop("Argument 'contour' has to be logical.")
   }
 
@@ -765,8 +719,17 @@ animate_topo_mean <- function(data,
     stop("'t0' must be a numeric value.")
   }
 
-  if (!"sensor" %in% names(data)) {
-    stop("The input data must include a 'sensor' column.")
+  stop_if_missing_cols(data, required_cols = c("average", "ci_low", "ci_up", "sensor", "time"))
+
+  if (any(is.na(data[["average"]]))) {
+    stop("There are NA's in the 'average' column.")
+  }
+
+  if (any(is.na(data[["ci_low"]]))) {
+    stop("There are NA's in the 'ci_low' column.")
+  }
+  if (any(is.na(data[["ci_up"]]))) {
+    stop("There are NA's in the 'ci_up' column.")
   }
 
   if (!is.null(template) && !is.null(coords)) {
@@ -789,13 +752,7 @@ animate_topo_mean <- function(data,
     coords <- coords_full[sensor_index,]
   }
 
-  required_cols <- c("x", "y", "sensor")
-  missing_cols <- setdiff(required_cols, colnames(coords))
-
-  if (length(missing_cols) > 0) {
-    stop(paste("The following required columns in 'coords' are missing:",
-               paste(missing_cols, collapse = ", ")))
-  }
+  stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
 
   if (missing(mesh)) {
     mesh <- point_mesh(dimension = 2, template = { template },

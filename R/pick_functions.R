@@ -126,3 +126,115 @@ pick_region <- function(coords = NULL,
   return(new_coords)
 }
 
+
+
+#' Subsets EEG data by group, subject, sensor, time, experimental condition or epoch
+#'
+#' @description
+#' Filters an input dataset by optional constraints on group, subject, sensor, time, condition and epoch.
+#' Filters are combined with logical AND, and exact value matching (\code{%in%}) is used.
+#'
+#' @param data A data frame, tibble or database table with input data. Required columns depend on the further parameters: setting `subject_rg` requires `subject` column etc.
+#' @param group_rg Optional vector of group identifiers to keep (character or numeric, matching \code{data$group}). If `NULL` (default), no filtering is applied based on group.
+#' @param subject_rg Optional vector of subject identifiers to keep (character or numeric, matching \code{data$subject}). If `NULL` (default), no filtering is applied based on subject.
+#' @param sensor_rg Optional vector of sensor identifiers to keep (character or numeric, matching \code{data$sensor}). If `NULL` (default), no filtering is applied based on sensor.
+#' @param condition_rg Optional vector of experimental condition identifiers to keep (character or numeric, matching \code{data$condition}). If `NULL` (default), no filtering is applied based on condition.
+#' @param epoch_rg Optional vector of epoch identifiers to keep (character or numeric, matching \code{data$epoch}). If `NULL` (default), no filtering is applied based on epoch.
+#' @param time_rg Optional vector of time points to keep (numeric, matching \code{data$time}). If `NULL` (default), no filtering is applied based on time.
+#'
+#' @return An object of the same class as \code{data} with rows filtered by the provided criteria; columns are unchanged.
+#' If all filters are \code{NULL}, the input is returned unmodified. If no rows match, the function ends with error message.
+#'
+#' @details
+#' All filters are combined conjunctively (AND). Matching uses membership (\code{%in%}) with case-sensitive comparison for character columns.
+#' On database backends, very long *_rg vectors may not translate efficiently; consider pre-filtering or semi-joins.
+#'
+#' @importFrom dplyr filter
+#' @importFrom rlang .data expr
+#'
+#' @seealso \code{\link{compute_mean}}, \code{\link{baseline_correction}}, \code{\link{pick_region}}
+#'
+#' @export
+#' @examples
+#' # Filtering epochs 1:5 and time points 1:10 for all subjects and sensor "E45"
+#' data_subset <- pick_data(epochdata, sensor_rg = "E45",
+#'  time_rg = 1:10, epoch_rg = 1:5)
+#' head(data_subset)
+#'
+#' \donttest{
+#' # Setting parameters outside the input data range (there is no subject 6 in epochdata)
+#' # results in an error message
+#' try(
+#' pick_data(epochdata, subject_rg = 6,
+#'  time_rg = 1:10, epoch_rg = 1:5)
+#'  )
+#' }
+pick_data <- function(data,
+                      group_rg = NULL,
+                      subject_rg = NULL,
+                      sensor_rg = NULL,
+                      condition_rg = NULL,
+                      epoch_rg = NULL,
+                      time_rg = NULL) {
+
+  conditions <- list()
+
+  if (!is.null(group_rg)) {
+    if (!"group" %in% colnames(data)) {
+      stop(paste0("There is no column 'group' in the input data."))
+    }
+    conditions <- append(conditions, expr(.data$group %in% {{ group_rg }}))
+  }
+
+  if (!is.null(subject_rg)) {
+    if (!"subject" %in% colnames(data)) {
+      stop(paste0("There is no column 'subject' in the input data."))
+    }
+    conditions <- append(conditions, expr(.data$subject %in% {{ subject_rg }}))
+  }
+  if (!is.null(sensor_rg)) {
+    if (!"sensor" %in% colnames(data)) {
+      stop(paste0("There is no column 'sensor' in the input data."))
+    }
+    conditions <- append(conditions, expr(.data$sensor %in% {{ sensor_rg }}))
+  }
+
+  if (!is.null(condition_rg)) {
+    if (!"condition" %in% colnames(data)) {
+      stop(paste0("There is no column 'condition' in the input data."))
+    }
+    conditions <- append(conditions, expr(.data$condition %in% {{ condition_rg }}))
+  }
+
+  if (!is.null(epoch_rg)) {
+    if (!"epoch" %in% colnames(data)) {
+      stop(paste0("There is no column 'epoch' in the input data."))
+    }
+    conditions <- append(conditions, expr(.data$epoch %in% {{ epoch_rg }}))
+  }
+
+  if (!is.null(time_rg)) {
+    if (!"time" %in% colnames(data)) {
+      stop(paste0("There is no column 'time' in the input data."))
+    }
+    conditions <- append(conditions, expr(.data$time %in% {{ time_rg }}))
+  }
+
+  newdata <- data |>
+    dplyr::filter(!!!conditions)
+
+  if (inherits(newdata, "tbl_sql") || inherits(newdata, "tbl_dbi")) {
+    check_zero <- newdata |>
+      dplyr::tally() |>
+      dplyr::pull() == 0
+  } else {
+    check_zero <- nrow(newdata) == 0
+  }
+
+  if (check_zero == TRUE) {
+    stop("The subset of original data is empty.")
+  }
+
+  return(newdata)
+
+}

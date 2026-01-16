@@ -1,22 +1,22 @@
 #' Plot interactive boxplots of EEG amplitude on epoch level
 #'
 #' @description
-#' Function for plotting interactive boxplots of EEG amplitude in individual epochs for selected subject and channel within the chosen time interval. The interactive `plotly` output enables to easily determine the epoch number from which outliers come and also allows to easily edit the image layout.
+#' Function for plotting interactive boxplots of EEG amplitude in individual epochs within the chosen time interval. The function assumes data from a single subject and a single sensor.
+#' The interactive `plotly` output enables to easily determine the epoch number from which outliers come and also allows to easily edit the image layout.
 #'
-#' @param data A data frame or a database table with EEG dataset. Required columns: `sensor`, `epoch`, `time` and the column with EEG amplitude named as in `amplitude` parameter.
-#' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal"}.
-#' @param subject An integer or character ID of selected subject to plot. If missing, a single subject input data are expected.
-#' @param channel An integer or character ID of channel to plot.
+#' @param data A data frame or a database table with EEG dataset. Required columns: `epoch`, `time` and the column with EEG amplitude named as in `amplitude` parameter.
+#' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values. Default is `"signal"`.
+#' @param epoch A vector with numbers of epochs to plot. If missing, boxplots are drawn for all avaliable epochs in `data`.
 #' @param time_lim A numeric vector with time range to plot.
+#' @param title_label A character string specifying the title of the plot. Defaults to `NULL` for plot without title.
 #' @param use_latex A logical value indicating whether to use LaTeX formatting for the y-axis title. The default is `TRUE`.
 #'
 #' @details
 #' The input data frame or database table must contain at least following columns:
-#' `sensor` - a column with sensor labels,
 #' `epoch` - a column with epoch numbers,
 #' `time` - a column with time point numbers,
 #' and a column with measured EEG signal values (or their averages) called as in `amplitude`.
-#' If the `subject` parameter is specified, the `subject` column with subject IDs is also required.
+#'
 #'
 #' @seealso \code{\link{boxplot_subject}}
 #'
@@ -28,33 +28,35 @@
 #'
 #' @examples
 #' # Interactive boxplots of signal from channel E34 for subject 1 (health control)
-#' # in chosen time points
-#' boxplot_epoch(epochdata, amplitude = "signal", subject = 1, channel = "E34",
-#'  time_lim = c(10:20))
+#' # in time points 10:20
+#' epochdata |>
+#' pick_data(subject_rg = 1, sensor_rg = "E34") |>
+#' boxplot_epoch(amplitude = "signal", time_lim = c(10:20),
+#' title_label = "Subject 1, channel E34")
 #'
 #' @export
 boxplot_epoch <- function(data,
                           amplitude = "signal",
-                          subject = NULL,
-                          channel,
+                          epoch = NULL,
                           time_lim,
+                          title_label = NULL,
                           use_latex = TRUE) {
 
-  stop_if_missing_cols(data, required_cols = c("time", "epoch", "sensor", amplitude))
+  stop_if_missing_cols(data, required_cols = c("time", "epoch", amplitude))
 
   if (!is.numeric(time_lim)) {
     stop("'time_lim' must be a numeric vector of time points.")
   }
 
-  db_sub <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ channel }}, time_rg = {{ time_lim }})
+  db_sub <- pick_data(data, epoch_rg = {{ epoch }}, time_rg = {{ time_lim }})
   db_sub <- db_sub |>
     dplyr::select("time", "epoch", {{ amplitude }})
   db_df <- collect(db_sub)
 
-  if ("subject" %in% colnames(db_df)) {
-    label <- rlang::englue("Epoch boxplots of EEG amplitude for channel { channel }")
+  if (!is.null(title_label)) {
+    label <- title_label
   } else {
-    label <- rlang::englue("Epoch boxplots of EEG amplitude for subject { subject }, channel { channel }")
+    label = ""
   }
 
   fig <- plot_ly(db_df, x = ~time, y = as.formula(paste0("~.data$", amplitude))) |>
@@ -83,23 +85,23 @@ boxplot_epoch <- function(data,
 #' Plot interactive boxplots of EEG amplitude across subjects
 #'
 #' @description
-#' Function for plotting interactive boxplots of EEG amplitude across subjects for a selected single epoch and channel, within a specified time interval. The interactive plotly output enables to easily determine the subjects with outlier amplitude and also allows to easily edit the image layout.
+#' Function for plotting interactive boxplots of EEG amplitude across subjects for a single epoch and channel, within a specified time interval. The function assumes data from a single epoch and a single sensor.
+#' The interactive plotly output enables to easily determine the subjects with outlier amplitude and also allows to easily edit the image layout.
 #'
 #' @param data A data frame or a database table with EEG dataset. Required columns: `subject`, `sensor`, `time` and the column with EEG amplitude named as in `amplitude` parameter.
 #' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal"}.
-#' @param epoch An integer or character ID of epoch to plot. If missing, a single epoch input data are expected.
 #' @param subject A vector with IDs of subjects to plot. If missing, boxplots are drawn for all avaliable subjects in `data`.
-#' @param channel An integer or character ID of channel to plot.
 #' @param time_lim A numeric vector with time range to plot.
+#' @param title_label A character string specifying the title of the plot. Defaults to `NULL` for plot without title.
 #' @param use_latex A logical value indicating whether to use LaTeX formatting for the y-axis title. The default is `TRUE`.
 #'
 #' @details
 #' The input data frame or database table must contain at least following columns:
 #' `subject` - a column with subject IDs,
-#' `sensor` - a column with sensor labels,
 #' `time` - a column with time point numbers,
 #' and a column with measured EEG signal values (or their averages) called as in `amplitude`.
-#' If the `epoch` parameter is specified, the `epoch` column with epoch number or ID is also required.
+#'
+#' Note: The function assumes that subject IDs are unique across the entire dataset. Using the same subject IDs in multiple groups may result in incorrect or misleading visualizations.
 #'
 #' @seealso \code{\link{boxplot_epoch}}
 #'
@@ -114,30 +116,35 @@ boxplot_epoch <- function(data,
 #' # for both subjects in chosen time points
 #' ## Note: it has no statistical sense to make boxplot from only 2 observations, but
 #' ## larger example dataset is not possible due to size limit of the package
-#' boxplot_subject(epochdata, amplitude = "signal",
-#' epoch = 1, channel = "E34", time_lim = c(10:20))
+#' epochdata |>
+#' pick_data(sensor_rg = "E34", epoch_rg = 1) |>
+#' boxplot_subject(amplitude = "signal", time_lim = c(10:20),
+#' title_label = "Sensor E34, epoch 1")
 #'
 #' @export
 boxplot_subject <- function(data,
                           amplitude = "signal",
-                          epoch = NULL,
                           subject = NULL,
-                          channel,
                           time_lim,
+                          title_label = NULL,
                           use_latex = TRUE) {
 
-  stop_if_missing_cols(data, required_cols = c("time", "sensor", "subject", amplitude))
+  stop_if_missing_cols(data, required_cols = c("time", "subject", amplitude))
 
   if (!is.numeric(time_lim)) {
     stop("'time_lim' must be a numeric vector of time points.")
   }
 
-  db_sub <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ channel }}, time_rg = {{ time_lim }}, epoch_rg = {{ epoch }})
+  db_sub <- pick_data(data, subject_rg = {{ subject }}, time_rg = {{ time_lim }})
   db_sub <- db_sub |>
     dplyr::select("time", "subject", {{ amplitude }})
   db_df <- collect(db_sub)
 
-  label <- rlang::englue("Boxplots across subjects for channel { channel }")
+  if (!is.null(title_label)) {
+    label <- title_label
+  } else {
+    label = NULL
+  }
 
   fig <- plot_ly(db_df, x = ~time, y = as.formula(paste0("~.data$", amplitude))) |>
    add_boxplot(hovertext = paste("Subject :", db_df$subject))

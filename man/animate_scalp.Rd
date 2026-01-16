@@ -56,7 +56,7 @@ The output depends on the provided arguments:
 }
 }
 \description{
-3D scalp plot animation in time
+Display a topographic 3D scalp animation of the change in amplitude over time. The function enables direct rendering in Rstudio Viewer or saving the animation in MP4 format or individual frames in PNG format to the chosen location.
 }
 \details{
 Setting the parameter \code{tri} requires defining a \code{mesh} parameter.
@@ -74,7 +74,7 @@ When specifying the \code{coords} and \code{template} at the same time, the \cod
 # Run only if you want to generate the full animation.
 # Note: The example opens a rgl 3D viewer.
 # Prepare a data structure:
-s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time \%in\% c(10:20))
+s1e05 <- pick_data(epochdata, subject_rg = 1, epoch_rg = 5, time_rg = 10:20)
 # Plot animation with default mesh and triangulation:
 animate_scalp(s1e05, amplitude = "signal")
 }
