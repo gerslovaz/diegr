@@ -4,12 +4,14 @@
 \alias{create_scale}
 \title{Create colour scale used in topographic figures}
 \usage{
-create_scale(col_range, k = NULL)
+create_scale(col_range, k = NULL, type = c("topo", "redblue"))
 }
 \arguments{
 \item{col_range}{A numeric vector with required range of the variable to be plotted in the colour scale.}
 
 \item{k}{A number from interval (0,1) indicating a sequence step for the colour palette. The smaller number, the finer division of the data range interval. See Details for more information about auto-computing if \code{NULL}.}
+
+\item{type}{A character indicating the type of color palette to create. Available options: \code{"topo"} (default value) for topographical palette and \code{"redblue"} for red-blue palette, see Details for more information.}
 }
 \value{
 A list with two components:
@@ -21,7 +23,10 @@ The list is intended for use in \code{\link[ggplot2]{scale_fill_gradientn}} or s
 Create colour scale used in topographic figures
 }
 \details{
-The palette is created according to topographical colours: negative values correspond to shades of blue and purple and positive values to shades of green, yellow and red. The zero value of the variable is always at the border of blue and green shades.
+The topographical palette (\code{type = "topo"}) is created according to topographical colours: negative values correspond to shades of blue and purple and positive values to shades of green, yellow and red. The zero value of the variable is always at the border of blue and green shades.
+
+The red-blue palette (\code{type = "redblue"}) has negative values corresponding to shades of blue and positive values corresponding to shades of red.
+
 To compare results for different subjects or conditions, set the same \code{col_range} for all cases. Otherwise, the colours are assigned separately in each plot and are not consistent with each other.
 
 The parameter \code{k} is set by default with respect to the range of \code{col_range} as follows:
@@ -32,9 +37,14 @@ The parameter \code{k} is set by default with respect to the range of \code{col_
 }
 }
 \examples{
-# Create scale on interval (-10,10) with default step number
-create_scale(col_range = c(-10,10))
+# Create red-blue scale on interval (-10,10) with default step number
+create_scale(col_range = c(-10,10), type = "redblue")
 
-# Create scale on interval c(-5,10) with small k (finer division)
-create_scale(col_range = c(-5, 10), k = 0.02)
+# Create topographic scale on interval c(-5,10) with small k (finer division)
+CStopo <- create_scale(col_range = c(-5, 10), k = 0.02)
+# plot colors of the scale as points
+k_col <- length(CStopo$colors)
+plot(1:k_col, rep(1, k_col), col = CStopo$colors, pch = 16,
+ axes = FALSE, ylab = "", xlab = "")
+
 }

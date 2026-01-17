@@ -171,31 +171,6 @@ control_D2 <- function(mesh){
 }
 # in: scalp_plot
 
-#' Exclude selected epochs from dataset
-#'
-#' @description
-#' Helper to filter out specified epochs from a data frame or tibble.
-#'
-#' @param data A data frame with an `epoch` column.
-#' @param ex_epoch A vector of epoch IDs to exclude.
-#'
-#' @return Filtered data frame without the specified epochs.
-#' @keywords internal
-#' @noRd
-exclude_epoch <- function(data,
-                          ex_epoch){
-
-  if (!"epoch" %in% colnames(data)) {
-    stop("There is no 'epoch' column in data.")
-  }
-
-  newdata <- data |>
-    dplyr::filter(!.data$epoch %in% {{ ex_epoch }})
-
-  return(newdata)
-}
-# in: compute_mean
-
 #' Generate spline matrix for interpolation
 #'
 #' @description

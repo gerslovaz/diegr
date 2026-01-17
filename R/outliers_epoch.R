@@ -1,36 +1,39 @@
 #' Select outlier epochs
 #'
 #' @description
-#' Function for selecting outlier epochs for one subject and one sensor in chosen time points. Epochs are marked as outliers based on one of the following criteria: interquartile range criterion, percentile approach or Hampel filter method.
+#' Function identifies epochs with outlier values in a numeric EEG amplitude variable in chosen time points.
+#' Outliers are detected separately at each time point within the groups present in the data. The function then summarizes how many times each epoch was marked as an outlier
+#' across all time points.
 #'
-#' @param data A data frame, tibble or a database table with input data, required columns: subject, sensor, time, epoch and the column with EEG amplitude named as in \code{amplitude} parameter.
-#' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal"}.
-#' @param subject An integer or character ID of selected subject.
-#' @param sensor An integer or character ID of selected sensor.
+#' Epochs are marked as outliers based on one of the following criteria: interquartile range criterion, percentile approach or Hampel filter method.
+#'
+#' @param data A data frame, tibble or a database table with input data, required columns: `time`, `epoch` and the column with EEG amplitude specified by `amplitude` parameter. Optional columns: `group`, `subject`, `sensor`, `condition`.
+#' @param amplitude A character specifying the name of the column from input data with an EEG amplitude values. Default is `"signal"`.
 #' @param time A vector with time range for outliers detection. If not defined, the outliers are searched for all time points in the dataset.
-#' @param method A character denoting the method used for outlier detection. The options are: \code{"iqr"} for interquartile range (IQR) criterion, \code{"percentile"} for percentile method and \code{"hampel"} for Hampel filter method. See details for further information about methods.
+#' @param method A character denoting the method used for outlier detection. The options are: `"iqr"` for interquartile range (IQR) criterion (default value), `"percentile"` for percentile method and `"hampel"` for Hampel filter method. See details for further information about methods.
 #' @param k_iqr A positive numeric value denoting the scaling factor used in the IQR criterion. Default value is `k_iqr = 1.5`.
 #' @param k_mad A positive numeric value denoting the scaling factor used in the Hampel filter method. Default value is `k_mad = 3`.
-#' @param p A probability value from \code{[0,1]} interval determining percentile to the percentile method (according to \code{probs} argument in \code{quantile()} function). The default value is set to 0.975 for the interval formed by the 2.5 and 97.5 percentiles.
-#' @param print_tab Logical. Indicates, whether result table should be printed in console. Default is \code{TRUE}.
+#' @param p A probability value from \code{[0,1]} interval determining percentile to the percentile method (according to `probs` argument in \code{quantile()} function). The default value is set to 0.975 for the interval formed by the 2.5 and 97.5 percentiles.
+#' @param print_tab Logical. Indicates, whether result table should be printed in console. Default is `TRUE`.
 #'
 #' @details
 #' The input data frame or database table must contain at least following columns:
-#' subject - a column with subject IDs,
-#' sensor - a column with sensor labels,
-#' time - a column with time point numbers,
+#' `epoch` - a column with epoch numbers/labels,
+#' `time` - a column with time point numbers,
 #' signal (or other name specified in `amplitude` parameter) - a column with measured EEG signal values.
 #'
-#' The outlier detection method is chosen through \code{method} argument. The possibilities are
-#' - \code{iqr}: The interquartile range criterion, values outside the interval \code{[lower quartile - k_iqr * IQR, upper quartile + k_iqr * IQR]} are considered as outliers. IQR denotes interquartile range and `k_iqr` the scaling factor.
-#' - \code{percentile}: The percentile method, values outside the interval defined by the chosen percentiles are considered as outliers. Note: chosing small `p`leads to marking too many (or all) values.
-#' - \code{hampel}: The Hampel filter method, values outside the interval \code{[median - k_mad * MAD, median + k_mad * MAD]} are considered as outliers. MAD denotes median absolute deviation and `k_mad` the scaling factor.
+#' The outlier detection method is chosen through `method` argument. The possibilities are
+#' - `iqr`: The interquartile range criterion, values outside the interval \code{[lower quartile - k_iqr * IQR, upper quartile + k_iqr * IQR]} are considered as outliers. IQR denotes interquartile range and `k_iqr` the scaling factor.
+#' - `percentile`: The percentile method, values outside the interval defined by the chosen percentiles are considered as outliers. Note: chosing small `p`leads to marking too many (or all) values.
+#' - `hampel`: The Hampel filter method, values outside the interval \code{[median - k_mad * MAD, median + k_mad * MAD]} are considered as outliers. MAD denotes median absolute deviation and `k_mad` the scaling factor.
 #' Each of the above methods operates independently per time point, not globally across time.
+#'
+#' Note: For large datasets, the calculation can be time-consuming. It is recommended to pre-filter or subset the data before using this function to reduce computation time.
 #'
 #' @return A list with following components:
 #' \item{epoch_table}{A data frame with epoch ID and the number of time points in which the epoch was evaluated as outlier. (Only epochs with occurrence of outliers in at least one time point are included.)}
 #' \item{outliers_data}{A data frame with subset of data corresponding to the outliers found. (The full record for each flagged point from `epoch_table`.)}
-#' With the setting \code{print_tab = TRUE}, the \code{epoch_table} is also printed to the console.
+#' With the setting `print_tab = TRUE`, the `epoch_table` is also printed to the console.
 #'
 #' @importFrom grDevices boxplot.stats
 #' @importFrom stats lm mad median quantile sd
@@ -38,29 +41,30 @@
 #' @export
 #'
 #' @examples
-#' # Outlier epoch detection for subject 2, electrode E45 for the whole time range with IQR method
-#' outliers_epoch(epochdata, amplitude = "signal", subject = 2, sensor = "E45", method = "iqr")
-#' # From the result table we see that epochs 14 and 15 were marked as outliers in 50 cases out of 50
+#' # 1. Outlier epoch detection for subject 2, electrode E45 for the whole time range with IQR method
+#' epochdata |>
+#' pick_data(subject_rg = 2, sensor_rg = "E45") |>
+#' outliers_epoch(amplitude = "signal")
+#' ## From the result table we see that epochs 14 and 15 were marked as outliers in 50 cases out of 50
 #'
-#' # Outlier epoch detection for subject 2, electrode E45 for the whole time range
+#' # 2. Outlier epoch detection for both subjects, electrode E45 for the whole time range
 #' # using percentile method with 1 and 99 percentiles
-#' outliers_epoch(epochdata, amplitude = "signal", subject = 2, sensor = "E45",
-#'  method = "percentile", p = 0.99)
+#' outdata <- epochdata |>
+#' pick_data(sensor_rg = "E45") |>
+#' outliers_epoch(amplitude = "signal", method = "percentile", p = 0.99)
+#' # see head of outliers data
+#' head(outdata$outliers_data)
 
 outliers_epoch <- function(data,
                            amplitude = "signal",
-                           subject = NULL,
-                           sensor = NULL,
                            time = NULL,
-                           method,
+                           method = c("iqr", "percentile", "hampel"),
                            k_iqr = 1.5,
                            k_mad = 3,
                            p = 0.975,
                            print_tab = TRUE){
 
-  if (!method %in% c("iqr", "percentile", "hampel")) {
-    stop("Invalid method specified.")
-  }
+  method <- match.arg(method)
 
   if (!is.numeric(k_iqr) || k_iqr <= 0) {
     stop("'k_iqr' must be a positive number.")
@@ -74,27 +78,21 @@ outliers_epoch <- function(data,
     stop("Argument 'print_tab' has to be logical.")
   }
 
-  if (!amplitude %in% colnames(data)) {
-    stop(paste0("There is no column '", amplitude, "' in the input data."))
-  }
+  stop_if_missing_cols(data, required_cols = c(amplitude, "time", "epoch"))
 
-  if (!all(c("subject", "sensor", "time", "epoch") %in% colnames(data))) {
-    stop("Input data must contain 'subject', 'sensor', 'time', and 'epoch' columns.")
-  }
+  newdata <- pick_data(data, time_rg = {{ time }}) |>
+    dplyr::collect()
+  newdata$epoch <- factor(newdata$epoch)
 
-  newdata <- pick_data(data, subject_rg = {{ subject }}, sensor_rg = {{ sensor }}, time_rg = {{ time }})
-
-   newdata <- newdata |>
-     dplyr::select(all_of(c("subject", "time", "epoch", "sensor", amplitude)))
-   newdata <- dplyr::collect(newdata)
-   newdata$epoch <- factor(newdata$epoch)
+  group_vars <- intersect(c("group", "subject", "sensor", "condition", "time"), names(data))
+  check_grouping_vars(data, vars = group_vars, action = "warn")
 
   if (method == "iqr") {
     outdata <- newdata |>
-      dplyr::group_by(.data$time) |>
+      dplyr::group_by(dplyr::across(all_of(group_vars))) |>
       dplyr::mutate(outliers = .data[[amplitude]] %in% boxplot.stats(.data[[amplitude]])$out) |>
       dplyr::filter(.data$outliers == TRUE) |>
-      dplyr::select(all_of(c("time", "epoch", "sensor", amplitude)))
+      dplyr::ungroup()
   }
 
   if (method == "percentile") {
@@ -103,27 +101,37 @@ outliers_epoch <- function(data,
     }
 
     outdata <- newdata |>
-      dplyr::group_by(.data$time) |>
+      dplyr::group_by(dplyr::across(all_of(group_vars))) |>
       dplyr::mutate(outliers = .data[[amplitude]] < quantile(.data[[amplitude]], 1 - p) | .data[[amplitude]] > quantile(.data[[amplitude]], p)) |>
       dplyr::filter(.data$outliers == TRUE) |>
-      dplyr::select(all_of(c("time", "epoch", "sensor", amplitude)))
+      dplyr::ungroup()
   }
 
   if (method == "hampel") {
     outdata <- newdata |>
-      dplyr::group_by(.data$time) |>
+      dplyr::group_by(dplyr::across(all_of(group_vars))) |>
       dplyr::mutate(outliers = .data[[amplitude]] < median(.data[[amplitude]]) - 3 * mad(.data[[amplitude]], constant = 1) | .data[[amplitude]] > median(.data[[amplitude]]) + 3 * mad(.data[[amplitude]], constant = 1)) |>
       dplyr::filter(.data$outliers == TRUE) |>
-      dplyr::select(all_of(c("time", "epoch", "sensor", amplitude)))
+      dplyr::ungroup()
   }
 
-  epoch_vec <- outdata$epoch
-  epoch_tbl <- table(droplevels(epoch_vec))
-  epoch_tbl <- as.data.frame(epoch_tbl)
-  colnames(epoch_tbl) <- c("Epoch", "Count")
+   group_vars_epoch <- setdiff(group_vars, "time")
+
+   epoch_tbl <- outdata |>
+     dplyr::group_by(
+       dplyr::across(all_of(c(group_vars_epoch, "epoch")))
+     ) |>
+     dplyr::summarise(
+       count = dplyr::n(),
+       .groups = "drop"
+     )
+
   if (print_tab == TRUE) {
     print(epoch_tbl)
   }
+
+   outdata <- outdata |>
+     dplyr::select(-"outliers")
 
   invisible(list(epoch_table = epoch_tbl, outliers_data = outdata))
 }

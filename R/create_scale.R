@@ -2,9 +2,13 @@
 #'
 #' @param col_range A numeric vector with required range of the variable to be plotted in the colour scale.
 #' @param k A number from interval (0,1) indicating a sequence step for the colour palette. The smaller number, the finer division of the data range interval. See Details for more information about auto-computing if `NULL`.
+#' @param type A character indicating the type of color palette to create. Available options: `"topo"` (default value) for topographical palette and `"redblue"` for red-blue palette, see Details for more information.
 #'
 #' @details
-#' The palette is created according to topographical colours: negative values correspond to shades of blue and purple and positive values to shades of green, yellow and red. The zero value of the variable is always at the border of blue and green shades.
+#' The topographical palette (`type = "topo"`) is created according to topographical colours: negative values correspond to shades of blue and purple and positive values to shades of green, yellow and red. The zero value of the variable is always at the border of blue and green shades.
+#'
+#' The red-blue palette (`type = "redblue"`) has negative values corresponding to shades of blue and positive values corresponding to shades of red.
+#'
 #' To compare results for different subjects or conditions, set the same \code{col_range} for all cases. Otherwise, the colours are assigned separately in each plot and are not consistent with each other.
 #'
 #' The parameter \code{k} is set by default with respect to the range of \code{col_range} as follows:
@@ -20,12 +24,20 @@
 #' @export
 #'
 #' @examples
-#' # Create scale on interval (-10,10) with default step number
-#' create_scale(col_range = c(-10,10))
+#' # Create red-blue scale on interval (-10,10) with default step number
+#' create_scale(col_range = c(-10,10), type = "redblue")
 #'
-#' # Create scale on interval c(-5,10) with small k (finer division)
-#' create_scale(col_range = c(-5, 10), k = 0.02)
-create_scale <- function(col_range, k = NULL) {
+#' # Create topographic scale on interval c(-5,10) with small k (finer division)
+#' CStopo <- create_scale(col_range = c(-5, 10), k = 0.02)
+#' # plot colours of the scale as points
+#' k_col <- length(CStopo$colors)
+#' plot(1:k_col, rep(1, k_col), col = CStopo$colors, pch = 16,
+#'  axes = FALSE, ylab = "", xlab = "")
+#'
+create_scale <- function(col_range,
+                          k = NULL,
+                          type = c("topo", "redblue")) {
+  type <- match.arg(type)
 
   if (!is.numeric(col_range) || length(col_range) != 2 || col_range[1] == col_range[2]) {
     stop("The argument 'col_range' must be a numeric vector of two distinct values.")
@@ -58,12 +70,18 @@ create_scale <- function(col_range, k = NULL) {
   breaks_positive <- which(breaks >= 0)
   k_negbreaks <- length(breaks_negative)
   k_posbreaks <- length(breaks_positive)
-  scale_color <- c(ColorsNeg(k_negbreaks - 1), ColorsPos(k_posbreaks - 1))
+  if (type == "topo") {
+    scale_color <- c(ColorsNeg(k_negbreaks - 1), ColorsPos(k_posbreaks - 1))
+  } else if (type == "redblue") {
+    scale_color <- c(ColorsBlue(k_negbreaks - 1), ColorsRed(k_posbreaks - 1))
+  } else {
+    stop("Unknown 'type' argument.")
+  }
 
   return(list(colors = scale_color, breaks = breaks))
 }
 
-#' Create HSV-based color ramp for negative EEG values
+#' Create HSV-based topo-color ramp for negative EEG values
 #'
 #' @param n Integer specifying the number of shades.
 #' @param alpha Transparency level between 0 and 1.
@@ -80,7 +98,8 @@ ColorsNeg <- function(n, alpha = 1) {
   }
 }
 
-#' Create HSV-based color ramp for positive EEG values
+
+#' Create HSV-based topo-color ramp for positive EEG values
 #'
 #' @param n Integer specifying the number of shades.
 #' @param alpha Transparency level between 0 and 1.
@@ -102,5 +121,53 @@ ColorsPos <- function(n, alpha = 1) {
   }
 }
 
+#' Create blue color ramp for negative EEG values for red-blue palette
+#'
+#' @param n Integer specifying the number of shades.
+#' @param alpha Transparency level between 0 and 1.
+#'
+#' @return A character vector of color hex codes.
+#'
+#' @keywords internal
+#' @noRd
+ColorsBlue <- function(n,
+                       alpha = 1) {
+  if (n > 0) {
+    pal <- grDevices::colorRampPalette(c("#2E5A87", "#DFEDF6"))
+    cols <- pal(n)
 
+    if (alpha < 1) {
+      cols <- grDevices::adjustcolor(cols, alpha.f = alpha)
+    }
+
+    cols
+  } else {
+    character()
+  }
+}
+
+#' Create red color ramp for positive EEG values for red-blue palette
+#'
+#' @param n Integer specifying the number of shades.
+#' @param alpha Transparency level between 0 and 1.
+#'
+#' @return A character vector of color hex codes.
+#'
+#' @keywords internal
+#' @noRd
+ColorsRed <- function(n,
+                      alpha = 1) {
+  if (n > 0) {
+    pal <- grDevices::colorRampPalette(c("#E4CCC6", "#A90C38"))
+    cols <- pal(n)
+
+    if (alpha < 1) {
+      cols <- grDevices::adjustcolor(cols, alpha.f = alpha)
+    }
+
+    cols
+  } else {
+    character()
+  }
+}
 

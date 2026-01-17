@@ -7,10 +7,8 @@
 outliers_epoch(
   data,
   amplitude = "signal",
-  subject = NULL,
-  sensor = NULL,
   time = NULL,
-  method,
+  method = c("iqr", "percentile", "hampel"),
   k_iqr = 1.5,
   k_mad = 3,
   p = 0.975,
@@ -18,17 +16,13 @@ outliers_epoch(
 )
 }
 \arguments{
-\item{data}{A data frame, tibble or a database table with input data, required columns: subject, sensor, time, epoch and the column with EEG amplitude named as in \code{amplitude} parameter.}
+\item{data}{A data frame, tibble or a database table with input data, required columns: \code{time}, \code{epoch} and the column with EEG amplitude specified by \code{amplitude} parameter. Optional columns: \code{group}, \code{subject}, \code{sensor}, \code{condition}.}
 
 \item{amplitude}{A character specifying the name of the column from input data with an EEG amplitude values. Default is \code{"signal"}.}
 
-\item{subject}{An integer or character ID of selected subject.}
-
-\item{sensor}{An integer or character ID of selected sensor.}
-
 \item{time}{A vector with time range for outliers detection. If not defined, the outliers are searched for all time points in the dataset.}
 
-\item{method}{A character denoting the method used for outlier detection. The options are: \code{"iqr"} for interquartile range (IQR) criterion, \code{"percentile"} for percentile method and \code{"hampel"} for Hampel filter method. See details for further information about methods.}
+\item{method}{A character denoting the method used for outlier detection. The options are: \code{"iqr"} for interquartile range (IQR) criterion (default value), \code{"percentile"} for percentile method and \code{"hampel"} for Hampel filter method. See details for further information about methods.}
 
 \item{k_iqr}{A positive numeric value denoting the scaling factor used in the IQR criterion. Default value is \code{k_iqr = 1.5}.}
 
@@ -45,13 +39,16 @@ A list with following components:
 With the setting \code{print_tab = TRUE}, the \code{epoch_table} is also printed to the console.
 }
 \description{
-Function for selecting outlier epochs for one subject and one sensor in chosen time points. Epochs are marked as outliers based on one of the following criteria: interquartile range criterion, percentile approach or Hampel filter method.
+Function identifies epochs with outlier values in a numeric EEG amplitude variable in chosen time points.
+Outliers are detected separately at each time point within the groups present in the data. The function then summarizes how many times each epoch was marked as an outlier
+across all time points.
+
+Epochs are marked as outliers based on one of the following criteria: interquartile range criterion, percentile approach or Hampel filter method.
 }
 \details{
 The input data frame or database table must contain at least following columns:
-subject - a column with subject IDs,
-sensor - a column with sensor labels,
-time - a column with time point numbers,
+\code{epoch} - a column with epoch numbers/labels,
+\code{time} - a column with time point numbers,
 signal (or other name specified in \code{amplitude} parameter) - a column with measured EEG signal values.
 
 The outlier detection method is chosen through \code{method} argument. The possibilities are
@@ -61,14 +58,21 @@ The outlier detection method is chosen through \code{method} argument. The possi
 \item \code{hampel}: The Hampel filter method, values outside the interval \code{[median - k_mad * MAD, median + k_mad * MAD]} are considered as outliers. MAD denotes median absolute deviation and \code{k_mad} the scaling factor.
 Each of the above methods operates independently per time point, not globally across time.
 }
+
+Note: For large datasets, the calculation can be time-consuming. It is recommended to pre-filter or subset the data before using this function to reduce computation time.
 }
 \examples{
-# Outlier epoch detection for subject 2, electrode E45 for the whole time range with IQR method
-outliers_epoch(epochdata, amplitude = "signal", subject = 2, sensor = "E45", method = "iqr")
-# From the result table we see that epochs 14 and 15 were marked as outliers in 50 cases out of 50
+# 1. Outlier epoch detection for subject 2, electrode E45 for the whole time range with IQR method
+epochdata |>
+pick_data(subject_rg = 2, sensor_rg = "E45") |>
+outliers_epoch(amplitude = "signal")
+## From the result table we see that epochs 14 and 15 were marked as outliers in 50 cases out of 50
 
-# Outlier epoch detection for subject 2, electrode E45 for the whole time range
+# 2. Outlier epoch detection for both subjects, electrode E45 for the whole time range
 # using percentile method with 1 and 99 percentiles
-outliers_epoch(epochdata, amplitude = "signal", subject = 2, sensor = "E45",
- method = "percentile", p = 0.99)
+outdata <- epochdata |>
+pick_data(sensor_rg = "E45") |>
+outliers_epoch(amplitude = "signal", method = "percentile", p = 0.99)
+# see head of outliers data
+head(outdata$outliers_data)
 }
