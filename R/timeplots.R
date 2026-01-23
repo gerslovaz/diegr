@@ -46,8 +46,9 @@
 #'
 #' # 2) Plot sensor level waveforms with confidence bands for subject 1 and electrodes "E65" and "E182"
 #' # a) preparing data
-#' sendata <- compute_mean(epochdata, amplitude = "signal", subject = 1, channel = c("E65", "E182"),
-#'  group = "time", level = "epoch")
+#' sendata <- epochdata |>
+#' pick_data(subject_rg = 1, sensor_rg = c("E65", "E182")) |>
+#' compute_mean(amplitude = "signal", domain = "time", level = "epoch")
 #' # b) plot the waveforms without the average
 #' interactive_waveforms(sendata, amplitude = "average", t0 = 10,
 #' level = "sensor", avg = FALSE, CI = TRUE)
@@ -203,8 +204,7 @@ interactive_waveforms <- function(data,
 #' # a2) baseline correction
 #' data_base <- baseline_correction(edata, baseline_range = 1:10)
 #' # a3) average computing
-#' data_mean <- compute_mean(data_base, amplitude = "signal_base", channel = "E65",
-#'  type = "point")
+#' data_mean <- compute_mean(data_base, amplitude = "signal_base", type = "point")
 #'
 #' # b) filter subject 2 and plot the average line with default settings
 #' # (the whole dataset treated as one condition, no legend plotted)

@@ -1,6 +1,8 @@
 test_that("topo_plot returns ggplot with geom_raster and geom_contour for contour = TRUE", {
-  data_mean <- compute_mean(epochdata, amplitude = "signal", subject = 2, time = 10,
-                            type = "jack", group = "space")
+  data_mean <- epochdata |>
+    pick_data(subject_rg = 2, time_rg = 10) |>
+    compute_mean(amplitude = "signal", type = "jack",
+                 domain = "space")
   p1 <- topo_plot(data_mean, amplitude = "average")
   p2 <- topo_plot(data_mean, amplitude = "average", contour = TRUE)
 

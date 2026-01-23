@@ -42,7 +42,7 @@ create_scale(col_range = c(-10,10), type = "redblue")
 
 # Create topographic scale on interval c(-5,10) with small k (finer division)
 CStopo <- create_scale(col_range = c(-5, 10), k = 0.02)
-# plot colors of the scale as points
+# plot colours of the scale as points
 k_col <- length(CStopo$colors)
 plot(1:k_col, rep(1, k_col), col = CStopo$colors, pch = 16,
  axes = FALSE, ylab = "", xlab = "")

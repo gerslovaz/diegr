@@ -24,9 +24,9 @@ req_cols <- function(obj,
 #'
 #' @param data A data frame, tibble, or database table.
 #' @param required_cols A character vector of required column names.
-#' @param obj_name Name of the object used in the error message. Defaults to the name of \code{data}.
+#' @param obj_name Name of the object used in the error message. Defaults to the name of `data`.
 #'
-#' @return Invisibly returns \code{TRUE} if all required columns are present.
+#' @return Invisibly returns `TRUE` if all required columns are present.
 #' @keywords internal
 #' @noRd
 stop_if_missing_cols <- function(data,
@@ -47,27 +47,25 @@ stop_if_missing_cols <- function(data,
 
 #' Validate grouping variables for NA-only columns
 #'
-#' Checks whether specified grouping variables present in the data contain only \code{NA} values.
+#' Checks whether specified grouping variables present in the data contain only `NA` values.
 #' Works with both in-memory data frames and database tables (via \pkg{dbplyr}).
 #'
-#' @param data A data frame or a database table (e.g. a \code{tbl_sql}).
-#' @param vars Character vector of grouping variable names to check. Variables that are not present in \code{data} are silently ignored.
-#' @param action Character string specifying how to handle grouping variables that contain only \code{NA} values. One of:
+#' @param data A data frame or a database table (e.g. a `tbl_sql`).
+#' @param vars Character vector of grouping variable names to check. Variables that are not present in `data` are silently ignored.
+#' @param action Character string specifying how to handle grouping variables that contain only `NA` values. One of:
 #'   \describe{
-#'     \item{\code{"warn"}}{Issue a warning (default).}
-#'     \item{\code{"stop"}}{Throw an error and stop execution.}
-#'     \item{\code{"none"}}{Do nothing.}
+#'     \item{`"warn"`}{Issue a warning (default).}
+#'     \item{`"stop"`}{Throw an error and stop execution.}
+#'     \item{`"none"`}{Do nothing.}
 #'   }
 #'
 #' @details
-#' A grouping variable is considered invalid if it contains zero non-missing
-#' values (i.e. all entries are \code{NA}). This condition is detected using a
-#' database-safe check based on counting non-\code{NA} values.
+#' A grouping variable is considered invalid if it contains zero non-missing values (i.e. all entries are `NA`).
+#' This condition is detected using a database-safe check based on counting non-`NA` values.
 #'
-#' Variables with a single unique non-\code{NA} value are allowed and do not
-#' trigger any message.
+#' Variables with a single unique non-`NA` value are allowed and do not trigger any message.
 #'
-#' @return Invisibly returns \code{NULL}. The function is used for its side effects
+#' @return Invisibly returns `NULL`. The function is used for its side effects
 #' (warnings or errors).
 #' @keywords internal
 #' @noRd
@@ -117,6 +115,36 @@ check_grouping_vars <- function(data,
   invisible(NULL)
 }
 
+#' Validate column of data for NA presence
+#'
+#' Checks whether specified column in the data contains `NA` values.
+#' Works with both in-memory data frames and database tables (via \pkg{dbplyr}).
+#'
+#' @param data A data frame or a database table (e.g. a `tbl_sql`).
+#' @param col Character with name of column to check.
+#'
+#' @return Invisibly returns `NULL`. The function is used for its side effect - warning.
+#' @keywords internal
+#'
+#' @noRd
+warn_if_na <- function(data,
+                       col) {
+
+  has_na <- data |>
+    filter(is.na(.data[[col]])) |>
+    collect(n = 1) |>
+    nrow() > 0
+
+  if (has_na) {
+    warning(
+      sprintf("There are NA's in '%s' column, the resulting mean is computed without corresponding rows.", col),
+      call. = FALSE
+    )
+  }
+
+  invisible(has_na)
+}
+
 
 
 #' Validate D3 part of mesh object
@@ -126,7 +154,7 @@ check_grouping_vars <- function(data,
 #'
 #' @param mesh A list expected to contain `D3`, typically from sensor layout.
 #'
-#' @return Invisible TRUE if checks pass; otherwise, stops with error.
+#' @return Invisible `TRUE` if checks pass; otherwise, stops with error.
 #' @keywords internal
 #' @noRd
 control_D3 <- function(mesh){
@@ -152,7 +180,7 @@ control_D3 <- function(mesh){
 #'
 #' @param mesh A list expected to contain `D2`, typically from sensor layout.
 #'
-#' @return Invisible TRUE if checks pass; otherwise, stops with error.
+#' @return Invisible `TRUE` if checks pass; otherwise, stops with error.
 #' @keywords internal
 #' @noRd
 control_D2 <- function(mesh){

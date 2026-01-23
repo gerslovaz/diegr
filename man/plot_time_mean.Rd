@@ -54,8 +54,7 @@ edata <- pick_data(epochdata, sensor_rg = c("E65"), epoch_rg = 1:13)
 # a2) baseline correction
 data_base <- baseline_correction(edata, baseline_range = 1:10)
 # a3) average computing
-data_mean <- compute_mean(data_base, amplitude = "signal_base", channel = "E65",
- type = "point")
+data_mean <- compute_mean(data_base, amplitude = "signal_base", type = "point")
 
 # b) filter subject 2 and plot the average line with default settings
 # (the whole dataset treated as one condition, no legend plotted)

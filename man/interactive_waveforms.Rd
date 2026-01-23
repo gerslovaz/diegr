@@ -65,8 +65,9 @@ interactive_waveforms(amplitude = "signal", t0 = 10, level = "epoch")
 
 # 2) Plot sensor level waveforms with confidence bands for subject 1 and electrodes "E65" and "E182"
 # a) preparing data
-sendata <- compute_mean(epochdata, amplitude = "signal", subject = 1, channel = c("E65", "E182"),
- group = "time", level = "epoch")
+sendata <- epochdata |>
+pick_data(subject_rg = 1, sensor_rg = c("E65", "E182")) |>
+compute_mean(amplitude = "signal", domain = "time", level = "epoch")
 # b) plot the waveforms without the average
 interactive_waveforms(sendata, amplitude = "average", t0 = 10,
 level = "sensor", avg = FALSE, CI = TRUE)

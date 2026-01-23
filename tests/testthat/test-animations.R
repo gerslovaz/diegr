@@ -1,7 +1,7 @@
 sendata <- epochdata |> filter(subject == 1, time %in% 8:10, epoch %in% 11:12)
 sensors <- unique(sendata$sensor)
 M <- point_mesh(n = 1000, template = "HCGSN256", sensor_select = sensors)
-meandata <- compute_mean(sendata, amplitude = "signal", group = "space", type = "jack")
+meandata <- compute_mean(sendata, amplitude = "signal", domain = "space", type = "jack")
 animdata <- sendata |> filter(epoch == 11)
 
 coords_full <- HCGSN256$D2

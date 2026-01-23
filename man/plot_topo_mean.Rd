@@ -58,8 +58,9 @@ edata <- pick_data(epochdata, subject_rg = 2, epoch_rg = 1:13, time_rg = 1:10)
 # a2) baseline correction (needed for suitable topographic map)
 data_base <- baseline_correction(edata, baseline_range = 1:10)
 # a3) average computing
-data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, time = 10,
- type = "jack", group = "space")
+data_mean <- data_base |>
+dplyr::filter(time == 10) |>
+compute_mean(amplitude = "signal_base", type = "jack", domain = "space")
 # a4) prepare a mesh for plotting
 M <- point_mesh(dimension = 2, n = 3000, template = "HCGSN256",
 sensor_select = unique(epochdata$sensor))

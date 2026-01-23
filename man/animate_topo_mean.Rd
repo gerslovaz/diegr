@@ -66,8 +66,8 @@ Note: When specifying the \code{coords} and \code{template} at the same time, th
 # first 10 points and only 13 epochs (epochs 14 and 15 are outliers)
 edata <- pick_data(epochdata, subject_rg = 2, epoch_rg = 1:13, time_rg = 1:10)
 data_base <- baseline_correction(edata, baseline_range = 1:10) # baseline correction
-data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2,
- type = "jack", group = "space") # compute mean
+data_mean <- compute_mean(data_base, amplitude = "signal_base",
+ type = "jack", domain = "space") # compute mean
 # b) render the animation
 # (t0 = 10 because the time of the stimulus in epochdata is in time point 10)
 animate_topo_mean(data_mean, t_lim = c(1,50), t0 = 10)

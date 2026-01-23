@@ -52,8 +52,9 @@
 #' # a2) baseline correction (needed for suitable topographic map)
 #' data_base <- baseline_correction(edata, baseline_range = 1:10)
 #' # a3) average computing
-#' data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2, time = 10,
-#'  type = "point", ex_epoch = c(14,15))
+#' data_mean <- data_base |>
+#' dplyr::filter(time == 10) |>
+#' compute_mean(amplitude = "signal_base", type = "point", domain = "space")
 
 #'
 #' # b) plotting the scalp polygon map
