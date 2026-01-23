@@ -30,10 +30,10 @@ The package `diegr` displays high-density electroencephalography (HD-EEG) data i
 
 ```{r}
 #| eval: false
-# development version:
+install.packages("diegr") 
+# or for development version:
 # install.packages("devtools")
 devtools::install_github("gerslovaz/diegr") 
-# install.packages("diegr") # after deploying to CRAN
 ```
 
 ### Data
@@ -42,7 +42,7 @@ The package contains built-in datasets. Due to the nature of the experiment and 
 
 #### epochdata
 The brain signal originally measured by 256-channel HydroCel Geodesic Sensor Net with sampling frequency 250 Hz. 
-Example dataset contains amplitude values from 204 selected channels at 50 time points (stimulus at time point 10) for 2 representative subjects (one healthy control, one patient). From 50 epochs per subject, 14 (or 15) epochs were selected.
+Example dataset contains amplitude values from 204 selected channels at 50 time points (stimulus at time point 10) for 2 representative subjects (one healthy control, one patient). Out of 50 epochs per subject, 14 (or 15, respectively) were selected.
 
 The data is organized into a data frame with the following columns:
 
@@ -60,8 +60,7 @@ The data is organized into a list with the following elements:
 
 - `D2`: A tibble with coordinates and labels of sensors in 2D.
 - `D3`: A tibble with coordinates and labels of sensors in 3D. 
-- `ROI`:A vector with the region of interest (ROI) assignment for each sensor ("central", "frontal", "occipital", "parietal" or "temporal").
-- `pairedname`: Alternative sensor labels corresponding to left/right paired electrodes (with C for midline).
+- `ROI`:A vector with the region of interest (ROI) assignment for each sensor ("central", "frontal", "occipital", "parietal" or "temporal" according to the brain regions and "face" for the face area).
 Sensors are labeled according to Geodesic Sensor Net Technical Manual, 2024.
 
 
@@ -86,19 +85,18 @@ The package assumes that the input data have already been preprocessed (artifact
 
 The useful tool in outliers detection is interactive plot with boxplots of amplitudes (`boxplot_epoch()`) or response times (`boxplot_rt()`) in individual epochs. The `plotly` output makes it easy to determine the epoch number from which outliers come and additionally allows editing of the output image layout.
 
-There is also an interactive graph of amplitudes in individual epochs with (or without) the average plotted (`interactive_waveforms()`). This function can also be used to compare signal for different sensor or subjects according to the `level` argument setting. 
+There is also an interactive graph of amplitudes in individual epochs with (or without) the average plotted (`interactive_waveforms()`). This function can also be used to compare signals across different experimental levels (e.g., sensor, subject, group, or condition) as specified by the `level` argument.
 
 ```{r}
-# in interactive boxplot of signal we choose subject, 
-# channel and concrete time range,
-# in which the boxplots should be plotted
-# example for subject 1 and channel E34 in time points from 10 to 20
-boxplot_epoch(epochdata, amplitude = "signal", subject = 1, channel = "E34",
-              time_lim = 10:20)
+# The function for interactive boxplot of signal assumes 
+# pre-filtered data input
+# example: subject 1 and channel E34 in time points from 10 to 20
+subdata <- epochdata |>
+  pick_data(subject_rg = 1, sensor_rg = "E34")
+boxplot_epoch(subdata, amplitude = "signal", time_lim = 10:20)
 
 # customizing the output title and axis labels using |> operator
-p1 <- boxplot_epoch(epochdata, amplitude = "signal", subject = 1, channel = "E34", 
-                    time_lim = 10:20)
+p1 <- boxplot_epoch(subdata, amplitude = "signal", time_lim = 10:20)
 p1 |> plotly::layout(xaxis = list(title = ""),
                      yaxis = list(title = "Amplitude"),
                      title = list(text = "Outlier detection for subject 1 and channel E34",
@@ -110,14 +108,17 @@ p1 |> plotly::layout(xaxis = list(title = ""),
 Outlier epochs can be easily detected using the hover text in the `plotly` output. In the case above, the outlier is epoch 14.
 
 The results can be supported computationally by the `outliers_epoch()` function, which allows the evaluation of outliers using one of three criteria (interquartile range - IQR, percentile approach or Hampel filter).  
-The output of this function is a table containing epoch IDs and the number of time points in which the epochs were evaluated as outliers (according to chosen criteria).
+The output of this function is a table containing epoch IDs and the number of time points in which the epochs were evaluated as outliers (according to chosen criteria) for unique combinations of input variables (e.g. group, subject, sensor).
 
 ```{r}
-# outlier detection for subject 1 and channel E34 using IQR method
-outliers_epoch(epochdata, subject = 1, sensor = "E34", method = "iqr")
+# Example: outlier detection for both subjects and channel E34 using IQR method
+# The column in which we are looking for outliers is specified by the `amplitude` argument
+epochdata |>
+  pick_data(sensor_rg = "E34") |>
+outliers_epoch(amplitude = "signal", method = "iqr")
 ```
 
-The results correspond with findings from `boxplot_epoch()` - epoch 14 was evaluated as an outlier in all 50 time points.
+The results correspond with findings from `boxplot_epoch()` - for subject 1, epoch 14 was evaluated as an outlier in all 50 time points.
 
 Analogously to function `boxplot_epoch()`, function `boxplot_subject()` works to identify outliers at the subject level.
 
@@ -126,20 +127,22 @@ The main focus of the package is interactive visualization and animation of the 
 
 The baseline correction of the amplitude is enabled through the function `baseline_correction()`. In the first release of the package, only most commonly used absolute correction (`type = "absolute"`), which subtracts mean over `base_int`, is available.
 
-The calculation of the average signal can be performed using the function `compute_mean()`, which computes pointwise or jackknife (leave one out) mean of the signal at different levels. In addition to the mean itself, the function also calculates the boundaries of the point confidence interval (`ci_low` and `ci_up` in the output). The argument `group` determines whether the average is calculated within individual time points (for curves) - `group = "time"` or sensors (for topographic maps) - `group = "space"`.
+The calculation of the average signal can be performed using the function `compute_mean()`, which computes pointwise standard/weighted or jackknife (leave one out) mean of the signal at different levels. In addition to the mean itself, the function also calculates the boundaries of the point confidence interval (`ci_low` and `ci_up` in the output). The argument `domain` determines whether the average is calculated within individual time points (for curves) - `domain = "time"` or sensors (for topographic maps) - `domain = "space"`.
 
 ```{r}
 #| eval: true
 # preparing data for later visualisation 
 # filtering signal without outlier epochs 14 and 15
 # and computing epoch level jackknife average from baseline corrected data
+# Note: data filtering is possible both using the pick_data() function or dplyr commands
 edata <- epochdata |>
-  dplyr::filter(subject == 2, epoch %in% 1:13)
-edata <- baseline_correction(edata, baseline_range = 1:10)
+  pick_data(subject_rg = 2, epoch_rg = 1:13) |>
+  baseline_correction(baseline_range = 1:10)
 
-s1 <- compute_mean(edata, amplitude = "signal_base", time = 10,
-                   level = "epoch", group = "space",
-                   type = "jack")
+s1 <- edata |>
+  dplyr::filter(time == 10) |>
+  compute_mean(amplitude = "signal_base", level = "epoch",
+               domain = "space", type = "jack")
 ```
 
 ### Temporal domain visualization
@@ -149,9 +152,10 @@ The `interactive_waveforms()` and `plot_time_mean()` can be used to display the 
 ```{r, fig.alt="An average amplitude time-series plot showing the brain's electrical activity (in microvolts) over time (in milliseconds), time-locked to a stimulus event at 0 ms. The red line represents the average amplitude, and the shaded red area represents the confidence interval."}
 #| eval: true
 # computing jackknife average from channel E65 
-s2 <- compute_mean(edata, amplitude = "signal_base", channel = "E65",
-                   level = "epoch", group = "time",
-                   type = "jack")
+s2 <- edata |>
+  pick_data(sensor_rg = "E65") |>
+  compute_mean(amplitude = "signal_base", level = "epoch",
+               domain = "time", type = "jack")
 
 # plotting the average, the zero time point (stimulus) is set to 10
 plot_time_mean(s2, t0 = 10)
@@ -196,9 +200,10 @@ If the `mesh` input is not specified, the graphic functions automatically use th
 
 #### Topographical maps in 2D projection
 
-The `topo_plot()` function is used to plot a topographic map of the brain signal, the amplitude values are colored using a topographic colour scale (unless users choose otherwise). An alternative to this function adapted directly to plot the mean along with the confidence interval bounds is `plot_topo_mean()`. 
-In the default colour scale, amplitude = 0 is mapped to the blue–green boundary; positive values trend towards yellow/red, negative towards dark blue. 
-Both functions allow setting some optionally arguments for editing the output appearance (with or without contours, sensor names, etc.) and return `ggplot` object for further customization.
+The `topo_plot()` function is used to plot a topographic map of the brain signal, the amplitude values are colored by default using a topographic colour scale. An alternative to this function adapted directly to plot the mean along with the confidence interval bounds is `plot_topo_mean()`. 
+In the default topographic colour scale, amplitude = 0 is mapped to the blue–green boundary; positive values trend towards yellow/red, negative towards dark blue. The `coulour_scale()` function also offers the `"redblue"` palette, with negative values corresponding to shades of blue and positive values corresponding to shades of red. Additionally, the users can choose their own palettes using `col_scale` argument.
+
+Both `topo_` functions allow setting some optionally arguments for editing the output appearance (with or without contours, sensor names, etc.) and return `ggplot` object for further customization.
 
 Notes: 
 
@@ -213,11 +218,14 @@ Notes:
 # the outlier epoch 14 is extracted before computing average
 
 # preparing data
-edata <- epochdata |>
-  dplyr::filter(subject == 1 & time %in% 1:10)
-data_base <- baseline_correction(edata, baseline_range = 1:10)
-data_mean <- compute_mean(data_base, amplitude = "signal_base", time = 10,
-                          type = "point", ex_epoch = 14, group = "space")
+data_base <- epochdata |>
+  pick_data(subject_rg = 1, time_rg = 1:10) |>
+  baseline_correction(baseline_range = 1:10)
+
+data_mean <- data_base |>
+  pick_data(epoch_rg = 1:13, time_rg = 10) |>
+  compute_mean(amplitude = "signal_base", type = "point",
+               domain = "space")
 
 # plotting the base topographic polygon map with contours and legend
 # interval (-30,15) is selected in consideration of the signal progress
@@ -226,7 +234,8 @@ topo_plot(data = data_mean, amplitude = "average",
 
 # plotting the same map without contours and legend 
 # but with sensor labels and adding the title
-g1 <- topo_plot(data = data_mean, amplitude = "average", col_range = c(-30, 15),
+g1 <- topo_plot(data = data_mean, amplitude = "average",
+                col_range = c(-30, 15),
                 label_sensors = TRUE, show_legend = FALSE)
 g1 + ggplot2::ggtitle("Subject 1, time of the stimulus")
 
@@ -237,12 +246,12 @@ plot_topo_mean(data = data_mean, template = "HCGSN256", col_range = c(-30, 15))
 
 #### Topographical maps on the scalp
 
-The `scalp_plot()` function is created for plotting a scalp polygon map of the EEG signal amplitude using topographic colour scale (default scale is the same as in `topo_plot()`). The result plot is rendered using `rgl::shape3d` function and the signal interpolation between sensor locations is based on thin-plate spline interpolation model.  
+The `scalp_plot()` function is created for plotting a scalp polygon map of the EEG signal amplitude using by default the same topographic colour scale as in `topo_plot()`). The result plot is rendered using `rgl::shape3d` function and the signal interpolation between sensor locations is based on thin-plate spline interpolation model.  
 Correct mesh triangulation is required for appropriate colour rendering. This triangulation is constructed by `make_triangulation()`, which creates a Delaunay type-I triangulation (Lai & Schumaker, 2007) with consistently oriented edges (Schneider & Eberly, 2003).
 
-The function allows setting the `col_range` argument, which is necessary to obtain comparable results between different subjects or conditions. 
-
-Note: The input values of amplitude outside the chosen `col_range` will cause "holes" in the resulting plot.
+Note: 
+- The input values of amplitude outside the chosen `col_range` will cause "holes" in the resulting plot.
+- To obtain comparable results between different subjects or conditions, setting the same values of `col_range` and `col_scale` arguments in all cases is necessary.
 
 ```{r}
 # plotting the scalp polygon map of previously prepared signal s1
@@ -262,12 +271,16 @@ Example: The animation of time course of the EEG signal for subject 1 and epoch 
 
 ```{r}
 # filtering the example data 
-s1e05 <- epochdata |> dplyr::filter(subject == 1 & epoch == 5 & time %in% 10:20)
-# Plot animation with setting the range of time:
-animate_topo(s1e05, t_lim = c(0,50))
+s1e05 <- epochdata |> 
+  pick_data(subject_rg = 1, epoch_rg = 5, time_rg = 10:20)
+
+# Plot animation with setting the range of time and t0 = 10 indicating the time of the stimulus:
+animate_topo(s1e05, amplitude = "signal", t_lim = c(0,50), t0 = 10)
+
 # Export the gif animation - this code will create the animation inside your working directory.
 # If you want to export it elsewhere, set the whole path in output_path parameter.
-animate_topo(s1e05, t_lim = c(0,50), output_path = "example_animation.gif")
+animate_topo(s1e05, amplitude = "signal", t_lim = c(0,50),
+             t0 = 10, output_path = "example_animation.gif")
 ```
 
 The scalp animation enables to export a video in `.mp4` format using the `av` package or save a sequence of frames into chosen directory setting the `frames_dir` parameter. The animation speed can be controlled by the `sec` parameter in the viewer or by the `framerate` parameter for the exported video. The video resolution quality can be affected using `par3d` function, for example `rgl::par3d(windowRect = c(100, 100, 800, 800))`.
@@ -298,64 +311,107 @@ rgl::play3d(rgl::spin3d(axis = c(0, 0, 1), rpm = 10), duration = 10)
 
 In this section we present a sample code for analyzing topographic maps across subjects:
 
-1. Outliers detection (for each subject separately)
+1. Outliers detection
+
 ```{r}
 # using IQR method for selected sensor from central region 
-outliers_epoch(epochdata, subject = 1, sensor = "E59", method = "iqr")
-outliers_epoch(epochdata, subject = 2, sensor = "E59", method = "iqr")
+dataE59 <- epochdata |>
+  pick_data(sensor_rg = "E59")
+outliers_epoch(dataE59, method = "iqr")
 
-# verify results by visual inspection 
-interactive_waveforms(epochdata, amplitude = "signal", subject = 1,
-                      channel= "E59", level = "epoch", t0 = 10)
-interactive_waveforms(epochdata, amplitude = "signal", subject = 2,
-                      channel= "E59", level = "epoch", t0 = 10)
+# verify results by visual inspection (for each subject separately)
+dataE59 |>
+  dplyr::filter(subject == 1) |>
+  interactive_waveforms(amplitude = "signal", level = "epoch",
+                        t0 = 10)
+dataE59 |>
+  dplyr::filter(subject == 2) |>
+  interactive_waveforms(amplitude = "signal", level = "epoch",
+                        t0 = 10)
 ```
 
 Subject 1: epoch 14 is an obvious outlier. 
 Subject 2: epoch 15 is an obvious outlier, epoch 14 was denoted as outlier for 37 time points - we exclude both of them from further analysis.
 
-2. Baseline correction (for each subject separately)
+2. Baseline correction 
+
 We exclude outlier epochs before baseline correction, otherwise they would affect the baseline average computing. 
 
-Note: `baseline_correction()` works with data of a specific subject. If there were multiple subjects in the input data, the baseline calculation would be done across all of them, which we want to avoid.
+Note: If there are multiple subjects (or other variables) in the input data, the `baseline_correction()` add them into grouping structure, so the baseline calculation is provided separately for unique combinations of these variables. This procedure allows to compute baseline correction for both subjects in one step.
 
 ```{r}
-sub1clear <- epochdata |>
-  filter(subject == 1, !epoch == 14)
-sub2clear <- epochdata |>
-  filter(subject == 2, !epoch %in% c(14, 15))
-sub1base <- baseline_correction(sub1clear, baseline_range = 1:10)
-sub2base <- baseline_correction(sub2clear, baseline_range = 1:10)
+#| eval: true
+subjects_base <- epochdata |>
+  pick_data(epoch_rg = 1:13) |>
+  baseline_correction(baseline_range = 1:10)
 ```
 
 3. Average computing
-We compute average topographic map in time point 35 (100 ms after stimulus) for both subjects. We use pointwise average with bootstrap confidence intervals.
 
-Note: `compute_mean()` allows for complex data at the input, from which we select using the parameter `subject`, but we have prepared separated data in previous steps, so we use them.
+We compute average topographic map in time point 35 (100 ms after stimulus) for both subjects. We use standard (un-weighted) pointwise average with bootstrap confidence intervals.
+
 ```{r}
-sub1mean <- compute_mean(sub1base, amplitude = "signal_base", time = 35,
-                         group = "space", level = "epoch", R = 1000)
-sub2mean <- compute_mean(sub2base, amplitude = "signal_base", time = 35,
-                         group = "space", level = "epoch", R = 1000)
+#| eval: true
+subjects_mean <- subjects_base |>
+  dplyr::filter(time == 35) |>
+  compute_mean(amplitude = "signal_base", domain = "space",
+               level = "epoch", R = 1000)
 ```
 
 4. Average plotting
-To maintain consistency between both subjects, we first construct a mesh and colour scale that we will use in both figures. For plotting, we will use the `plot_topo_mean()` function, which is directly adapted for rendering topographic map of the average EEG amplitude together with its lower and upper confidence interval (CI) bounds.
+
+To maintain consistency between both subjects, we first construct a mesh and set colour range that we will use in both figures: 
+
 ```{r}
+#| eval: true
 # prepare a mesh for plotting
 M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256",
-                sensor_select = unique(sub1mean$sensor), type = "polygon")
+                sensor_select = unique(subjects_mean$sensor),
+                type = "polygon")
 # compute consistent col_range across subjects
 # a) find the range of average amplitude
-c(min(sub1mean$average, sub2mean$average), max(sub1mean$average, sub2mean$average)) 
+range(subjects_mean$average) 
 # -15.634288   8.609518
 # b) make the range symmetric
 cr_subjects <- c(-16,16)
+```
+
+
+For plotting, we will use the `plot_topo_mean()` function, which is directly adapted for rendering topographic map of the average EEG amplitude together with its lower and upper confidence interval (CI) bounds.
+
+```{r}
 # plot the average topographic maps with the same color range for both subjects
-plot_topo_mean(sub1mean, M, template = "HCGSN256", col_range = cr_subjects,
-               contour = TRUE)
-plot_topo_mean(sub2mean, M, template = "HCGSN256", col_range = cr_subjects,
-               contour = TRUE)
+subjects_mean |>
+  dplyr::filter(subject == 1) |>
+  plot_topo_mean(mesh = M, template = "HCGSN256",
+                 col_range = cr_subjects, contour = TRUE)
+
+subjects_mean |>
+  dplyr::filter(subject == 2) |>
+  plot_topo_mean(mesh = M, template = "HCGSN256",
+                 col_range = cr_subjects, contour = TRUE)
+
+# note: the output is not plotted to reduce the vignette file size
+```
+
+5. Average difference plot
+
+To display difference in the average of both subjects considered in the example, we can also use the red-blue colour palette inside the `topo_plot()` function.
+
+```{r fig.show='hold', fig.alt="A top-down topographic map of a high-density EEG amplitude difference of two subjects in red-blue colour scale with contours and black points on sensor locations. The amplitude legend is on the left side of the scalp projection."}
+#| eval: true
+# compute difference
+subjects_diff <- subjects_mean |>
+  dplyr::group_by(.data$sensor) |>
+  dplyr::reframe(
+    diff = .data$average[.data$subject == "1"] - .data$average[.data$subject == "2"]
+  )
+# create colour scale
+CS1 <- create_scale(col_range = range(subjects_diff$diff), type = "redblue")
+# display the plot: positive difference values (i.e., average for subject 1 higher than for subject 2)
+# are displayed in shades of red, negative values in shades of blue
+topo_plot(subjects_diff, amplitude = "diff", mesh = M,
+          template = "HCGSN256", col_scale = CS1)
 ```
 
 
@@ -398,9 +454,3 @@ Electrical Geodesics, Inc.: *Geodesic Sensor Net Technical Manual*. 2024. <https
 > * **Media Requirements:**
 >     Interactive plots (from **plotly**) and animations (from **gganimate** and **gifski** / **av**) require the respective R packages and, for local rendering or specific output formats, may require external libraries or codecs. If media fails to render, check the documentation for `plotly`, `gganimate`, `gifski`, and `av` regarding system dependencies for video/GIF encoding.
 > 
-> * **Full Session Details:**
->     For complete details on the software environment, please run the following command in your R session:
->     
->     ```r
->     sessionInfo()
->     ```

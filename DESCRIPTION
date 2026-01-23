@@ -12,7 +12,7 @@ Authors@R:
     )
 Description: Allows to visualize high-density electroencephalography (HD-EEG) data through interactive plots and animations, enabling exploratory and communicative analysis of temporal-spatial brain signals. Funder: Masaryk University (Grant No. MUNI/A/1457/2023).
 License: MIT + file LICENSE
-Date: 2025-08-27
+Date: 2026-01-23
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
