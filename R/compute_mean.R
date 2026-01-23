@@ -138,10 +138,6 @@ compute_mean <- function(data,
   group_vars <- set_group_vars(data, domain, level)
   check_grouping_vars(data, group_vars, action = "warn")
 
-  #group_vars <- group_vars |>
-  #  rlang::syms()
-
-
   if (type == "point") { # pointwise average
     if (is.null(weights_col)) {
       data <- data |>
@@ -197,7 +193,7 @@ compute_mean <- function(data,
 #' - If `weights_col` is `NULL`, all observations are treated equally, and the function computes the standard un-weighted mean, SE, and CI.
 #'
 #' @import dplyr
-#' @importFrom rlang .data .env
+#' @importFrom rlang .data
 #' @importFrom purrr map_dbl
 #' @noRd
 pointwise_mean <- function(data,

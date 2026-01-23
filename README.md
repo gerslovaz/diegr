@@ -19,11 +19,14 @@ The package `diegr` includes:
 
 - interactive boxplots (`boxplot_epoch`, `boxplot_subject`,
   `boxplot_rt`)
-- interactive epoch waveforms (`interactive_waveforms`)
+- interactive waveforms (`interactive_waveforms`)
 - topographic maps in 2D (`topo_plot`)
 - scalp plots in 3D (`scalp_plot`)
-- functions for computing baseline correction, pointwise and jackknife
-  mean (`baseline_correction`, `compute_mean`)
+- functions for computing summary statistics, baseline correction,
+  pointwise and jackknife mean
+  (`summary_stats_rt`,`baseline_correction`, `compute_mean`)
+- functions for easy selection of subdata or region of interest
+  (`pick_data`, `pick_region`)
 - functions for plotting the mean with pointwise confidence interval
   (`plot_time_mean`, `plot_topo_mean`)
 - animations of time course of the raw signal or the average in 2D and
@@ -52,21 +55,26 @@ to common formats such as data frames or tibbles). Such a procedure is
 more efficient in terms of memory usage.
 
 The database you want to use as input to `diegr` functions must contain
-columns with the following structure::
+columns with the following structure:
 
+- `group` - ID of groups,
 - `subject` - ID of subjects,
-- `epoch` - epoch numbers
-- `time` - numbers of time points (as sampling points, not in ms),
 - `sensor` - sensor labels,
-- `signal` - the EEG signal amplitude in microvolts (in some functions
+- `epoch` - epoch numbers,
+- `condition` - labels of experimental condition,
+- `time` - numbers of time points (as sampling points, not in ms),
+- `signal` - the EEG signal amplitude in microvolts (in most functions
   it is possible to set the name of the column containing the amplitude
   arbitrarily).
+
+Note: It is not necessary for the data to contain all variables, but if
+it does, they must be named according to the structure presented above.
 
 The package contains some included training datasets:
 
 - `epochdata`: epoched HD-EEG data (anonymized short slice from big
-  HD-EEG study presented in Madetko-Alster, 2025) arranged as mentioned
-  above,
+  HD-EEG study presented in Madetko-Alster, 2025) for 2 subjects and 204
+  selected sensors in 50 time points,
 - `HCGSN256`: a list with Cartesian coordinates of HD-EEG sensor
   positions in 3D space on the scalp surface and their projection into
   2D space
@@ -91,7 +99,9 @@ data("epochdata")
 ```
 
 ``` r
-boxplot_epoch(epochdata, amplitude = "signal", subject = 1, channel = "E65", time_lim = c(10:20))
+epochdata |>
+  pick_data(subject_rg = 1, sensor_rg = "E65") |>
+boxplot_epoch(amplitude = "signal", time_lim = c(10:20))
 ```
 
 <img src="./man/figures/README-boxplot.png" width="100%" />
@@ -107,29 +117,32 @@ data("HCGSN256")
 M1 <- point_mesh(dimension = 2, n = 30000, type = "polygon", sensor_select = unique(epochdata$sensor))
 # filtering a subset of data to display 
 data_short <- epochdata |>
-  dplyr::filter(subject == 1 & epoch == 10 & time == 15) 
+  pick_data(subject_rg = 1, time_rg = 15, epoch_rg = 10)
+# or you can use dplyr::filter()
+# dplyr::filter(subject == 1 & epoch == 10 & time == 15) 
 # function for displaying a topographic map of the chosen signal on the created mesh M1
 topo_plot(data_short, amplitude = "signal", mesh = M1)
 ```
 
 <img src="man/figures/README-topoplot-1.png" width="100%" />
 
-#### Computing and displaying the average
+#### Computing and displaying the average in time domain
 
-Compute the average signal for subject 2 from the channel E65 (exclude
-the oulier epochs 14 and 15) and then display it along with CI bounds
+Compute the average signal for subject 2 from the channels E65 and E34
+(exclude the oulier epochs 14 and 15) and then display it along with CI
+bounds (use plot_time_mean conditioned by sensor)
 
 ``` r
 # extract required data
 edata <- epochdata |>
-dplyr::filter(subject == 2 & sensor == "E65" & epoch %in% 1:13)
+  pick_data(subject_rg = 2, sensor_rg = c("E34", "E65"), epoch_rg = 1:13)
 # baseline correction
 data_base <- baseline_correction(edata, baseline_range = 1:10)
 # compute average
-data_mean <- compute_mean(data_base, amplitude = "signal_base", subject = 2,
-                          channel = "E65", type = "point")
-# plot the average line with CI in blue colors
-plot_time_mean(data = data_mean, t0 = 10, color = "blue", fill = "lightblue")
+data_mean <- data_base |> 
+  compute_mean(amplitude = "signal_base", type = "point", domain = "time")
+# plot the average line with CI
+plot_time_mean(data = data_mean, t0 = 10, condition_column = "sensor", legend_title = "Sensor")
 ```
 
 <img src="man/figures/README-timemean-1.png" width="100%" />
