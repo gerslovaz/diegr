@@ -2,3 +2,40 @@ url: https://gerslovaz.github.io/diegr/
 template:
   bootstrap: 5
 
+reference:
+- title: Visualization
+  desc: >
+    Functions for visualization of HD-EEG data
+  contents:
+    - animate_scalp
+    - animate_topo
+    - animate_topo_mean
+    - boxplot_epoch
+    - boxplot_subject
+    - boxplot_rt
+    - interactive_waveforms
+    - plot_point_mesh
+    - plot_time_mean
+    - plot_topo_mean
+    - scalp_plot
+    - topo_plot
+- title: Computational and Utility Functions
+  desc: >
+    Functions supporting HD-EEG data processing, analysis and visualization
+  contents:
+    - baseline_correction
+    - compute_mean
+    - create_scale
+    - make_triangulation
+    - outliers_epoch
+    - pick_data
+    - pick_region
+    - point_mesh
+    - summary_stats_rt
+- title: Datasets
+  desc: >
+    Example HD-EEG data for practicing package functionality
+  contents:
+    - HCGSN256
+    - epochdata
+    - rtdata
