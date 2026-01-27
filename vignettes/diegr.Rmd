@@ -13,6 +13,7 @@ knitr::opts_chunk$set(
   eval = FALSE,
   comment = "#>"
 )
+Sys.setenv(RGL_USE_NULL = "true")
 #> library(rgl)
 #> knitr::knit_hooks$set(webgl = hook_webgl)
 ```
@@ -321,11 +322,11 @@ outliers_epoch(dataE59, method = "iqr")
 
 # verify results by visual inspection (for each subject separately)
 dataE59 |>
-  dplyr::filter(subject == 1) |>
+  dplyr::filter(.data$subject == 1) |>
   interactive_waveforms(amplitude = "signal", level = "epoch",
                         t0 = 10)
 dataE59 |>
-  dplyr::filter(subject == 2) |>
+  dplyr::filter(.data$subject == 2) |>
   interactive_waveforms(amplitude = "signal", level = "epoch",
                         t0 = 10)
 ```
@@ -382,12 +383,12 @@ For plotting, we will use the `plot_topo_mean()` function, which is directly ada
 ```{r}
 # plot the average topographic maps with the same color range for both subjects
 subjects_mean |>
-  dplyr::filter(subject == 1) |>
+  dplyr::filter(.data$subject == 1) |>
   plot_topo_mean(mesh = M, template = "HCGSN256",
                  col_range = cr_subjects, contour = TRUE)
 
 subjects_mean |>
-  dplyr::filter(subject == 2) |>
+  dplyr::filter(.data$subject == 2) |>
   plot_topo_mean(mesh = M, template = "HCGSN256",
                  col_range = cr_subjects, contour = TRUE)
 
