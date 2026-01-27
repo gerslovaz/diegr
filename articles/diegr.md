@@ -1,9 +1,5 @@
 # diegr
 
-    #> Warning in rgl.init(initValue, onlyNULL): RGL: unable to open X11 display
-    #> Warning: 'rgl.init' failed, will use the null device.
-    #> See '?rgl.useNULL' for ways to avoid this warning.
-
 The package `diegr` displays high-density electroencephalography
 (HD-EEG) data in different ways using interactive elements or animations
 for a comprehensive overview of data.
@@ -516,11 +512,11 @@ outliers_epoch(dataE59, method = "iqr")
 
 # verify results by visual inspection (for each subject separately)
 dataE59 |>
-  dplyr::filter(subject == 1) |>
+  dplyr::filter(.data$subject == 1) |>
   interactive_waveforms(amplitude = "signal", level = "epoch",
                         t0 = 10)
 dataE59 |>
-  dplyr::filter(subject == 2) |>
+  dplyr::filter(.data$subject == 2) |>
   interactive_waveforms(amplitude = "signal", level = "epoch",
                         t0 = 10)
 ```
@@ -589,12 +585,12 @@ interval (CI) bounds.
 ``` r
 # plot the average topographic maps with the same color range for both subjects
 subjects_mean |>
-  dplyr::filter(subject == 1) |>
+  dplyr::filter(.data$subject == 1) |>
   plot_topo_mean(mesh = M, template = "HCGSN256",
                  col_range = cr_subjects, contour = TRUE)
 
 subjects_mean |>
-  dplyr::filter(subject == 2) |>
+  dplyr::filter(.data$subject == 2) |>
   plot_topo_mean(mesh = M, template = "HCGSN256",
                  col_range = cr_subjects, contour = TRUE)
 
@@ -652,7 +648,7 @@ Electrical Geodesics, Inc.: *Geodesic Sensor Net Technical Manual*.
 
 #### Reproducibility & System Requirements
 
-> **This document was compiled on 2026-01-26 using R version 4.5.2 and
+> **This document was compiled on 2026-01-27 using R version 4.5.2 and
 > the following package versions:**
 >
 > - **Primary Packages:**

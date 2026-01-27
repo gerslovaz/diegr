@@ -63,16 +63,13 @@
 
     
     
-<pre><code><span><span class="co">#&gt; Warning in rgl.init(initValue, onlyNULL): RGL: unable to open X11 display</span></span>
-<span><span class="co">#&gt; Warning: 'rgl.init' failed, will use the null device.</span></span>
-<span><span class="co">#&gt; See '?rgl.useNULL' for ways to avoid this warning.</span></span></code></pre>
 <p>The package <code>diegr</code> displays high-density
 electroencephalography (HD-EEG) data in different ways using interactive
 elements or animations for a comprehensive overview of data.</p>
 <div class="section level3">
 <h3 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h3>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"diegr"</span><span class="op">)</span> </span>
 <span><span class="co"># or for development version:</span></span>
 <span><span class="co"># install.packages("devtools")</span></span>
@@ -180,7 +177,7 @@ with (or without) the average plotted
 to compare signals across different experimental levels (e.g., sensor,
 subject, group, or condition) as specified by the <code>level</code>
 argument.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The function for interactive boxplot of signal assumes </span></span>
 <span><span class="co"># pre-filtered data input</span></span>
 <span><span class="co"># example: subject 1 and channel E34 in time points from 10 to 20</span></span>
@@ -207,7 +204,7 @@ The output of this function is a table containing epoch IDs and the
 number of time points in which the epochs were evaluated as outliers
 (according to chosen criteria) for unique combinations of input
 variables (e.g. group, subject, sensor).</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example: outlier detection for both subjects and channel E34 using IQR method</span></span>
 <span><span class="co"># The column in which we are looking for outliers is specified by the `amplitude` argument</span></span>
 <span><span class="va">epochdata</span> <span class="op">|&gt;</span></span>
@@ -241,7 +238,7 @@ calculates the boundaries of the point confidence interval
 <code>domain</code> determines whether the average is calculated within
 individual time points (for curves) - <code>domain = "time"</code> or
 sensors (for topographic maps) - <code>domain = "space"</code>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># preparing data for later visualisation </span></span>
 <span><span class="co"># filtering signal without outlier epochs 14 and 15</span></span>
 <span><span class="co"># and computing epoch level jackknife average from baseline corrected data</span></span>
@@ -265,7 +262,7 @@ interactively displays individual waveforms at different levels via
 <code>plotly</code>, function <code><a href="../reference/plot_time_mean.html">plot_time_mean()</a></code> is adapted
 directly to display the average signal including the pointwise
 confidence interval as a <code>ggplot</code> object.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># computing jackknife average from channel E65 </span></span>
 <span><span class="va">s2</span> <span class="op">&lt;-</span> <span class="va">edata</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/pick_data.html">pick_data</a></span><span class="op">(</span>sensor_rg <span class="op">=</span> <span class="st">"E65"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -316,7 +313,7 @@ in first plot).</li>
 <code>n</code> and to reuse a precomputed mesh across plots for
 speed.</li>
 </ul>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># creating a mesh with default settings</span></span>
 <span><span class="va">sensors204</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">epochdata</span><span class="op">$</span><span class="va">sensor</span><span class="op">)</span></span>
 <span><span class="va">M1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/point_mesh.html">point_mesh</a></span><span class="op">(</span>template <span class="op">=</span> <span class="st">"HCGSN256"</span>, sensor_select <span class="op">=</span> <span class="va">sensors204</span><span class="op">)</span></span>
@@ -366,7 +363,7 @@ plot.</p></li>
 the same values of <code>col_range</code> and <code>col_scale</code>
 arguments in all cases is necessary.</p></li>
 </ul>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot average topographic map of baseline corrected signal for subject 1 </span></span>
 <span><span class="co"># from the time point 10 (the time of the stimulus)</span></span>
 <span><span class="co"># the outlier epoch 14 is extracted before computing average</span></span>
@@ -416,7 +413,7 @@ which creates a Delaunay type-I triangulation (Lai &amp; Schumaker,
 obtain comparable results between different subjects or conditions,
 setting the same values of <code>col_range</code> and
 <code>col_scale</code> arguments in all cases is necessary.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># plotting the scalp polygon map of previously prepared signal s1</span></span>
 <span><span class="co">#open3d()</span></span>
 <span><span class="fu"><a href="../reference/scalp_plot.html">scalp_plot</a></span><span class="op">(</span><span class="va">s1</span>, amplitude <span class="op">=</span> <span class="st">"average"</span>, col_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>, <span class="fl">15</span><span class="op">)</span><span class="op">)</span></span>
@@ -453,7 +450,7 @@ course of the EEG signal for subject 1 and epoch 5 (from
 <code>epochdata</code>) between time points 10 and 20 with the whole
 range of time 0:50 is created as follows (the output is not rendered to
 reduce the vignette file size):</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># filtering the example data </span></span>
 <span><span class="va">s1e05</span> <span class="op">&lt;-</span> <span class="va">epochdata</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/pick_data.html">pick_data</a></span><span class="op">(</span>subject_rg <span class="op">=</span> <span class="fl">1</span>, epoch_rg <span class="op">=</span> <span class="fl">5</span>, time_rg <span class="op">=</span> <span class="fl">10</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span></span>
@@ -475,7 +472,7 @@ video. The video resolution quality can be affected using
 <code>rgl::par3d(windowRect = c(100, 100, 800, 800))</code>. Example of
 scalp animation with the same data as above (the output is not rendered
 to reduce the vignette file size):</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot animation with default mesh and triangulation:</span></span>
 <span><span class="fu"><a href="../reference/animate_scalp.html">animate_scalp</a></span><span class="op">(</span><span class="va">s1e05</span>, amplitude <span class="op">=</span> <span class="st">"signal"</span><span class="op">)</span></span>
 <span><span class="co"># export the video - the .mp4 extension is required for correct functioning</span></span>
@@ -487,7 +484,7 @@ to reduce the vignette file size):</p>
 fixed time point, you can easily achieve this by using the combination
 of <code><a href="https://dmurdoch.github.io/rgl/dev/reference/play3d.html" class="external-link">rgl::play3d</a></code> and <code><a href="https://dmurdoch.github.io/rgl/dev/reference/spin3d.html" class="external-link">rgl::spin3d</a></code> functions
 according to the following code.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#open3d()</span></span>
 <span><span class="fu"><a href="../reference/scalp_plot.html">scalp_plot</a></span><span class="op">(</span><span class="va">s1</span>, amplitude <span class="op">=</span> <span class="st">"average"</span>, col_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>,<span class="fl">15</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">rgl</span><span class="fu">::</span><span class="fu"><a href="https://dmurdoch.github.io/rgl/dev/reference/play3d.html" class="external-link">play3d</a></span><span class="op">(</span><span class="fu">rgl</span><span class="fu">::</span><span class="fu"><a href="https://dmurdoch.github.io/rgl/dev/reference/spin3d.html" class="external-link">spin3d</a></span><span class="op">(</span>axis <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, rpm <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, duration <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
@@ -503,7 +500,7 @@ maps across subjects:</p>
 <ol style="list-style-type: decimal">
 <li>Outliers detection</li>
 </ol>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># using IQR method for selected sensor from central region </span></span>
 <span><span class="va">dataE59</span> <span class="op">&lt;-</span> <span class="va">epochdata</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/pick_data.html">pick_data</a></span><span class="op">(</span>sensor_rg <span class="op">=</span> <span class="st">"E59"</span><span class="op">)</span></span>
@@ -511,11 +508,11 @@ maps across subjects:</p>
 <span></span>
 <span><span class="co"># verify results by visual inspection (for each subject separately)</span></span>
 <span><span class="va">dataE59</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">subject</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">subject</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/interactive_waveforms.html">interactive_waveforms</a></span><span class="op">(</span>amplitude <span class="op">=</span> <span class="st">"signal"</span>, level <span class="op">=</span> <span class="st">"epoch"</span>,</span>
 <span>                        t0 <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">dataE59</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">subject</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">subject</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/interactive_waveforms.html">interactive_waveforms</a></span><span class="op">(</span>amplitude <span class="op">=</span> <span class="st">"signal"</span>, level <span class="op">=</span> <span class="st">"epoch"</span>,</span>
 <span>                        t0 <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <p>Subject 1: epoch 14 is an obvious outlier. Subject 2: epoch 15 is an
@@ -531,7 +528,7 @@ input data, the <code><a href="../reference/baseline_correction.html">baseline_c
 grouping structure, so the baseline calculation is provided separately
 for unique combinations of these variables. This procedure allows to
 compute baseline correction for both subjects in one step.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subjects_base</span> <span class="op">&lt;-</span> <span class="va">epochdata</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/pick_data.html">pick_data</a></span><span class="op">(</span>epoch_rg <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">13</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/baseline_correction.html">baseline_correction</a></span><span class="op">(</span>baseline_range <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span></code></pre></div>
@@ -541,7 +538,7 @@ compute baseline correction for both subjects in one step.</p>
 <p>We compute average topographic map in time point 35 (100 ms after
 stimulus) for both subjects. We use standard (un-weighted) pointwise
 average with bootstrap confidence intervals.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subjects_mean</span> <span class="op">&lt;-</span> <span class="va">subjects_base</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">time</span> <span class="op">==</span> <span class="fl">35</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/compute_mean.html">compute_mean</a></span><span class="op">(</span>amplitude <span class="op">=</span> <span class="st">"signal_base"</span>, domain <span class="op">=</span> <span class="st">"space"</span>,</span>
@@ -551,7 +548,7 @@ average with bootstrap confidence intervals.</p>
 </ol>
 <p>To maintain consistency between both subjects, we first construct a
 mesh and set colour range that we will use in both figures:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># prepare a mesh for plotting</span></span>
 <span><span class="va">M</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/point_mesh.html">point_mesh</a></span><span class="op">(</span>dimension <span class="op">=</span> <span class="fl">2</span>, n <span class="op">=</span> <span class="fl">4000</span>, template <span class="op">=</span> <span class="st">"HCGSN256"</span>,</span>
 <span>                sensor_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">subjects_mean</span><span class="op">$</span><span class="va">sensor</span><span class="op">)</span>,</span>
@@ -567,15 +564,15 @@ mesh and set colour range that we will use in both figures:</p>
 which is directly adapted for rendering topographic map of the average
 EEG amplitude together with its lower and upper confidence interval (CI)
 bounds.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># plot the average topographic maps with the same color range for both subjects</span></span>
 <span><span class="va">subjects_mean</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">subject</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">subject</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/plot_topo_mean.html">plot_topo_mean</a></span><span class="op">(</span>mesh <span class="op">=</span> <span class="va">M</span>, template <span class="op">=</span> <span class="st">"HCGSN256"</span>,</span>
 <span>                 col_range <span class="op">=</span> <span class="va">cr_subjects</span>, contour <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">subjects_mean</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">subject</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">subject</span> <span class="op">==</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/plot_topo_mean.html">plot_topo_mean</a></span><span class="op">(</span>mesh <span class="op">=</span> <span class="va">M</span>, template <span class="op">=</span> <span class="st">"HCGSN256"</span>,</span>
 <span>                 col_range <span class="op">=</span> <span class="va">cr_subjects</span>, contour <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
@@ -586,7 +583,7 @@ bounds.</p>
 <p>To display difference in the average of both subjects considered in
 the example, we can also use the red-blue colour palette inside the
 <code><a href="../reference/topo_plot.html">topo_plot()</a></code> function.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># compute difference</span></span>
 <span><span class="va">subjects_diff</span> <span class="op">&lt;-</span> <span class="va">subjects_mean</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">sensor</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -623,7 +620,7 @@ Manual</em>. 2024. <a href="https://www.egi.com/knowledge-center" class="externa
 <h4 id="reproducibility-system-requirements">Reproducibility &amp; System Requirements<a class="anchor" aria-label="anchor" href="#reproducibility-system-requirements"></a>
 </h4>
 <blockquote>
-<p><strong>This document was compiled on 2026-01-26 using R version
+<p><strong>This document was compiled on 2026-01-27 using R version
 4.5.2 and the following package versions:</strong></p>
 <ul>
 <li>
@@ -652,7 +649,7 @@ display (headless servers, like those often used for package checks). If
 you are reproducing this vignette on a headless system, ensure the
 following command is run <strong>before</strong> loading
 <code>rgl</code>:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>rgl.useNULL <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co"># Alternatively, set the environment variable RGL_USE_NULL="true"</span></span></code></pre></div>
 </li>
