@@ -39,6 +39,7 @@ Suggests:
     rmarkdown,
     RSQLite,
     DBI,
+    dbplyr,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
