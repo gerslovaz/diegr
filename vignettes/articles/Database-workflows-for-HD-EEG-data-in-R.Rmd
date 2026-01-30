@@ -17,6 +17,8 @@ knitr::opts_chunk$set(
 #| message: false
 library(diegr)
 library(dplyr)
+library(DBI)
+library(RSQLite)
 ```
 
 This article introduces basic principles of working with databases in R and demonstrates how to convert HD-EEG data stored in BrainVision or HDF5 file format into database tables compatible with the `diegr` package.
@@ -241,7 +243,6 @@ The second approach can be advantageous for HD-EEG data, as it avoids holding a 
 
 ```{r}
 #| eval: false
-
 # Create database table with the first epoch
 DBI::dbWriteTable(con, "table_name", data_epoch_01)
 
