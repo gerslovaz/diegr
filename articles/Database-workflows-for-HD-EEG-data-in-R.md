@@ -1,9 +1,5 @@
 # Database workflows for HD-EEG data in R
 
-    #> Warning in rgl.init(initValue, onlyNULL): RGL: unable to open X11 display
-    #> Warning: 'rgl.init' failed, will use the null device.
-    #> See '?rgl.useNULL' for ways to avoid this warning.
-
 This article introduces basic principles of working with databases in R
 and demonstrates how to convert HD-EEG data stored in BrainVision or
 HDF5 file format into database tables compatible with the `diegr`
