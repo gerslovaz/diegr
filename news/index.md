@@ -6,13 +6,14 @@ CRAN release: 2026-01-24
 
 - Added support for multiple conditions and groups in the input data to
   improve flexibility and generality.
-- Added the option to calculate the weighted mean in `compute_mean`.
+- Added the option to calculate the weighted mean in
+  [`compute_mean()`](https://gerslovaz.github.io/diegr/reference/compute_mean.md).
 - Added functions for summary statistics computation.
 - Improved code readability through the use of internal helper
   functions.
 - Internal refactoring of source files.
 - Fixed sensor order in animations and average plotting in
-  interactive_waveforms().
+  [`interactive_waveforms()`](https://gerslovaz.github.io/diegr/reference/interactive_waveforms.md).
 - Added a `NEWS.md` file to track changes to the package.
 
 ### Breaking changes
