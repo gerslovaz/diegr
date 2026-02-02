@@ -197,7 +197,7 @@ Note: When working with raw (unprocessed) EEG data, preprocessing needs to be ca
 
 **Example for HDF5 files**
 
-Assume that, using the procedure described in Step 2, we have imported an HDF5 file containing EEG data. The stimulus-locked signal is stored in a component denoted as `dataT`, which is a three-dimensional array with dimensions *number of sensors × number of time points × number of epochs*. Sensor labels are stored in `data$hdr$label`.
+Assume that, using the procedure described in Step 2, we have imported an HDF5 file containing EEG data. The stimulus-locked signal is stored in a component denoted as `dataT`, which is a three-dimensional array with dimensions *number of sensors × number of time points × number of epochs*. 
 
 Under these assumptions, the procedure for converting the stimulus-locked data for one epoch into a long-format table may proceed as follows:
 
@@ -207,11 +207,10 @@ signal_array <- data$dataT # array with signal values
 n_epoch <- dim(signal_array)[3] # number of epochs
 n_time <- dim(signal_array)[2] # number of time points
 n_sensor <- dim(signal_array)[1] # number of sensors
-sensornames <- data$hdr$label # sensor labels
 
 # create long-format table for epoch 01
 df_stimul <- as.data.frame(t(signal_array[, , 1]))
-colnames(df_stimul) <- sensornames
+colnames(df_stimul) <- sensornames # vector with sensor labels
 data_epoch_01 <- tidyr::pivot_longer(
   data = df_stimul,
   cols = everything(),
@@ -229,7 +228,11 @@ data_epoch_01 <- data_epoch_01 |>
   )
 ```
 
-Note: The example above follows the *subject–sensor–epoch–time–signal* structure. However, the code can be readily adapted to accommodate additional variables, such as different groups or experimental conditions, if they are present in the data.
+Notes:   
+
+1. Unfortunately, for MATLAB `.mat` files version 7.3 and higher (HDF5-based), there is currently no straightforward way to read sensor labels directly in R. Although the labels are stored in `data$hdr$label`, the `rhdf5` package cannot properly read MATLAB cell arrays containing strings, and the `R.matlab` package does not support MAT v7.3 files. Therefore, the sensor labels must be obtained using an alternative approach.
+
+2. The example above follows the *subject–sensor–epoch–time–signal* structure. However, the code can be readily adapted to accommodate additional variables, such as different groups or experimental conditions, if they are present in the data.
 
 
 ### Step 4 -- Writing data into a database table

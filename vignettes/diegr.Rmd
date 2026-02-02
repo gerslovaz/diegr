@@ -438,6 +438,8 @@ Electrical Geodesics, Inc.: *Geodesic Sensor Net Technical Manual*. 2024. <https
 > * **Primary Packages:**
 >     * `diegr` (version `r packageVersion("diegr")`)
 >     * `dplyr` (version `r packageVersion("dplyr")`)
+>     * `rlang` (version `r packageVersion("rlang")`)
+>     * `ggplot2` (version `r packageVersion("ggplot2")`)
 >     * `rgl` (version `r packageVersion("rgl")`)
 >     * `plotly` (version `r packageVersion("plotly")`)
 >     * `gganimate` (version `r packageVersion("gganimate")`)
