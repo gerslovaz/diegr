@@ -648,14 +648,16 @@ Electrical Geodesics, Inc.: *Geodesic Sensor Net Technical Manual*.
 
 #### Reproducibility & System Requirements
 
-> **This document was compiled on 2026-01-30 using R version 4.5.2 and
+> **This document was compiled on 2026-02-03 using R version 4.5.2 and
 > the following package versions:**
 >
 > - **Primary Packages:**
 >
 >   - `diegr` (version 0.2.0)
 >   - `dplyr` (version 1.1.4)
->   - `rgl` (version 1.3.31)
+>   - `rlang` (version 1.1.7)
+>   - `ggplot2` (version 4.0.1)
+>   - `rgl` (version 1.3.34)
 >   - `plotly` (version 4.12.0)
 >   - `gganimate` (version 1.0.11)
 >   - `gifski` (version 1.32.0.2)
