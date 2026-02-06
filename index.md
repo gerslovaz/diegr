@@ -1,9 +1,8 @@
 # diegr: Dynamic and Interactive EEG Graphics
 
-## Overview
+**Overview**
 
-The name diegr comes from **Dynamic and Interactive EEG Graphics using
-R**. The `diegr` package enables researchers to visualize high-density
+The `diegr` package enables researchers to visualize high-density
 electroencephalography (HD-EEG) data with animated and interactive
 graphics, supporting both exploratory and confirmatory analyses of
 sensor-level brain signals.
