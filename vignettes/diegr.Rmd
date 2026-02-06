@@ -163,7 +163,7 @@ plot_time_mean(s2, t0 = 10)
 ```
 
 
-### Spatial visualization 
+### Spatial domain visualization 
 
 #### Mesh Generation
 The original electrode grid is too coarse for graphical rendering. To achieve smoother and more visually appealing results in plots, it's necessary to generate a denser mesh of points. This refined mesh provides better spatial resolution and enhances the quality of visualizations.

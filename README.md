@@ -1,9 +1,12 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# diegr
+# diegr: Dynamic and Interactive EEG Graphics <img src="man/figures/logo.png" align="right" width="200"/>
 
 <!-- badges: start -->
+
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version-last-release/diegr)](https://cran.r-project.org/package=diegr)
+[![Downloads](https://cranlogs.r-pkg.org/badges/grand-total/diegr)](https://cran.r-project.org/package=diegr)
 
 <!-- badges: end -->
 
