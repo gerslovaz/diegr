@@ -220,7 +220,7 @@ stimulus event at 0 ms. The red line represents the average amplitude,
 and the shaded red area represents the confidence
 interval.](diegr_files/figure-html/unnamed-chunk-6-1.png)
 
-### Spatial visualization
+### Spatial domain visualization
 
 #### Mesh Generation
 
@@ -648,15 +648,15 @@ Electrical Geodesics, Inc.: *Geodesic Sensor Net Technical Manual*.
 
 #### Reproducibility & System Requirements
 
-> **This document was compiled on 2026-02-03 using R version 4.5.2 and
+> **This document was compiled on 2026-02-06 using R version 4.5.2 and
 > the following package versions:**
 >
 > - **Primary Packages:**
 >
 >   - `diegr` (version 0.2.0)
->   - `dplyr` (version 1.1.4)
+>   - `dplyr` (version 1.2.0)
 >   - `rlang` (version 1.1.7)
->   - `ggplot2` (version 4.0.1)
+>   - `ggplot2` (version 4.0.2)
 >   - `rgl` (version 1.3.34)
 >   - `plotly` (version 4.12.0)
 >   - `gganimate` (version 1.0.11)

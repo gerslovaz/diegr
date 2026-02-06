@@ -1,4 +1,4 @@
-# diegr
+# diegr: Dynamic and Interactive EEG Graphics
 
 ## Overview
 
