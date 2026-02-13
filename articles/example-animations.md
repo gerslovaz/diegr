@@ -1,9 +1,5 @@
 # Example animations of HD-EEG topographic maps
 
-    #> Warning in rgl.init(initValue, onlyNULL): RGL: unable to open X11 display
-    #> Warning: 'rgl.init' failed, will use the null device.
-    #> See '?rgl.useNULL' for ways to avoid this warning.
-
 This article introduces how to create animated HD-EEG topographic maps
 using the `diegr` package. We will demonstrate how to visualize changes
 in EEG amplitude over time using built-in animation functions.
