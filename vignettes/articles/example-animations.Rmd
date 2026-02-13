@@ -16,6 +16,7 @@ options(
   gganimate.renderer = gganimate::gifski_renderer(),
   bitmapType = "cairo"
 )
+Sys.setenv(RGL_USE_NULL = "true")
 ```
 
 ```{r setup}
