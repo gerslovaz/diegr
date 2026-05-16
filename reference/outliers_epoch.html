@@ -118,7 +118,7 @@ across all time points.</p>
 <code>time</code> - a column with time point numbers,
 signal (or other name specified in <code>amplitude</code> parameter) - a column with measured EEG signal values.</p>
 <p>The outlier detection method is chosen through <code>method</code> argument. The possibilities are</p><ul><li><p><code>iqr</code>: The interquartile range criterion, values outside the interval <code>[lower quartile - k_iqr * IQR, upper quartile + k_iqr * IQR]</code> are considered as outliers. IQR denotes interquartile range and <code>k_iqr</code> the scaling factor.</p></li>
-<li><p><code>percentile</code>: The percentile method, values outside the interval defined by the chosen percentiles are considered as outliers. Note: chosing small <code>p</code>leads to marking too many (or all) values.</p></li>
+<li><p><code>percentile</code>: The percentile method, values outside the interval defined by the chosen percentiles are considered as outliers. Note: chosing small <code>p</code> leads to marking too many (or all) values.</p></li>
 <li><p><code>hampel</code>: The Hampel filter method, values outside the interval <code>[median - k_mad * MAD, median + k_mad * MAD]</code> are considered as outliers. MAD denotes median absolute deviation and <code>k_mad</code> the scaling factor.
 Each of the above methods operates independently per time point, not globally across time.</p></li>
 </ul><p>Note: For large datasets, the calculation can be time-consuming. It is recommended to pre-filter or subset the data before using this function to reduce computation time.</p>

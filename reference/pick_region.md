@@ -82,6 +82,7 @@ requested `region` and `hemisphere` combination.
 ## Examples
 
 ``` r
+
 # Choosing regions from HCGSN256 template
 # a) temporal region in left hemisphere
 pick_region(hemisphere = "left", region = "temporal")

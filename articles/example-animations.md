@@ -38,6 +38,7 @@ individual sensor within a selected time range) using interactive
 boxplots.
 
 ``` r
+
 # load datasets
 data("epochdata")
 data("rtdata")
@@ -46,6 +47,7 @@ boxplot_rt(rtdata)
 ```
 
 ``` r
+
 # filter subject 1
 subject01 <- pick_data(epochdata, subject_rg = 1)
 # boxplots of amplitude for sensor E152
@@ -58,6 +60,7 @@ times - epoch 14 as an outlier in amplitude. These two epoch should be
 excluded before further computation.
 
 ``` r
+
 # extract outlier epochs
 subject01_clean <- pick_data(subject01, epoch_rg = 2:13)
 ```
@@ -76,6 +79,7 @@ After baseline correction we compute the mean amplitudes for the time
 window of interest (10 to 35 time points).
 
 ``` r
+
 # baseline correction
 subject01_base <- baseline_correction(subject01_clean, baseline_range = 1:10)
 # compute average for selected times
@@ -112,6 +116,7 @@ automatically inside the function
 **Animation via `animate_topo` function**
 
 ``` r
+
 animate_topo(subject01_mean, amplitude = "average",
              t_lim = c(1,50), t0 = 10, FS = 250,
              template = "HCGSN256")
@@ -122,6 +127,7 @@ animate_topo(subject01_mean, amplitude = "average",
 **Animation via `animate_topo_mean` function**
 
 ``` r
+
 animate_topo_mean(subject01_mean, 
              t_lim = c(1,50), t0 = 10, FS = 250,
              template = "HCGSN256")

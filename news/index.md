@@ -1,5 +1,9 @@
 # Changelog
 
+## diegr 0.3.0
+
+- Added static version of outputs for boxplots.
+
 ## diegr 0.2.0
 
 CRAN release: 2026-01-24

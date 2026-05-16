@@ -29,12 +29,14 @@ The package `diegr` includes:
 You can install the current version of `diegr` from CRAN with:
 
 ``` r
+
 install.packages("diegr")
 ```
 
 or the latest development version from GitHub with:
 
 ``` r
+
 # install.packages("devtools")
 devtools::install_github("gerslovaz/diegr") 
 ```
@@ -87,11 +89,13 @@ This is a basic example which shows how to plot interactive epoch
 boxplots from chosen electrode in different time points for one subject:
 
 ``` r
+
 library(diegr)
 data("epochdata")
 ```
 
 ``` r
+
 epochdata |>
   pick_data(subject_rg = 1, sensor_rg = "E65") |>
 boxplot_epoch(amplitude = "signal", time_lim = c(10:20))
@@ -105,6 +109,7 @@ interactive elements, only the static preview of the result is shown.
 #### Topographic map
 
 ``` r
+
 data("HCGSN256")
 # creating a mesh
 M1 <- point_mesh(dimension = 2, n = 30000, type = "polygon", sensor_select = unique(epochdata$sensor))
@@ -126,6 +131,7 @@ Compute the average signal for subject 2 from the channels E65 and E34
 bounds (use plot_time_mean conditioned by sensor)
 
 ``` r
+
 # extract required data
 edata <- epochdata |>
   pick_data(subject_rg = 2, sensor_rg = c("E34", "E65"), epoch_rg = 1:13)

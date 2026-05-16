@@ -86,6 +86,7 @@ data.
 An example of a valid data structure might look like this:
 
 ``` r
+
 head(data)
 #>   subject sensor epoch time signal
 #> 1      1     E1     1    1   2.34
@@ -114,17 +115,17 @@ also available.
 Below is a brief overview of basic database commands in R with `DBI`,
 `dbplyr`, and `RSQLite`:
 
-| Command                                                                 | Description                                                                                                                                  |
-|-------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| [`dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html)         | Establishes a connection to a database. User specifies the database driver and location.                                                     |
-| [`dbDisconnect()`](https://dbi.r-dbi.org/reference/dbDisconnect.html)   | Closes the connection to the database.                                                                                                       |
-| [`dbListTables()`](https://dbi.r-dbi.org/reference/dbListTables.html)   | Lists all tables available in the connected database.                                                                                        |
-| [`dbListFields()`](https://dbi.r-dbi.org/reference/dbListFields.html)   | Lists all columns available in the selected database table.                                                                                  |
-| [`dbReadTable()`](https://dbi.r-dbi.org/reference/dbReadTable.html)     | Reads a table from the database into R as a `data.frame` or `tibble`.                                                                        |
-| [`dbWriteTable()`](https://dbi.r-dbi.org/reference/dbWriteTable.html)   | Writes a `data.frame` or `tibble` from R into the database as a new table.                                                                   |
-| [`dbRemoveTable()`](https://dbi.r-dbi.org/reference/dbRemoveTable.html) | Deletes a database table from database.                                                                                                      |
-| [`dbExecute()`](https://dbi.r-dbi.org/reference/dbExecute.html)         | Executes a SQL command that does not return a result, e.g., creating or deleting tables.                                                     |
-| `tbl()`                                                                 | Creates a `dplyr`-friendly reference to a database table. Allows using `dplyr` verbs (`filter`, `select`, etc.) directly on database tables. |
+| Command | Description |
+|----|----|
+| [`dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html) | Establishes a connection to a database. User specifies the database driver and location. |
+| [`dbDisconnect()`](https://dbi.r-dbi.org/reference/dbDisconnect.html) | Closes the connection to the database. |
+| [`dbListTables()`](https://dbi.r-dbi.org/reference/dbListTables.html) | Lists all tables available in the connected database. |
+| [`dbListFields()`](https://dbi.r-dbi.org/reference/dbListFields.html) | Lists all columns available in the selected database table. |
+| [`dbReadTable()`](https://dbi.r-dbi.org/reference/dbReadTable.html) | Reads a table from the database into R as a `data.frame` or `tibble`. |
+| [`dbWriteTable()`](https://dbi.r-dbi.org/reference/dbWriteTable.html) | Writes a `data.frame` or `tibble` from R into the database as a new table. |
+| [`dbRemoveTable()`](https://dbi.r-dbi.org/reference/dbRemoveTable.html) | Deletes a database table from database. |
+| [`dbExecute()`](https://dbi.r-dbi.org/reference/dbExecute.html) | Executes a SQL command that does not return a result, e.g., creating or deleting tables. |
+| `tbl()` | Creates a `dplyr`-friendly reference to a database table. Allows using `dplyr` verbs (`filter`, `select`, etc.) directly on database tables. |
 
 ## Converting HD-EEG data into database tables
 
@@ -153,6 +154,7 @@ we have a database named *mydatabase.db*. In R, you can connect to it
 using the `DBI` and `RSQLite` packages as follows:
 
 ``` r
+
 library(DBI)
 con <- DBI::dbConnect(RSQLite::SQLite(),
                       dbname = "mydatabase.db")
@@ -186,6 +188,7 @@ BrainVision files can be imported into R, for example, using the
 GitHub):
 
 ``` r
+
 # Install eegUtils from GitHub if not already installed
 # install.packages("remotes")
 # remotes::install_github("craddm/eegUtils")
@@ -213,6 +216,7 @@ In the following, we present an example using the `H5Fopen()` function
 from the `rhdf5` package.
 
 ``` r
+
 # Install rhdf5 if not already installed
 # install.packages("BiocManager")
 # BiocManager::install("rhdf5")
@@ -257,6 +261,7 @@ stimulus-locked data for one epoch into a long-format table may proceed
 as follows:
 
 ``` r
+
 signal_array <- data$dataT # array with signal values
 n_epoch <- dim(signal_array)[3] # number of epochs
 n_time <- dim(signal_array)[2] # number of time points
@@ -319,6 +324,7 @@ The second approach can be advantageous for HD-EEG data, as it avoids
 holding a single, very large long-format `data.frame` in memory.
 
 ``` r
+
 # Create database table with the first epoch
 DBI::dbWriteTable(con, "table_name", data_epoch_01)
 
@@ -343,6 +349,7 @@ applications, the database would typically be stored on disk or on a
 database server.
 
 ``` r
+
 data(epochdata, package = "diegr")
 # create connection to the database in a temporary directory
 con <- DBI::dbConnect(
@@ -369,6 +376,7 @@ converted to an appropriate type (numeric/integer) before being used in
 `diegr` or `dplyr` functions.
 
 ``` r
+
 # convert the type of the columns
 epochdb_table <- epochdb_table |>
   dplyr::mutate(
@@ -394,6 +402,7 @@ pick_data(epochdb_table,
 ```
 
 ``` r
+
 library(plotly)
 # plot interactive epoch-boxplot for subject 1 and electrode E65 directly from the database
 pick_data(epochdb_table,
@@ -408,6 +417,7 @@ pick_data(epochdb_table,
 ```
 
 ``` r
+
 # close the database connection (at the end of work)
 DBI::dbDisconnect(con)
 ```

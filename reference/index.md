@@ -11,11 +11,11 @@ Functions for visualization of HD-EEG data
 - [`animate_topo_mean()`](https://gerslovaz.github.io/diegr/reference/animate_topo_mean.md)
   : Animate EEG average topographic map with confidence bounds
 - [`boxplot_epoch()`](https://gerslovaz.github.io/diegr/reference/boxplot_epoch.md)
-  : Plot interactive boxplots of EEG amplitude on epoch level
+  : Plot boxplots of EEG amplitude on epoch level
 - [`boxplot_subject()`](https://gerslovaz.github.io/diegr/reference/boxplot_subject.md)
-  : Plot interactive boxplots of EEG amplitude across subjects
+  : Plot boxplots of EEG amplitude across subjects
 - [`boxplot_rt()`](https://gerslovaz.github.io/diegr/reference/boxplot_rt.md)
-  : Plot interactive boxplots of response times
+  : Plot boxplots of response times
 - [`interactive_waveforms()`](https://gerslovaz.github.io/diegr/reference/interactive_waveforms.md)
   : Plot interactive waveform graph
 - [`plot_point_mesh()`](https://gerslovaz.github.io/diegr/reference/plot_point_mesh.md)

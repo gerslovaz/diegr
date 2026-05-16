@@ -29,12 +29,14 @@ The package `diegr` includes:
 You can install the current version of `diegr` from CRAN with:
 
 ``` r
+
 install.packages("diegr")
 ```
 
 or the latest development version from GitHub with:
 
 ``` r
+
 # install.packages("devtools")
 devtools::install_github("gerslovaz/diegr") 
 ```
@@ -87,11 +89,13 @@ This is a basic example which shows how to plot interactive epoch
 boxplots from chosen electrode in different time points for one subject:
 
 ``` r
+
 library(diegr)
 data("epochdata")
 ```
 
 ``` r
+
 epochdata |>
   pick_data(subject_rg = 1, sensor_rg = "E65") |>
 boxplot_epoch(amplitude = "signal", time_lim = c(10:20))
@@ -105,6 +109,7 @@ interactive elements, only the static preview of the result is shown.
 #### Topographic map
 
 ``` r
+
 data("HCGSN256")
 # creating a mesh
 M1 <- point_mesh(dimension = 2, n = 30000, type = "polygon", sensor_select = unique(epochdata$sensor))
@@ -126,6 +131,7 @@ Compute the average signal for subject 2 from the channels E65 and E34
 bounds (use plot_time_mean conditioned by sensor)
 
 ``` r
+
 # extract required data
 edata <- epochdata |>
   pick_data(subject_rg = 2, sensor_rg = c("E34", "E65"), epoch_rg = 1:13)
@@ -168,11 +174,11 @@ Functions for visualization of HD-EEG data
 - [`animate_topo_mean()`](https://gerslovaz.github.io/diegr/reference/animate_topo_mean.md)
   : Animate EEG average topographic map with confidence bounds
 - [`boxplot_epoch()`](https://gerslovaz.github.io/diegr/reference/boxplot_epoch.md)
-  : Plot interactive boxplots of EEG amplitude on epoch level
+  : Plot boxplots of EEG amplitude on epoch level
 - [`boxplot_subject()`](https://gerslovaz.github.io/diegr/reference/boxplot_subject.md)
-  : Plot interactive boxplots of EEG amplitude across subjects
+  : Plot boxplots of EEG amplitude across subjects
 - [`boxplot_rt()`](https://gerslovaz.github.io/diegr/reference/boxplot_rt.md)
-  : Plot interactive boxplots of response times
+  : Plot boxplots of response times
 - [`interactive_waveforms()`](https://gerslovaz.github.io/diegr/reference/interactive_waveforms.md)
   : Plot interactive waveform graph
 - [`plot_point_mesh()`](https://gerslovaz.github.io/diegr/reference/plot_point_mesh.md)

@@ -109,7 +109,7 @@ possibilities are
 
 - `percentile`: The percentile method, values outside the interval
   defined by the chosen percentiles are considered as outliers. Note:
-  chosing small `p`leads to marking too many (or all) values.
+  chosing small `p` leads to marking too many (or all) values.
 
 - `hampel`: The Hampel filter method, values outside the interval
   `[median - k_mad * MAD, median + k_mad * MAD]` are considered as

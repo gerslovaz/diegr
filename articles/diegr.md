@@ -7,6 +7,7 @@ for a comprehensive overview of data.
 ### Installation
 
 ``` r
+
 install.packages("diegr") 
 # or for development version:
 # install.packages("devtools")
@@ -101,6 +102,7 @@ experimental levels (e.g., sensor, subject, group, or condition) as
 specified by the `level` argument.
 
 ``` r
+
 # The function for interactive boxplot of signal assumes 
 # pre-filtered data input
 # example: subject 1 and channel E34 in time points from 10 to 20
@@ -132,6 +134,7 @@ number of time points in which the epochs were evaluated as outliers
 variables (e.g. group, subject, sensor).
 
 ``` r
+
 # Example: outlier detection for both subjects and channel E34 using IQR method
 # The column in which we are looking for outliers is specified by the `amplitude` argument
 epochdata |>
@@ -175,6 +178,7 @@ points (for curves) - `domain = "time"` or sensors (for topographic
 maps) - `domain = "space"`.
 
 ``` r
+
 # preparing data for later visualisation 
 # filtering signal without outlier epochs 14 and 15
 # and computing epoch level jackknife average from baseline corrected data
@@ -204,6 +208,7 @@ is adapted directly to display the average signal including the
 pointwise confidence interval as a `ggplot` object.
 
 ``` r
+
 # computing jackknife average from channel E65 
 s2 <- edata |>
   pick_data(sensor_rg = "E65") |>
@@ -260,6 +265,7 @@ Notes:
   to reuse a precomputed mesh across plots for speed.
 
 ``` r
+
 # creating a mesh with default settings
 sensors204 <- unique(epochdata$sensor)
 M1 <- point_mesh(template = "HCGSN256", sensor_select = sensors204)
@@ -323,6 +329,7 @@ Notes:
   necessary.
 
 ``` r
+
 # Plot average topographic map of baseline corrected signal for subject 1 
 # from the time point 10 (the time of the stimulus)
 # the outlier epoch 14 is extracted before computing average
@@ -404,6 +411,7 @@ between different subjects or conditions, setting the same values of
 `col_range` and `col_scale` arguments in all cases is necessary.
 
 ``` r
+
 # plotting the scalp polygon map of previously prepared signal s1
 #open3d()
 scalp_plot(s1, amplitude = "average", col_range = c(-30, 15))
@@ -448,6 +456,7 @@ time 0:50 is created as follows (the output is not rendered to reduce
 the vignette file size):
 
 ``` r
+
 # filtering the example data 
 s1e05 <- epochdata |> 
   pick_data(subject_rg = 1, epoch_rg = 5, time_rg = 10:20)
@@ -472,6 +481,7 @@ animation with the same data as above (the output is not rendered to
 reduce the vignette file size):
 
 ``` r
+
 # Plot animation with default mesh and triangulation:
 animate_scalp(s1e05, amplitude = "signal")
 # export the video - the .mp4 extension is required for correct functioning
@@ -490,6 +500,7 @@ and
 functions according to the following code.
 
 ``` r
+
 #open3d()
 scalp_plot(s1, amplitude = "average", col_range = c(-30,15))
 rgl::play3d(rgl::spin3d(axis = c(0, 0, 1), rpm = 10), duration = 10)
@@ -505,6 +516,7 @@ across subjects:
 1.  Outliers detection
 
 ``` r
+
 # using IQR method for selected sensor from central region 
 dataE59 <- epochdata |>
   pick_data(sensor_rg = "E59")
@@ -539,6 +551,7 @@ procedure allows to compute baseline correction for both subjects in one
 step.
 
 ``` r
+
 subjects_base <- epochdata |>
   pick_data(epoch_rg = 1:13) |>
   baseline_correction(baseline_range = 1:10)
@@ -551,6 +564,7 @@ stimulus) for both subjects. We use standard (un-weighted) pointwise
 average with bootstrap confidence intervals.
 
 ``` r
+
 subjects_mean <- subjects_base |>
   dplyr::filter(time == 35) |>
   compute_mean(amplitude = "signal_base", domain = "space",
@@ -563,6 +577,7 @@ To maintain consistency between both subjects, we first construct a mesh
 and set colour range that we will use in both figures:
 
 ``` r
+
 # prepare a mesh for plotting
 M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256",
                 sensor_select = unique(subjects_mean$sensor),
@@ -583,6 +598,7 @@ average EEG amplitude together with its lower and upper confidence
 interval (CI) bounds.
 
 ``` r
+
 # plot the average topographic maps with the same color range for both subjects
 subjects_mean |>
   dplyr::filter(.data$subject == 1) |>
@@ -605,6 +621,7 @@ example, we can also use the red-blue colour palette inside the
 function.
 
 ``` r
+
 # compute difference
 subjects_diff <- subjects_mean |>
   dplyr::group_by(.data$sensor) |>
@@ -648,16 +665,16 @@ Electrical Geodesics, Inc.: *Geodesic Sensor Net Technical Manual*.
 
 #### Reproducibility & System Requirements
 
-> **This document was compiled on 2026-02-13 using R version 4.5.2 and
+> **This document was compiled on 2026-05-16 using R version 4.6.0 and
 > the following package versions:**
 >
 > - **Primary Packages:**
 >
 >   - `diegr` (version 0.2.0)
->   - `dplyr` (version 1.2.0)
->   - `rlang` (version 1.1.7)
->   - `ggplot2` (version 4.0.2)
->   - `rgl` (version 1.3.34)
+>   - `dplyr` (version 1.2.1)
+>   - `rlang` (version 1.2.0)
+>   - `ggplot2` (version 4.0.3)
+>   - `rgl` (version 1.3.36)
 >   - `plotly` (version 4.12.0)
 >   - `gganimate` (version 1.0.11)
 >   - `gifski` (version 1.32.0.2)
@@ -670,6 +687,7 @@ Electrical Geodesics, Inc.: *Geodesic Sensor Net Technical Manual*.
 >   run **before** loading `rgl`:
 >
 >   ``` r
+>
 >   options(rgl.useNULL = TRUE)
 >   # Alternatively, set the environment variable RGL_USE_NULL="true"
 >   ```
