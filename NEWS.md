@@ -1,3 +1,8 @@
+# diegr 0.3.0
+
+* Added static version of outputs for boxplots.
+
+
 # diegr 0.2.0
 
 * Added support for multiple conditions and groups in the input data to improve flexibility and generality.

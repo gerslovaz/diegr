@@ -2,7 +2,7 @@
 % Please edit documentation in R/boxplots.R
 \name{boxplot_subject}
 \alias{boxplot_subject}
-\title{Plot interactive boxplots of EEG amplitude across subjects}
+\title{Plot boxplots of EEG amplitude across subjects}
 \usage{
 boxplot_subject(
   data,
@@ -10,7 +10,8 @@ boxplot_subject(
   subject = NULL,
   time_lim,
   title_label = NULL,
-  use_latex = TRUE
+  use_latex = TRUE,
+  interactivity = TRUE
 )
 }
 \arguments{
@@ -25,13 +26,15 @@ boxplot_subject(
 \item{title_label}{A character string specifying the title of the plot. Defaults to \code{NULL} for plot without title.}
 
 \item{use_latex}{A logical value indicating whether to use LaTeX formatting for the y-axis title. The default is \code{TRUE}.}
+
+\item{interactivity}{Logical. Determines whether to render an interactive \code{plotly} graph (default) or a static \code{ggplot} graph.}
 }
 \value{
-A \code{plotly} object with boxplots of EEG amplitude across subjects.
+A \code{plotly} or \code{ggplot2} object with boxplots of EEG amplitude across subjects.
 }
 \description{
-Function for plotting interactive boxplots of EEG amplitude across subjects for a single epoch and channel, within a specified time interval. The function assumes data from a single epoch and a single sensor.
-The interactive plotly output enables to easily determine the subjects with outlier amplitude and also allows to easily edit the image layout.
+Function for plotting interactive or static boxplots of EEG amplitude across subjects for a single epoch and channel, within a specified time interval. The function assumes data from a single epoch and a single sensor.
+Both the static \code{ggplot} output and the interactive \code{plotly} output can be easily customized and edited, while the interactive \code{plotly} output additionally allows easy identification of the subjects corresponding to outliers.
 }
 \details{
 The input data frame or database table must contain at least following columns:
@@ -46,10 +49,14 @@ Note: The function assumes that subject IDs are unique across the entire dataset
 # for both subjects in chosen time points
 ## Note: it has no statistical sense to make boxplot from only 2 observations, but
 ## larger example dataset is not possible due to size limit of the package
-epochdata |>
-pick_data(sensor_rg = "E34", epoch_rg = 1) |>
-boxplot_subject(amplitude = "signal", time_lim = c(10:20),
+exampledata <- epochdata |>
+pick_data(sensor_rg = "E34", epoch_rg = 1)
+boxplot_subject(exampledata, amplitude = "signal", time_lim = c(10:20),
 title_label = "Sensor E34, epoch 1")
+
+# Static version of the previous graph
+boxplot_subject(exampledata, amplitude = "signal", time_lim = c(10:20),
+title_label = "Sensor E34, epoch 1", interactivity = FALSE)
 
 }
 \seealso{

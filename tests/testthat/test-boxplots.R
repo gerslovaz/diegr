@@ -2,8 +2,10 @@
 test_that("check boxplot_rt structure", {
 
   p_test <- boxplot_rt(rtdata)
-
   expect_s3_class(p_test, "plotly")
+
+  p_test2 <- boxplot_rt(rtdata, interactivity = FALSE)
+  expect_s3_class(p_test2, "ggplot")
 
 })
 
@@ -15,6 +17,10 @@ test_that("check boxplot_epoch structure", {
 
   expect_s3_class(p_test, "plotly")
 
+  p_test2 <- boxplot_epoch(edata, amplitude = "signal", time_lim = c(1:2),
+                             interactivity = FALSE)
+  expect_s3_class(p_test2, "ggplot")
+
 })
 
 test_that("check boxplot_subject structure", {
@@ -24,6 +30,10 @@ test_that("check boxplot_subject structure", {
   p_test <- boxplot_subject(epochdata, amplitude = "signal", time_lim = c(1:2))
 
   expect_s3_class(p_test, "plotly")
+
+  p_test2 <- boxplot_subject(epochdata, amplitude = "signal", time_lim = c(1:2),
+                             interactivity = FALSE)
+  expect_s3_class(p_test2, "ggplot")
 
 })
 

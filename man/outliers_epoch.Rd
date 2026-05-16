@@ -54,7 +54,7 @@ signal (or other name specified in \code{amplitude} parameter) - a column with m
 The outlier detection method is chosen through \code{method} argument. The possibilities are
 \itemize{
 \item \code{iqr}: The interquartile range criterion, values outside the interval \code{[lower quartile - k_iqr * IQR, upper quartile + k_iqr * IQR]} are considered as outliers. IQR denotes interquartile range and \code{k_iqr} the scaling factor.
-\item \code{percentile}: The percentile method, values outside the interval defined by the chosen percentiles are considered as outliers. Note: chosing small \code{p}leads to marking too many (or all) values.
+\item \code{percentile}: The percentile method, values outside the interval defined by the chosen percentiles are considered as outliers. Note: chosing small \code{p} leads to marking too many (or all) values.
 \item \code{hampel}: The Hampel filter method, values outside the interval \code{[median - k_mad * MAD, median + k_mad * MAD]} are considered as outliers. MAD denotes median absolute deviation and \code{k_mad} the scaling factor.
 Each of the above methods operates independently per time point, not globally across time.
 }

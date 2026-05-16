@@ -2,25 +2,32 @@
 % Please edit documentation in R/boxplots.R
 \name{boxplot_rt}
 \alias{boxplot_rt}
-\title{Plot interactive boxplots of response times}
+\title{Plot boxplots of response times}
 \usage{
-boxplot_rt(data, subject = NULL)
+boxplot_rt(data, subject = NULL, interactivity = TRUE)
 }
 \arguments{
 \item{data}{A data frame or a database table containing response time data. Required columns: \code{subject}, \code{epoch}, \code{RT} (value of response time in ms). An optional \code{condition} column may be used to
 colour-code the boxplots.}
 
 \item{subject}{A vector with IDs of subjects to plot. If missing, boxplots are drawn for all available subjects in \code{data}.}
+
+\item{interactivity}{Logical. Determines whether to render an interactive \code{plotly} graph (default) or a static \code{ggplot} graph.}
 }
 \value{
-A \code{plotly} object with boxplots of response times.
+A \code{plotly} or \code{ggplot2} object with boxplots of response times.
 }
 \description{
-Function for plotting interactive boxplots of response time in individual epochs for selected subjects. If the \code{condition} column is present in the input data, the boxplots are color-coded by condition. The interactive plotly output enables to easily determine the epoch number from which outliers come and also allows to easily edit the image layout.
+Function for plotting interactive or static boxplots of response time in individual epochs for selected subjects. Both the static \code{ggplot} output and the interactive \code{plotly} output can be easily customized and edited, while the interactive \code{plotly} output additionally allows easy identification of the epoch numbers corresponding to outliers.
+
+If the \code{condition} column is present in the input data, the boxplots are color-coded by condition.
 }
 \examples{
 # Display interactive boxplots for both example subjects
 boxplot_rt(rtdata)
+
+# Display static boxplots for both example subjects
+boxplot_rt(rtdata, interactivity = FALSE)
 
 # Interactive boxplots per subject divided by condition
 # a) add condition column to data (just for example)

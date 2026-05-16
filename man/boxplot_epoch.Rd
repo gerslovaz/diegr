@@ -2,7 +2,7 @@
 % Please edit documentation in R/boxplots.R
 \name{boxplot_epoch}
 \alias{boxplot_epoch}
-\title{Plot interactive boxplots of EEG amplitude on epoch level}
+\title{Plot boxplots of EEG amplitude on epoch level}
 \usage{
 boxplot_epoch(
   data,
@@ -10,7 +10,8 @@ boxplot_epoch(
   epoch = NULL,
   time_lim,
   title_label = NULL,
-  use_latex = TRUE
+  use_latex = TRUE,
+  interactivity = TRUE
 )
 }
 \arguments{
@@ -25,13 +26,15 @@ boxplot_epoch(
 \item{title_label}{A character string specifying the title of the plot. Defaults to \code{NULL} for plot without title.}
 
 \item{use_latex}{A logical value indicating whether to use LaTeX formatting for the y-axis title. The default is \code{TRUE}.}
+
+\item{interactivity}{Logical. Determines whether to render an interactive \code{plotly} graph (default) or a static \code{ggplot} graph.}
 }
 \value{
-A \code{plotly} object with boxplots of EEG amplitude for individual epochs.
+A \code{plotly} or \code{ggplot2} object with boxplots of EEG amplitude for individual epochs.
 }
 \description{
-Function for plotting interactive boxplots of EEG amplitude in individual epochs within the chosen time interval. The function assumes data from a single subject and a single sensor.
-The interactive \code{plotly} output enables to easily determine the epoch number from which outliers come and also allows to easily edit the image layout.
+Function for plotting interactive or static boxplots of EEG amplitude in individual epochs within the chosen time interval. The function assumes data from a single subject and a single sensor.
+Both the static \code{ggplot} output and the interactive \code{plotly} output can be easily customized and edited, while the interactive \code{plotly} output additionally allows easy identification of the epochs corresponding to outliers.
 }
 \details{
 The input data frame or database table must contain at least following columns:
@@ -42,10 +45,14 @@ and a column with measured EEG signal values (or their averages) called as in \c
 \examples{
 # Interactive boxplots of signal from channel E34 for subject 1 (health control)
 # in time points 10:20
-epochdata |>
-pick_data(subject_rg = 1, sensor_rg = "E34") |>
-boxplot_epoch(amplitude = "signal", time_lim = c(10:20),
+exampledata <- epochdata |>
+pick_data(subject_rg = 1, sensor_rg = "E34")
+boxplot_epoch(exampledata, amplitude = "signal", time_lim = c(10:20),
 title_label = "Subject 1, channel E34")
+
+# static version of the previous graph
+boxplot_epoch(exampledata, amplitude = "signal", time_lim = c(10:20),
+title_label = "Subject 1, channel E34", interactivity = FALSE)
 
 }
 \seealso{
