@@ -37,8 +37,8 @@ or the latest development version from GitHub with:
 
 ``` r
 
-# install.packages("devtools")
-devtools::install_github("gerslovaz/diegr") 
+# install.packages("pak")
+pak::pak("gerslovaz/diegr") 
 ```
 
 ## Data

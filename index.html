@@ -12,8 +12,8 @@
 <link rel="icon" sizes="any" href="favicon.ico">
 <link rel="manifest" href="site.webmanifest">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Dynamic and Interactive EEG Graphics">
 <meta name="description" content="Allows to visualize high-density electroencephalography (HD-EEG) data through interactive plots and animations, enabling exploratory and communicative analysis of temporal-spatial brain signals. Funder: Masaryk University (Grant No. MUNI/A/1457/2023).">
@@ -88,8 +88,8 @@
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"diegr"</span><span class="op">)</span></span></code></pre></div>
 <p>or the latest development version from GitHub with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"gerslovaz/diegr"</span><span class="op">)</span> </span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"gerslovaz/diegr"</span><span class="op">)</span> </span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
@@ -138,7 +138,7 @@
 <code class="sourceCode R"><span><span class="va">epochdata</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/pick_data.html">pick_data</a></span><span class="op">(</span>subject_rg <span class="op">=</span> <span class="fl">1</span>, sensor_rg <span class="op">=</span> <span class="st">"E65"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span><span class="fu"><a href="reference/boxplot_epoch.html">boxplot_epoch</a></span><span class="op">(</span>amplitude <span class="op">=</span> <span class="st">"signal"</span>, time_lim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="./reference/figures/README-boxplot.png" width="100%"></p>
+<p><img src="./reference/figures/README-boxplot.png" alt="" width="100%"></p>
 <p>Note: The README format does not allow the inclusion of <code>plotly</code> interactive elements, only the static preview of the result is shown.</p>
 </div>
 <div class="section level4">
@@ -155,7 +155,7 @@
 <span><span class="co"># dplyr::filter(subject == 1 &amp; epoch == 10 &amp; time == 15) </span></span>
 <span><span class="co"># function for displaying a topographic map of the chosen signal on the created mesh M1</span></span>
 <span><span class="fu"><a href="reference/topo_plot.html">topo_plot</a></span><span class="op">(</span><span class="va">data_short</span>, amplitude <span class="op">=</span> <span class="st">"signal"</span>, mesh <span class="op">=</span> <span class="va">M1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-topoplot-1.png" width="100%"></p>
+<p><img src="reference/figures/README-topoplot-1.png" alt="" width="100%"></p>
 </div>
 <div class="section level4">
 <h4 id="computing-and-displaying-the-average-in-time-domain">Computing and displaying the average in time domain<a class="anchor" aria-label="anchor" href="#computing-and-displaying-the-average-in-time-domain"></a>
@@ -172,7 +172,7 @@
 <span>  <span class="fu"><a href="reference/compute_mean.html">compute_mean</a></span><span class="op">(</span>amplitude <span class="op">=</span> <span class="st">"signal_base"</span>, type <span class="op">=</span> <span class="st">"point"</span>, domain <span class="op">=</span> <span class="st">"time"</span><span class="op">)</span></span>
 <span><span class="co"># plot the average line with CI</span></span>
 <span><span class="fu"><a href="reference/plot_time_mean.html">plot_time_mean</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data_mean</span>, t0 <span class="op">=</span> <span class="fl">10</span>, condition_column <span class="op">=</span> <span class="st">"sensor"</span>, legend_title <span class="op">=</span> <span class="st">"Sensor"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-timemean-1.png" width="100%"></p>
+<p><img src="reference/figures/README-timemean-1.png" alt="" width="100%"></p>
 <p>For detailed examples and usage explanation, please see the package vignette: <code><a href="articles/diegr.html">vignette("diegr", package = "diegr")</a></code>.</p>
 <p><strong>References</strong> Madetko-Alster N., Alster P., Lamoš M., Šmahovská L., Boušek T., Rektor I. and Bočková M. The role of the somatosensory cortex in self-paced movement impairment in Parkinson’s disease. <em>Clinical Neurophysiology.</em> 2025, vol. 171, 11-17. <a href="https://doi.org/10.1016/j.clinph.2025.01.001" class="external-link uri">https://doi.org/10.1016/j.clinph.2025.01.001</a></p>
 <p><strong>License</strong> This package is distributed under the MIT license. See LICENSE file for details.</p>
