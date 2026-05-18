@@ -1,6 +1,7 @@
 # diegr 0.3.0
 
 * Added static version of outputs for boxplots.
+* Updated the installation method for the development version in the README. 
 
 
 # diegr 0.2.0

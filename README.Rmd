@@ -49,8 +49,8 @@ install.packages("diegr")
 or the latest development version from GitHub with:
 
 ```{r, eval = FALSE}
-# install.packages("devtools")
-devtools::install_github("gerslovaz/diegr") 
+# install.packages("pak")
+pak::pak("gerslovaz/diegr") 
 ```
 
 ## Data

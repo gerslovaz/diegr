@@ -45,8 +45,8 @@ install.packages("diegr")
 or the latest development version from GitHub with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("gerslovaz/diegr") 
+# install.packages("pak")
+pak::pak("gerslovaz/diegr") 
 ```
 
 ## Data
@@ -106,7 +106,7 @@ epochdata |>
 boxplot_epoch(amplitude = "signal", time_lim = c(10:20))
 ```
 
-<img src="./man/figures/README-boxplot.png" width="100%" />
+<img src="./man/figures/README-boxplot.png" alt="" width="100%" />
 
 Note: The README format does not allow the inclusion of `plotly`
 interactive elements, only the static preview of the result is shown.
@@ -126,7 +126,7 @@ data_short <- epochdata |>
 topo_plot(data_short, amplitude = "signal", mesh = M1)
 ```
 
-<img src="man/figures/README-topoplot-1.png" width="100%" />
+<img src="man/figures/README-topoplot-1.png" alt="" width="100%" />
 
 #### Computing and displaying the average in time domain
 
@@ -147,7 +147,7 @@ data_mean <- data_base |>
 plot_time_mean(data = data_mean, t0 = 10, condition_column = "sensor", legend_title = "Sensor")
 ```
 
-<img src="man/figures/README-timemean-1.png" width="100%" />
+<img src="man/figures/README-timemean-1.png" alt="" width="100%" />
 
 For detailed examples and usage explanation, please see the package
 vignette: `vignette("diegr", package = "diegr")`.
