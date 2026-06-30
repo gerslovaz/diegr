@@ -665,7 +665,7 @@ Electrical Geodesics, Inc.: *Geodesic Sensor Net Technical Manual*.
 
 #### Reproducibility & System Requirements
 
-> **This document was compiled on 2026-05-18 using R version 4.6.0 and
+> **This document was compiled on 2026-06-30 using R version 4.6.1 and
 > the following package versions:**
 >
 > - **Primary Packages:**
