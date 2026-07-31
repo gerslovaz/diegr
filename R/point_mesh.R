@@ -39,7 +39,7 @@
 #'
 #' @references EGI Geodesic Sensor Net Technical Manual (2024)
 #'
-#' @import sp
+#' @import sf
 #' @importFrom stats na.omit
 #' @importFrom grDevices chull
 #'
@@ -143,6 +143,16 @@ point_mesh <- function(dimension = c(2,3),
   coords_ch <- coords_xy[conv_hull,]
   coords_ch <- rbind(coords_ch, coords_ch[1,])
 
+  if (type == "polygon") {
+    pts_sf <- sf::st_as_sf(mesh_circle, coords = c("x", "y"))
+    poly_mat <- as.matrix(coords_ch[, c("x", "y")])
+    poly_sfc <- sf::st_sfc(sf::st_polygon(list(poly_mat)))
+    # find points in polygon
+    inside <- sf::st_intersects(pts_sf, poly_sfc, sparse = FALSE)
+    mesh_polygon <- mesh_circle[as.vector(inside), ]
+  }
+
+
   if (identical(dimension, 2)) {
 
     switch(type,
@@ -150,8 +160,6 @@ point_mesh <- function(dimension = c(2,3),
              mesh_out <- list(D2 = mesh_circle)
            },
            "polygon" = {
-             inside <- sp::point.in.polygon(mesh_circle$x, mesh_circle$y, coords_ch$x, coords_ch$y)
-             mesh_polygon <- mesh_circle[inside > 0,]
              mesh_out <- list(D2 = data.frame(x = mesh_polygon[,1], y = mesh_polygon[,2]))
            },
            stop("Invalid type argument.")
@@ -166,13 +174,12 @@ point_mesh <- function(dimension = c(2,3),
     }
     coords_xyz <- coords_xyz |>
       dplyr::select("x", "y", "z")
+
     switch(type,
            "circle" = {
              mesh_out <- list(D3 = recompute_3d(coords_xy, coords_xyz, mesh_circle))
            },
            "polygon" = {
-             inside <- sp::point.in.polygon(mesh_circle$x, mesh_circle$y, coords_ch$x, coords_ch$y)
-             mesh_polygon <- mesh_circle[inside > 0,]
              mesh_out <- list(D3 = recompute_3d(coords_xy, coords_xyz, mesh_polygon))
            },
            stop("Invalid type argument.")
@@ -187,14 +194,13 @@ point_mesh <- function(dimension = c(2,3),
     }
     coords_xyz <- coords_xyz |>
       dplyr::select("x", "y", "z")
+
     switch(type,
            "circle" = {
              mesh_out <- list(D2 = data.frame(x = mesh_circle[,1], y = mesh_circle[,2]),
                               D3 = recompute_3d(coords_xy, coords_xyz, mesh_circle))
            },
            "polygon" = {
-             inside <- sp::point.in.polygon(mesh_circle$x, mesh_circle$y, coords_ch$x, coords_ch$y)
-             mesh_polygon <- mesh_circle[inside > 0,]
              mesh_out <- list(D2 = data.frame(x = mesh_polygon[,1], y = mesh_polygon[,2]),
                               D3 = recompute_3d(coords_xy, coords_xyz, mesh_polygon))
            },
@@ -203,6 +209,68 @@ point_mesh <- function(dimension = c(2,3),
   } else {
     stop("Invalid dimension argument.")
   }
+
+
+ # if (identical(dimension, 2)) {
+
+  #  switch(type,
+  #         "circle" = {
+  #           mesh_out <- list(D2 = mesh_circle)
+  #         },
+  #         "polygon" = {
+  #           inside <- sp::point.in.polygon(mesh_circle$x, mesh_circle$y, coords_ch$x, coords_ch$y)
+  #           mesh_polygon <- mesh_circle[inside > 0,]
+  #           mesh_out <- list(D2 = data.frame(x = mesh_polygon[,1], y = mesh_polygon[,2]))
+  #        },
+  #         stop("Invalid type argument.")
+  #  )
+  #} else if (identical(dimension, 3)) {
+  #  if (!is.null(sensor_select)) {
+  #    coords_full <- coordinates$D3
+  #    sensor_index <- which(coords_full$sensor %in% sensor_select)
+  #    coords_xyz <- coords_full[sensor_index,]
+  #  } else {
+  #    coords_xyz <- coordinates$D3
+  #  }
+  #  coords_xyz <- coords_xyz |>
+  #    dplyr::select("x", "y", "z")
+  #  switch(type,
+  #         "circle" = {
+  #           mesh_out <- list(D3 = recompute_3d(coords_xy, coords_xyz, mesh_circle))
+  #         },
+  #         "polygon" = {
+  #           inside <- sp::point.in.polygon(mesh_circle$x, mesh_circle$y, coords_ch$x, coords_ch$y)
+  #           mesh_polygon <- mesh_circle[inside > 0,]
+  #           mesh_out <- list(D3 = recompute_3d(coords_xy, coords_xyz, mesh_polygon))
+  #         },
+  #         stop("Invalid type argument.")
+  #  )
+  #} else if (identical(dimension, c(2, 3)) || identical(dimension, c(3, 2))) {
+  #  if (!is.null(sensor_select)) {
+  #    coords_full <- coordinates$D3
+  #    sensor_index <- which(coords_full$sensor %in% sensor_select)
+  #    coords_xyz <- coords_full[sensor_index,]
+  #  } else {
+  #    coords_xyz <- coordinates$D3
+  #  }
+  #  coords_xyz <- coords_xyz |>
+  #    dplyr::select("x", "y", "z")
+  #  switch(type,
+  #         "circle" = {
+  #           mesh_out <- list(D2 = data.frame(x = mesh_circle[,1], y = mesh_circle[,2]),
+  #                            D3 = recompute_3d(coords_xy, coords_xyz, mesh_circle))
+  #         },
+  #         "polygon" = {
+  #           inside <- sp::point.in.polygon(mesh_circle$x, mesh_circle$y, coords_ch$x, coords_ch$y)
+  #           mesh_polygon <- mesh_circle[inside > 0,]
+  #           mesh_out <- list(D2 = data.frame(x = mesh_polygon[,1], y = mesh_polygon[,2]),
+  #                            D3 = recompute_3d(coords_xy, coords_xyz, mesh_polygon))
+  #         },
+  #         stop("Invalid type argument.")
+  #  )
+  #} else {
+  #  stop("Invalid dimension argument.")
+  #}
 
   mesh_out$template <- template
   mesh_out$r <- r

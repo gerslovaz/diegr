@@ -1,5 +1,7 @@
 # diegr 0.3.0
 
+* Rewrote `point_mesh()` using `sf` instead of the `sp` package.
+* Fixed bugs in `outliers_epoch()` and baseline range in examples and documentation.
 * Added static version of outputs for boxplots.
 * Updated the installation method for the development version in the README. 
 

@@ -41,7 +41,8 @@ uninformative grouping.
 }
 }
 \examples{
-# Computing baseline correction for subject 1 on first 9 points (points before stimulus), sensor "E1"
+# Computing baseline correction for subject 1 on first 9 points (points before stimulus),
+# sensor "E1"
 # a) Prepare data and compute
 data01 <- epochdata |> dplyr::filter(.data$subject == 1 & .data$sensor == "E1")
 basedata <- baseline_correction(data01, baseline_range = 1:9, type = "absolute")

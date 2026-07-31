@@ -6,7 +6,7 @@ interactive_surfaceplot <- function(data,
                                     col_range = NULL,
                                     col_scale = NULL,
                                     show_sensors = TRUE
-                                    ){
+){
   stop_if_missing_cols(data, required_cols = c(amplitude, "sensor"))
 
   if (any(is.na(data[[amplitude]]))) {
@@ -138,9 +138,9 @@ make_plotly_scale <- function(col_scale) {
 
 
 interactive_surfaceplot_curves <- function(data,
-                                    sensor_ticks = NULL,
-                                    col_range = NULL,
-                                    col_scale = NULL
+                                           sensor_ticks = NULL,
+                                           col_range = NULL,
+                                           col_scale = NULL
 ){
 
   if (inherits(data, "tbl_sql") || inherits(data, "tbl_dbi")) {
@@ -173,7 +173,7 @@ interactive_surfaceplot_curves <- function(data,
       colorscale = col_scale_plotly,
       cmin = min(col_scale$breaks),
       cmax = max(col_scale$breaks),
-      colorbar = list(title = "Amplituda (µV)")
+      colorbar = list(title = "Amplitude (\u00b5V)")
     )
 
   selected_tickvals <- which(sensors %in% sensor_ticks)
@@ -182,17 +182,17 @@ interactive_surfaceplot_curves <- function(data,
   fig <- fig %>% layout(
     scene = list(
       yaxis = list(
-        title = "Elektrody",
+        title = "Sensors",
         tickmode = "array",
         tickvals = selected_tickvals,
         ticktext = selected_ticktext
       ),
       xaxis = list(
-        title = "Čas (ms)",
+        title = "Time (ms)",
         autorange = TRUE
       ),
       zaxis = list(
-        title = "Amplituda (µV)"
+        title = "Amplitude (\u00b5V)"
       )
     )
   )
