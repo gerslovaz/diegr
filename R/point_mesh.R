@@ -30,6 +30,13 @@
 #'
 #' Note: When specifying the `own_coordinates` and `template` at the same time, the `template` parameter takes precedence and the `own_coordinates` parameter is ignored.
 #'
+#' Note on Matrix Conditioning: The interpolation matrix used in thin-plate
+#' spline interpolation can be ill-conditioned depending on the spatial
+#' configuration of input sensor locations. If this occurs, the function
+#' automatically uses a Moore-Penrose pseudoinverse (`MASS::ginv()`) instead of
+#' the standard matrix inverse to improve numerical stability and issues a
+#' warning.
+#'
 #' @return Returns a list of class \code{"mesh"} containing some (or all) of the following components:
 #'
 #' \item{D2}{A data frame with \code{x} and \code{y} coordinates of the created two dimensional point mesh.}

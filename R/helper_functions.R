@@ -258,6 +258,10 @@ spline_matrix <- function(X,
 #' @param Xcp Optional matrix of evaluation coordinates.
 #'
 #' @return A matrix of appropriate structure for spline interpolation estimation.
+#'
+#' @details
+#' If the thin-plate spline interpolation matrix is ill-conditioned, the function automatically falls back to a
+#' Moore-Penrose pseudoinverse (`MASS::ginv()`) and issues a warning.
 #' @keywords internal
 #' @noRd
 XP_IM <- function(X,
@@ -338,11 +342,14 @@ IM <- function(X,
   if (condition_num > 1e+12) { # Check ill-conditioned matrix
     warning(paste("The X_P matrix is ill-conditioned (kappa =",
                   format(condition_num, scientific = TRUE, digits = 3),
-                  ") and the results from solve() could be inaccurate."))
+                  "). Falling back to MASS::ginv() to prevent 3D geometry corruption."))
+    inv_X_P <- MASS::ginv(X_P)
+  } else {
+    inv_X_P <- solve(X_P)
   }
 
   Y_P <- rbind(Y, matrix(0, d1 + 1, d2))
-  beta_hat <- solve(X_P) %*% Y_P
+  beta_hat <- inv_X_P %*% Y_P
 
   if (identical(X, Xcp)) {
     y_Pcp <- X_P %*% beta_hat

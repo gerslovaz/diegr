@@ -29,7 +29,8 @@ Imports:
     scales,
     stats,
     purrr,
-    tidyr
+    tidyr,
+    MASS
 LazyData: true
 Suggests: 
     av,

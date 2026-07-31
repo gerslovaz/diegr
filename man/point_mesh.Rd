@@ -57,6 +57,13 @@ To build the appropriate meshes in both dimensions, it is necessary to have the 
 It is also necessary to keep the same sensor locations order in \code{D2} and \code{D3} part of the coordinates.
 
 Note: When specifying the \code{own_coordinates} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{own_coordinates} parameter is ignored.
+
+Note on Matrix Conditioning: The interpolation matrix used in thin-plate
+spline interpolation can be ill-conditioned depending on the spatial
+configuration of input sensor locations. If this occurs, the function
+automatically uses a Moore-Penrose pseudoinverse (\code{MASS::ginv()}) instead of
+the standard matrix inverse to improve numerical stability and issues a
+warning.
 }
 \examples{
 # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template
