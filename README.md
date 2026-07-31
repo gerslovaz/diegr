@@ -149,8 +149,9 @@ plot_time_mean(data = data_mean, t0 = 10, condition_column = "sensor", legend_ti
 
 <img src="man/figures/README-timemean-1.png" alt="" width="100%" />
 
-For detailed examples and usage explanation, please see the package
-vignette: `vignette("diegr", package = "diegr")`.
+For detailed examples, usage instructions, and troubleshooting
+information, including system requirements, see the package vignette:
+`vignette("diegr", package = "diegr")`.
 
 **References** Madetko-Alster N., Alster P., Lamoš M., Šmahovská L.,
 Boušek T., Rektor I. and Bočková M. The role of the somatosensory cortex
