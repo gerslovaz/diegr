@@ -663,7 +663,7 @@ Wickham H. *ggplot2: Elegant Graphics for Data Analysis.* Springer;
 Electrical Geodesics, Inc.: *Geodesic Sensor Net Technical Manual*.
 2024. <https://www.egi.com/knowledge-center>
 
-#### Reproducibility & System Requirements
+#### Reproducibility, System Requirements & Troubleshooting
 
 > **This document was compiled on 2026-07-31 using R version 4.6.1 and
 > the following package versions:**
@@ -680,11 +680,17 @@ Electrical Geodesics, Inc.: *Geodesic Sensor Net Technical Manual*.
 >   - `gifski` (version 1.32.0.2)
 >   - `av` (version 0.9.6)
 >
+> - **OpenGL and `rgl`:** Interactive 3D visualizations rely on the
+>   `rgl` package and OpenGL support. If rendering fails, verify that
+>   OpenGL (or WebGL) is available on your system. On Linux, additional
+>   OpenGL libraries may need to be installed.
+>
 > - **rgl on Headless Systems:** The `rgl` package requires specific
 >   setup for graphics on systems without a display (headless servers,
->   like those often used for package checks). If you are reproducing
->   this vignette on a headless system, ensure the following command is
->   run **before** loading `rgl`:
+>   such as those often used for package checks or continuous
+>   integration). If you are reproducing this vignette on a headless
+>   system, ensure the following command is run **before** loading
+>   `rgl`:
 >
 >   ``` r
 >
@@ -692,9 +698,24 @@ Electrical Geodesics, Inc.: *Geodesic Sensor Net Technical Manual*.
 >   # Alternatively, set the environment variable RGL_USE_NULL="true"
 >   ```
 >
-> - **Media Requirements:** Interactive plots (from **plotly**) and
->   animations (from **gganimate** and **gifski** / **av**) require the
->   respective R packages and, for local rendering or specific output
->   formats, may require external libraries or codecs. If media fails to
->   render, check the documentation for `plotly`, `gganimate`, `gifski`,
->   and `av` regarding system dependencies for video/GIF encoding.
+> - **Browser-based Widgets and Media Requirements:** Interactive plots
+>   (from `plotly`) require a modern WebGL-enabled browser. If a widget
+>   does not display correctly in the RStudio Viewer, try opening it in
+>   an external browser. Exporting widgets as static images may require
+>   the `webshot2` package together with a Chrome- or Chromium-based
+>   browser.
+>
+>   Animations (from `gganimate` and `gifski` / `av`) require the
+>   respective R packages and, for some output formats, additional
+>   system dependencies. In particular, exporting video formats requires
+>   FFmpeg to be installed and available on the system.
+>
+> - **LaTeX Labels:** Figures containing LaTeX mathematical labels
+>   require a working TeX distribution. Installing TinyTeX via the
+>   `tinytex` package is recommended:
+>
+>   ``` r
+>
+>   install.packages("tinytex")
+>   tinytex::install_tinytex()
+>   ```

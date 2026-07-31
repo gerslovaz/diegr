@@ -624,7 +624,7 @@ Springer; 2016.</p>
 Manual</em>. 2024. <a href="https://www.egi.com/knowledge-center" class="external-link uri">https://www.egi.com/knowledge-center</a></p>
 </div>
 <div class="section level4">
-<h4 id="reproducibility-system-requirements">Reproducibility &amp; System Requirements<a class="anchor" aria-label="anchor" href="#reproducibility-system-requirements"></a>
+<h4 id="reproducibility-system-requirements-troubleshooting">Reproducibility, System Requirements &amp; Troubleshooting<a class="anchor" aria-label="anchor" href="#reproducibility-system-requirements-troubleshooting"></a>
 </h4>
 <blockquote>
 <p><strong>This document was compiled on 2026-07-31 using R version
@@ -653,25 +653,43 @@ Manual</em>. 2024. <a href="https://www.egi.com/knowledge-center" class="externa
 <code>av</code> (version 0.9.6)</li>
 </ul>
 </li>
+<li><p><strong>OpenGL and <code>rgl</code>:</strong> Interactive 3D
+visualizations rely on the <code>rgl</code> package and OpenGL support.
+If rendering fails, verify that OpenGL (or WebGL) is available on your
+system. On Linux, additional OpenGL libraries may need to be
+installed.</p></li>
 <li>
 <p><strong>rgl on Headless Systems:</strong> The <code>rgl</code>
 package requires specific setup for graphics on systems without a
-display (headless servers, like those often used for package checks). If
-you are reproducing this vignette on a headless system, ensure the
-following command is run <strong>before</strong> loading
-<code>rgl</code>:</p>
+display (headless servers, such as those often used for package checks
+or continuous integration). If you are reproducing this vignette on a
+headless system, ensure the following command is run
+<strong>before</strong> loading <code>rgl</code>:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>rgl.useNULL <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co"># Alternatively, set the environment variable RGL_USE_NULL="true"</span></span></code></pre></div>
 </li>
-<li><p><strong>Media Requirements:</strong> Interactive plots (from
-<strong>plotly</strong>) and animations (from <strong>gganimate</strong>
-and <strong>gifski</strong> / <strong>av</strong>) require the
-respective R packages and, for local rendering or specific output
-formats, may require external libraries or codecs. If media fails to
-render, check the documentation for <code>plotly</code>,
-<code>gganimate</code>, <code>gifski</code>, and <code>av</code>
-regarding system dependencies for video/GIF encoding.</p></li>
+<li>
+<p><strong>Browser-based Widgets and Media Requirements:</strong>
+Interactive plots (from <code>plotly</code>) require a modern
+WebGL-enabled browser. If a widget does not display correctly in the
+RStudio Viewer, try opening it in an external browser. Exporting widgets
+as static images may require the <code>webshot2</code> package together
+with a Chrome- or Chromium-based browser.</p>
+<p>Animations (from <code>gganimate</code> and <code>gifski</code> /
+<code>av</code>) require the respective R packages and, for some output
+formats, additional system dependencies. In particular, exporting video
+formats requires FFmpeg to be installed and available on the
+system.</p>
+</li>
+<li>
+<p><strong>LaTeX Labels:</strong> Figures containing LaTeX
+mathematical labels require a working TeX distribution. Installing
+TinyTeX via the <code>tinytex</code> package is recommended:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"tinytex"</span><span class="op">)</span></span>
+<span><span class="fu">tinytex</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tinytex/man/install_tinytex.html" class="external-link">install_tinytex</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</li>
 </ul>
 </blockquote>
 </div>

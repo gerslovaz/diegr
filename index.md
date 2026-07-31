@@ -146,8 +146,8 @@ plot_time_mean(data = data_mean, t0 = 10, condition_column = "sensor", legend_ti
 
 ![](reference/figures/README-timemean-1.png)
 
-For detailed examples and usage explanation, please see the package
-vignette:
+For detailed examples, usage instructions, and troubleshooting
+information, including system requirements, see the package vignette:
 [`vignette("diegr", package = "diegr")`](https://gerslovaz.github.io/diegr/articles/diegr.md).
 
 **References** Madetko-Alster N., Alster P., Lamoš M., Šmahovská L.,
