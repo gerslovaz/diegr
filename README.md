@@ -139,7 +139,7 @@ bounds (use plot_time_mean conditioned by sensor)
 edata <- epochdata |>
   pick_data(subject_rg = 2, sensor_rg = c("E34", "E65"), epoch_rg = 1:13)
 # baseline correction
-data_base <- baseline_correction(edata, baseline_range = 1:10)
+data_base <- baseline_correction(edata, baseline_range = 1:9)
 # compute average
 data_mean <- data_base |> 
   compute_mean(amplitude = "signal_base", type = "point", domain = "time")

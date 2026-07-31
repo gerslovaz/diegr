@@ -75,4 +75,10 @@ pick_data(sensor_rg = "E45") |>
 outliers_epoch(amplitude = "signal", method = "percentile", p = 0.99)
 # see head of outliers data
 head(outdata$outliers_data)
+
+# 3. Outlier epoch detection for subject 2, electrode E45 for the whole time range
+# using Hampel filter method and scaling factor = 4
+epochdata |>
+pick_data(subject_rg = 2, sensor_rg = "E45") |>
+outliers_epoch(amplitude = "signal", method = "hampel", k_mad = 4)
 }

@@ -54,6 +54,12 @@
 #' outliers_epoch(amplitude = "signal", method = "percentile", p = 0.99)
 #' # see head of outliers data
 #' head(outdata$outliers_data)
+#'
+#' # 3. Outlier epoch detection for subject 2, electrode E45 for the whole time range
+#' # using Hampel filter method and scaling factor = 4
+#' epochdata |>
+#' pick_data(subject_rg = 2, sensor_rg = "E45") |>
+#' outliers_epoch(amplitude = "signal", method = "hampel", k_mad = 4)
 
 outliers_epoch <- function(data,
                            amplitude = "signal",
@@ -90,7 +96,7 @@ outliers_epoch <- function(data,
   if (method == "iqr") {
     outdata <- newdata |>
       dplyr::group_by(dplyr::across(all_of(group_vars))) |>
-      dplyr::mutate(outliers = .data[[amplitude]] %in% boxplot.stats(.data[[amplitude]])$out) |>
+      dplyr::mutate(outliers = .data[[amplitude]] %in% boxplot.stats(.data[[amplitude]], coef = k_iqr)$out) |>
       dplyr::filter(.data$outliers == TRUE) |>
       dplyr::ungroup()
   }
@@ -110,7 +116,7 @@ outliers_epoch <- function(data,
   if (method == "hampel") {
     outdata <- newdata |>
       dplyr::group_by(dplyr::across(all_of(group_vars))) |>
-      dplyr::mutate(outliers = .data[[amplitude]] < median(.data[[amplitude]]) - 3 * mad(.data[[amplitude]], constant = 1) | .data[[amplitude]] > median(.data[[amplitude]]) + 3 * mad(.data[[amplitude]], constant = 1)) |>
+      dplyr::mutate(outliers = .data[[amplitude]] < median(.data[[amplitude]]) - k_mad * mad(.data[[amplitude]], constant = 1) | .data[[amplitude]] > median(.data[[amplitude]]) + k_mad * mad(.data[[amplitude]], constant = 1)) |>
       dplyr::filter(.data$outliers == TRUE) |>
       dplyr::ungroup()
   }

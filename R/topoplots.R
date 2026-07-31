@@ -49,7 +49,7 @@
 #' # a1) extract required data
 #' edata <- pick_data(epochdata, subject_rg = 2, epoch_rg = 1:13, time_rg = 1:10)
 #' # a2) baseline correction (needed for suitable topographic map)
-#' data_base <- baseline_correction(edata, baseline_range = 1:10)
+#' data_base <- baseline_correction(edata, baseline_range = 1:9)
 #' # a3) average computing
 #' data_mean <- data_base |>
 #' dplyr::filter(time == 10) |>
@@ -250,7 +250,7 @@ topo_plot <- function(data,
 #' # a1) extract required data
 #' edata <- pick_data(epochdata, subject_rg = 2, epoch_rg = 1:13, time_rg = 1:10)
 #' # a2) baseline correction (needed for suitable topographic map)
-#' data_base <- baseline_correction(edata, baseline_range = 1:10)
+#' data_base <- baseline_correction(edata, baseline_range = 1:9)
 #' # a3) average computing
 #' data_mean <- data_base |>
 #' dplyr::filter(time == 10) |>

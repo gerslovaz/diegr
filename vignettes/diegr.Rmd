@@ -138,7 +138,7 @@ The calculation of the average signal can be performed using the function `compu
 # Note: data filtering is possible both using the pick_data() function or dplyr commands
 edata <- epochdata |>
   pick_data(subject_rg = 2, epoch_rg = 1:13) |>
-  baseline_correction(baseline_range = 1:10)
+  baseline_correction(baseline_range = 1:9)
 
 s1 <- edata |>
   dplyr::filter(time == 10) |>
@@ -221,7 +221,7 @@ Notes:
 # preparing data
 data_base <- epochdata |>
   pick_data(subject_rg = 1, time_rg = 1:10) |>
-  baseline_correction(baseline_range = 1:10)
+  baseline_correction(baseline_range = 1:9)
 
 data_mean <- data_base |>
   pick_data(epoch_rg = 1:13, time_rg = 10) |>
@@ -344,7 +344,7 @@ Note: If there are multiple subjects (or other variables) in the input data, the
 #| eval: true
 subjects_base <- epochdata |>
   pick_data(epoch_rg = 1:13) |>
-  baseline_correction(baseline_range = 1:10)
+  baseline_correction(baseline_range = 1:9)
 ```
 
 3. Average computing

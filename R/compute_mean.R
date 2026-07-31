@@ -76,10 +76,10 @@
 #' }
 #'
 #' # Jackknife average signal for subject 1 in all electrodes in time point 11 with baseline correction
-#' # on interval 1:10 (again without outlier epoch 14)
+#' # on interval 1:9 (again without outlier epoch 14)
 #' # a) prepare corrected data
 #' basedata <- pick_data(epochdata, subject_rg = 1) |>
-#' baseline_correction(baseline_range = 1:10, type = "absolute")
+#' baseline_correction(baseline_range = 1:9, type = "absolute")
 #' # b) filter time point 11 (without epoch 14) and compute the average
 #' avg_data <- pick_data(basedata, time_rg = 11, epoch_rg = 1:13) |>
 #' compute_mean(amplitude = "signal_base", level = "epoch", domain = "space", type = "jack")
