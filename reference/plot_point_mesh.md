@@ -110,7 +110,7 @@ setting `label_sensors = TRUE`).
 # and default settings
 # Note: for nice plot we recommend set par(mar = c(0,0,0,0))
 M <- point_mesh(n = 4000, template = "HCGSN256")
-#> Warning: The X_P matrix is ill-conditioned (kappa = 1.76e+12 ) and the results from solve() could be inaccurate.
+#> Warning: The X_P matrix is ill-conditioned (kappa = 1.76e+12 ). Falling back to MASS::ginv() to prevent 3D geometry corruption.
 plot_point_mesh(M$D2)
 
 

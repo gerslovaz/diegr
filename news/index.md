@@ -2,6 +2,9 @@
 
 ## diegr 0.3.0
 
+- Added a fallback to
+  [`MASS::ginv()`](https://rdrr.io/pkg/MASS/man/ginv.html) for
+  ill-conditioned interpolation matrices.
 - Rewrote
   [`point_mesh()`](https://gerslovaz.github.io/diegr/reference/point_mesh.md)
   using `sf` instead of the `sp` package.
@@ -10,7 +13,7 @@
   and baseline range in examples and documentation.
 - Added static version of outputs for boxplots.
 - Updated the installation method for the development version in the
-  README.
+  README, edited troubleshooting section in vignette.
 
 ## diegr 0.2.0
 

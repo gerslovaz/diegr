@@ -122,6 +122,14 @@ Note: When specifying the `own_coordinates` and `template` at the same
 time, the `template` parameter takes precedence and the
 `own_coordinates` parameter is ignored.
 
+Note on Matrix Conditioning: The interpolation matrix used in thin-plate
+spline interpolation can be ill-conditioned depending on the spatial
+configuration of input sensor locations. If this occurs, the function
+automatically uses a Moore-Penrose pseudoinverse
+([`MASS::ginv()`](https://rdrr.io/pkg/MASS/man/ginv.html)) instead of
+the standard matrix inverse to improve numerical stability and issues a
+warning.
+
 ## References
 
 EGI Geodesic Sensor Net Technical Manual (2024)
@@ -137,7 +145,7 @@ M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256", type = "circle")
 ## Note: the coordinates are the same as for HCGSN256 template, it is
 ## just a mod example of using the own_coordinates parameter
 M <- point_mesh(dimension = 3, n = 2000, own_coordinates = HCGSN256)
-#> Warning: The X_P matrix is ill-conditioned (kappa = 1.76e+12 ) and the results from solve() could be inaccurate.
+#> Warning: The X_P matrix is ill-conditioned (kappa = 1.76e+12 ). Falling back to MASS::ginv() to prevent 3D geometry corruption.
 
 # Computing coordinates of a polygon mesh in 2D and 3D in one step (starting number 3000 points),
 # using 204 electrodes selected for epochdata

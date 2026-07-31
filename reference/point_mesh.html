@@ -115,6 +115,12 @@ For the equivalence between 2D and 3D mesh and the possibility to compare models
 </ul><p>To build the appropriate meshes in both dimensions, it is necessary to have the input of 3D sensor locations and their corresponding projection onto a plane; the function itself does not perform this projection.
 It is also necessary to keep the same sensor locations order in <code>D2</code> and <code>D3</code> part of the coordinates.</p>
 <p>Note: When specifying the <code>own_coordinates</code> and <code>template</code> at the same time, the <code>template</code> parameter takes precedence and the <code>own_coordinates</code> parameter is ignored.</p>
+<p>Note on Matrix Conditioning: The interpolation matrix used in thin-plate
+spline interpolation can be ill-conditioned depending on the spatial
+configuration of input sensor locations. If this occurs, the function
+automatically uses a Moore-Penrose pseudoinverse (<code><a href="https://rdrr.io/pkg/MASS/man/ginv.html" class="external-link">MASS::ginv()</a></code>) instead of
+the standard matrix inverse to improve numerical stability and issues a
+warning.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -131,7 +137,7 @@ It is also necessary to keep the same sensor locations order in <code>D2</code> 
 <span class="r-in"><span><span class="co">## Note: the coordinates are the same as for HCGSN256 template, it is</span></span></span>
 <span class="r-in"><span><span class="co">## just a mod example of using the own_coordinates parameter</span></span></span>
 <span class="r-in"><span><span class="va">M</span> <span class="op">&lt;-</span> <span class="fu">point_mesh</span><span class="op">(</span>dimension <span class="op">=</span> <span class="fl">3</span>, n <span class="op">=</span> <span class="fl">2000</span>, own_coordinates <span class="op">=</span> <span class="va">HCGSN256</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The X_P matrix is ill-conditioned (kappa = 1.76e+12 ) and the results from solve() could be inaccurate.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The X_P matrix is ill-conditioned (kappa = 1.76e+12 ). Falling back to MASS::ginv() to prevent 3D geometry corruption.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Computing coordinates of a polygon mesh in 2D and 3D in one step (starting number 3000 points),</span></span></span>
 <span class="r-in"><span><span class="co"># using 204 electrodes selected for epochdata</span></span></span>
