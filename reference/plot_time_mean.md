@@ -104,7 +104,7 @@ interactive version of time plot:
 # a1) extract required data
 edata <- pick_data(epochdata, sensor_rg = c("E65"), epoch_rg = 1:13)
 # a2) baseline correction
-data_base <- baseline_correction(edata, baseline_range = 1:10)
+data_base <- baseline_correction(edata, baseline_range = 1:9)
 # a3) average computing
 data_mean <- compute_mean(data_base, amplitude = "signal_base", type = "point")
 
@@ -123,7 +123,7 @@ plot_time_mean(data = data_mean, condition_column = "subject", t0 = 10, legend_t
 # preparing data
 edata <- pick_data(epochdata, subject_rg = 1, sensor_rg = c("E5", "E35" ,"E65"),
                  epoch_rg = 1:13)
-data_base <- baseline_correction(edata, baseline_range = 1:10)
+data_base <- baseline_correction(edata, baseline_range = 1:9)
 data_mean <- compute_mean(data_base, amplitude = "signal_base", type = "point")
 # plot the time course by sensor (channel)
 plot_time_mean(data = data_mean, condition_column = "sensor", t0 = 10, legend_title = "Channel")

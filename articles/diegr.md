@@ -185,7 +185,7 @@ maps) - `domain = "space"`.
 # Note: data filtering is possible both using the pick_data() function or dplyr commands
 edata <- epochdata |>
   pick_data(subject_rg = 2, epoch_rg = 1:13) |>
-  baseline_correction(baseline_range = 1:10)
+  baseline_correction(baseline_range = 1:9)
 
 s1 <- edata |>
   dplyr::filter(time == 10) |>
@@ -337,7 +337,7 @@ Notes:
 # preparing data
 data_base <- epochdata |>
   pick_data(subject_rg = 1, time_rg = 1:10) |>
-  baseline_correction(baseline_range = 1:10)
+  baseline_correction(baseline_range = 1:9)
 
 data_mean <- data_base |>
   pick_data(epoch_rg = 1:13, time_rg = 10) |>
@@ -554,7 +554,7 @@ step.
 
 subjects_base <- epochdata |>
   pick_data(epoch_rg = 1:13) |>
-  baseline_correction(baseline_range = 1:10)
+  baseline_correction(baseline_range = 1:9)
 ```
 
 3.  Average computing
@@ -585,7 +585,7 @@ M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256",
 # compute consistent col_range across subjects
 # a) find the range of average amplitude
 range(subjects_mean$average) 
-#> [1] -15.634288   8.609518
+#> [1] -15.962526   8.671741
 # -15.634288   8.609518
 # b) make the range symmetric
 cr_subjects <- c(-16,16)
@@ -665,17 +665,17 @@ Electrical Geodesics, Inc.: *Geodesic Sensor Net Technical Manual*.
 
 #### Reproducibility & System Requirements
 
-> **This document was compiled on 2026-06-30 using R version 4.6.1 and
+> **This document was compiled on 2026-07-31 using R version 4.6.1 and
 > the following package versions:**
 >
 > - **Primary Packages:**
 >
 >   - `diegr` (version 0.2.0)
 >   - `dplyr` (version 1.2.1)
->   - `rlang` (version 1.2.0)
+>   - `rlang` (version 1.3.0)
 >   - `ggplot2` (version 4.0.3)
 >   - `rgl` (version 1.3.36)
->   - `plotly` (version 4.12.0)
+>   - `plotly` (version 4.12.1)
 >   - `gganimate` (version 1.0.11)
 >   - `gifski` (version 1.32.0.2)
 >   - `av` (version 0.9.6)

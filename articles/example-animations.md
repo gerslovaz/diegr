@@ -81,7 +81,7 @@ window of interest (10 to 35 time points).
 ``` r
 
 # baseline correction
-subject01_base <- baseline_correction(subject01_clean, baseline_range = 1:10)
+subject01_base <- baseline_correction(subject01_clean, baseline_range = 1:9)
 # compute average for selected times
 subject01_mean <- subject01_base |>
   pick_data(time_rg = 10:35) |>
@@ -109,9 +109,11 @@ In this example, we set: `t0 = 10` – stimulus onset is at time point
 `t_lim = c(1,50)` – the whole time interval presented in the
 `epochdata`  
 `FS = 250` – sampling frequency is 250 Hz (i.e. there is interval 4 ms
-between two time points) `template = "HCGSN256"` – we want plot
-according to the HCGSN256 template, dense point mesh is constructed
-automatically inside the function
+between two time points)
+
+`template = "HCGSN256"` – we want plot according to the HCGSN256
+template, dense point mesh is constructed automatically inside the
+function
 
 **Animation via `animate_topo` function**
 

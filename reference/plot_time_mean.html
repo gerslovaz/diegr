@@ -118,7 +118,7 @@
 <span class="r-in"><span><span class="co"># a1) extract required data</span></span></span>
 <span class="r-in"><span><span class="va">edata</span> <span class="op">&lt;-</span> <span class="fu"><a href="pick_data.html">pick_data</a></span><span class="op">(</span><span class="va">epochdata</span>, sensor_rg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"E65"</span><span class="op">)</span>, epoch_rg <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">13</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># a2) baseline correction</span></span></span>
-<span class="r-in"><span><span class="va">data_base</span> <span class="op">&lt;-</span> <span class="fu"><a href="baseline_correction.html">baseline_correction</a></span><span class="op">(</span><span class="va">edata</span>, baseline_range <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">data_base</span> <span class="op">&lt;-</span> <span class="fu"><a href="baseline_correction.html">baseline_correction</a></span><span class="op">(</span><span class="va">edata</span>, baseline_range <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># a3) average computing</span></span></span>
 <span class="r-in"><span><span class="va">data_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="compute_mean.html">compute_mean</a></span><span class="op">(</span><span class="va">data_base</span>, amplitude <span class="op">=</span> <span class="st">"signal_base"</span>, type <span class="op">=</span> <span class="st">"point"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -137,7 +137,7 @@
 <span class="r-in"><span><span class="co"># preparing data</span></span></span>
 <span class="r-in"><span><span class="va">edata</span> <span class="op">&lt;-</span> <span class="fu"><a href="pick_data.html">pick_data</a></span><span class="op">(</span><span class="va">epochdata</span>, subject_rg <span class="op">=</span> <span class="fl">1</span>, sensor_rg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"E5"</span>, <span class="st">"E35"</span> ,<span class="st">"E65"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                 epoch_rg <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">13</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">data_base</span> <span class="op">&lt;-</span> <span class="fu"><a href="baseline_correction.html">baseline_correction</a></span><span class="op">(</span><span class="va">edata</span>, baseline_range <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">data_base</span> <span class="op">&lt;-</span> <span class="fu"><a href="baseline_correction.html">baseline_correction</a></span><span class="op">(</span><span class="va">edata</span>, baseline_range <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">data_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="compute_mean.html">compute_mean</a></span><span class="op">(</span><span class="va">data_base</span>, amplitude <span class="op">=</span> <span class="st">"signal_base"</span>, type <span class="op">=</span> <span class="st">"point"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># plot the time course by sensor (channel)</span></span></span>
 <span class="r-in"><span><span class="fu">plot_time_mean</span><span class="op">(</span>data <span class="op">=</span> <span class="va">data_mean</span>, condition_column <span class="op">=</span> <span class="st">"sensor"</span>, t0 <span class="op">=</span> <span class="fl">10</span>, legend_title <span class="op">=</span> <span class="st">"Channel"</span><span class="op">)</span></span></span>
@@ -153,7 +153,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

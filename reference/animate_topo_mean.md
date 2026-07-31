@@ -134,7 +134,7 @@ static version:
 # a) prepare data: compute the mean from baseline corrected signal for subject 2,
 # first 10 points and only 13 epochs (epochs 14 and 15 are outliers)
 edata <- pick_data(epochdata, subject_rg = 2, epoch_rg = 1:13, time_rg = 1:10)
-data_base <- baseline_correction(edata, baseline_range = 1:10) # baseline correction
+data_base <- baseline_correction(edata, baseline_range = 1:9) # baseline correction
 data_mean <- compute_mean(data_base, amplitude = "signal_base",
  type = "jack", domain = "space") # compute mean
 # b) render the animation

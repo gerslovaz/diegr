@@ -166,6 +166,22 @@ Each of the above methods operates independently per time point, not globally ac
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span>     4  -<span style="color: #BB0000;">23.1</span> 13    E45    1      </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span>     5  -<span style="color: #BB0000;">21.1</span> 13    E45    1      </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span>     6  -<span style="color: #BB0000;">19.3</span> 13    E45    1      </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># 3. Outlier epoch detection for subject 2, electrode E45 for the whole time range</span></span></span>
+<span class="r-in"><span><span class="co"># using Hampel filter method and scaling factor = 4</span></span></span>
+<span class="r-in"><span><span class="va">epochdata</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="pick_data.html">pick_data</a></span><span class="op">(</span>subject_rg <span class="op">=</span> <span class="fl">2</span>, sensor_rg <span class="op">=</span> <span class="st">"E45"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span><span class="fu">outliers_epoch</span><span class="op">(</span>amplitude <span class="op">=</span> <span class="st">"signal"</span>, method <span class="op">=</span> <span class="st">"hampel"</span>, k_mad <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 7 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   subject sensor epoch count</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 2       E45    7         5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 2       E45    8         7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 2       E45    10        2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> 2       E45    11        1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 2       E45    13        1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> 2       E45    14       50</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> 2       E45    15       50</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -177,7 +193,7 @@ Each of the above methods operates independently per time point, not globally ac
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

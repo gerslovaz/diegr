@@ -125,7 +125,7 @@ The output in the form of a <code>ggplot</code> object allows to easily edit the
 <span class="r-in"><span><span class="co"># a1) extract required data</span></span></span>
 <span class="r-in"><span><span class="va">edata</span> <span class="op">&lt;-</span> <span class="fu"><a href="pick_data.html">pick_data</a></span><span class="op">(</span><span class="va">epochdata</span>, subject_rg <span class="op">=</span> <span class="fl">2</span>, epoch_rg <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">13</span>, time_rg <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># a2) baseline correction (needed for suitable topographic map)</span></span></span>
-<span class="r-in"><span><span class="va">data_base</span> <span class="op">&lt;-</span> <span class="fu"><a href="baseline_correction.html">baseline_correction</a></span><span class="op">(</span><span class="va">edata</span>, baseline_range <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">data_base</span> <span class="op">&lt;-</span> <span class="fu"><a href="baseline_correction.html">baseline_correction</a></span><span class="op">(</span><span class="va">edata</span>, baseline_range <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># a3) average computing</span></span></span>
 <span class="r-in"><span><span class="va">data_mean</span> <span class="op">&lt;-</span> <span class="va">data_base</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">time</span> <span class="op">==</span> <span class="fl">10</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
@@ -148,7 +148,7 @@ The output in the form of a <code>ggplot</code> object allows to easily edit the
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

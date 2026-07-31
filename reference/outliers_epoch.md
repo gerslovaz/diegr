@@ -164,4 +164,20 @@ head(outdata$outliers_data)
 #> 4     4  -23.1 13    E45    1      
 #> 5     5  -21.1 13    E45    1      
 #> 6     6  -19.3 13    E45    1      
+
+# 3. Outlier epoch detection for subject 2, electrode E45 for the whole time range
+# using Hampel filter method and scaling factor = 4
+epochdata |>
+pick_data(subject_rg = 2, sensor_rg = "E45") |>
+outliers_epoch(amplitude = "signal", method = "hampel", k_mad = 4)
+#> # A tibble: 7 × 4
+#>   subject sensor epoch count
+#>   <fct>   <chr>  <fct> <int>
+#> 1 2       E45    7         5
+#> 2 2       E45    8         7
+#> 3 2       E45    10        2
+#> 4 2       E45    11        1
+#> 5 2       E45    13        1
+#> 6 2       E45    14       50
+#> 7 2       E45    15       50
 ```
