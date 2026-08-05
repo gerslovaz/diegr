@@ -38,6 +38,7 @@ reference:
   contents:
     - HCGSN256
     - biosemi128
+    - biosemi256
     - system1005
     - epochdata
     - rtdata
