@@ -61,6 +61,8 @@ Example HD-EEG data for practicing package functionality
   : Coordinates of 256-channel HCGSN sensors
 - [`biosemi128`](https://gerslovaz.github.io/diegr/reference/biosemi128.md)
   : Coordinates of the spherical BioSemi system with 128 electrodes
+- [`biosemi256`](https://gerslovaz.github.io/diegr/reference/biosemi256.md)
+  : Coordinates of the spherical BioSemi system with 256 electrodes
 - [`system1005`](https://gerslovaz.github.io/diegr/reference/system1005.md)
   : Coordinates of the spherical 10-05 system sensors
 - [`epochdata`](https://gerslovaz.github.io/diegr/reference/epochdata.md)
