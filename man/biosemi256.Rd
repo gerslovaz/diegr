@@ -7,8 +7,8 @@
 \format{
 A list with the following elements:
 \describe{
-\item{D2}{A tibble with 3 columns containing x and y coordinates and sensor labels in 2D.}
-\item{D3}{A tibble with 4 columns containing x, y and z coordinates and sensor labels in 3D. See 'Details' for more information.}
+\item{D2}{A tibble with 3 columns containing x and y coordinates and sensor labels (according to the BioSemi naming convention) in 2D.}
+\item{D3}{A tibble with 4 columns containing x, y and z coordinates and sensor labels (according to the BioSemi naming convention) in 3D. See 'Details' for more information.}
 }
 }
 \source{

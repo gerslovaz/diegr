@@ -13,11 +13,12 @@ plot_point_mesh(
   col = "gray",
   cex = 0.4,
   col_sensors = "green",
-  own_coordinates = NULL
+  own_coordinates = NULL,
+  plot_dim = NULL
 )
 }
 \arguments{
-\item{mesh}{A data frame or tibble with cartesian coordinates of point mesh to plot. It could be \code{D2} or \code{D3} element of output from \code{\link{point_mesh}} function or any data frame (or tibble) with named x and y (x, y and z, respectively) columns. See Details for more information.}
+\item{mesh}{An object of class \code{"mesh"} (typically returned by the \code{\link{point_mesh}} function), or another list with the same structure. It must contain dense mesh coordinates in \code{D2} and/or \code{D3} and a \code{template} string indicating the sensor montage used.}
 
 \item{sensors}{A logical value indicating whether the sensor locations should also be plotted (default value is \code{TRUE}).}
 
@@ -33,47 +34,49 @@ plot_point_mesh(
 
 \item{col_sensors}{The colour of sensor locations points (default colour is green).}
 
-\item{own_coordinates}{A data frame or tibble with coordinates of the sensor locations (matching the dimensionality of mesh and containing appropriate coordinate columns). If the value is \code{NULL} and \code{sensors} is set to \code{TRUE}, the HCGSN256 template is used.}
+\item{own_coordinates}{A data frame or tibble with coordinates of the sensor locations (matching the dimensionality of the mesh and containing appropriate coordinate columns). If the value is \code{NULL} and \code{sensors} is set to \code{TRUE}, the template specified in \code{mesh$template} is used automatically.}
+
+\item{plot_dim}{A numeric value (\code{2} or \code{3}) specifying which dimension of the mesh to plot. If \code{NULL} (default), the function automatically plots 3D if available in the \code{mesh} object, otherwise it falls back to 2D.}
 }
 \value{
-A \code{ggplot} object (for 2D mesh) or plots directly to \code{rgl} 3D viewer (for 3D mesh).
+A \code{ggplot} object when \code{plot_dim = 2}.
+For \code{plot_dim = 3}, the mesh and sensors are drawn in the active \code{rgl} device.
 }
 \description{
-Plots a mesh of points (typically from \code{\link{point_mesh}}, but not necessary) as either a 2D \code{ggplot} or 3D \code{rgl} plot depending on mesh dimension.
+Plots a mesh of points (typically from \code{\link{point_mesh}}) as either a 2D \code{ggplot} or 3D \code{rgl} plot depending on the requested dimension.
 }
 \details{
 Please follow the instructions below when entering \code{own_coordinates}:
 
-The output plot is designed with frontal part of the brain above and occipital part of the brain bottom. The orientation of \code{own_coordinates} should be consistent with this. In other case the results could be distorted.
+The output 2D plot is designed with frontal part of the brain above and occipital part of the brain bottom. The orientation of \code{own_coordinates} should be consistent with this. In other case the results could be distorted.
 
-For displaying 3D rgl plot, the \code{own_coordinates} must contain the x, y and z coordinates of the sensors, otherwise the function does not work correctly.
+For displaying 3D rgl plot, the \code{own_coordinates} must contain the \code{D3} part with x, y and z coordinates of the sensors, otherwise the function does not work correctly.
 
 The order of elements in \code{names_vec} must be consistent with elements of \code{own_coordinates}.
 
 When both \code{names_vec} and \code{own_coordinates} are provided, it is essential that the length of \code{names_vec} matches the number of rows in \code{own_coordinates}, otherwise the names are not plotted (despite the setting \code{label_sensors = TRUE}).
 }
 \examples{
-# 2D polygon point mesh with all sensors from the HCGSN256 template
-# and default settings
+# 2D polygon point mesh with all sensors from the BioSemi 128 template
 # Note: for nice plot we recommend set par(mar = c(0,0,0,0))
-M <- point_mesh(n = 4000, template = "HCGSN256")
-plot_point_mesh(M$D2)
+M <- point_mesh(n = 4000, template = "biosemi128")
+plot_point_mesh(M, plot_dim = 2)
 
 ## Note: the example opens a rgl 3D viewer
 # Plotting 3D polygon point mesh with default settings
 rgl::open3d()
-plot_point_mesh(M$D3)
+plot_point_mesh(M, plot_dim = 3)
 
 # Plotting 2D circle point mesh with sensors from epochdata as orange points
 sensors <- unique(epochdata$sensor)
 M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256",
 sensor_select = sensors, type = "circle")
-plot_point_mesh(M$D2, sensor_select = sensors, col_sensors = "orange")
+plot_point_mesh(M, sensor_select = sensors, col_sensors = "orange")
 
 # Plotting the same mesh with marking only midline electrodes
 midline <- HCGSN256$D2[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204),]
 names_vec <- HCGSN256$D2$sensor[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204)]
-plot_point_mesh(M$D2, label_sensors = TRUE, names_vec = names_vec, own_coordinates = midline)
+plot_point_mesh(M, label_sensors = TRUE, names_vec = names_vec, own_coordinates = midline)
 }
 \seealso{
 \code{\link[=point_mesh]{point_mesh()}}

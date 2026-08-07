@@ -10,7 +10,7 @@
 #' @format A list with following elements:
 #' \describe{
 #'   \item{D2}{A tibble with 3 columns containing x and y coordinates and sensor labels (according to EGI GSN Technical Manual) in 2D.}
-#'   \item{D3}{A tibble with 4 columns containing x, y and z coordinates and sensor labels in 3D. See 'Details' for more information.}
+#'   \item{D3}{A tibble with 4 columns containing x, y and z coordinates and sensor labels (according to EGI GSN Technical Manual) in 3D. See 'Details' for more information.}
 #'   \item{ROI}{Factor containing the name of the region to which the corresponding sensor belongs.
 #'   The levels are: "central", "frontal", "occipital", "parietal", "temporal" and "face" for electrodes from the face area.}
 #' }

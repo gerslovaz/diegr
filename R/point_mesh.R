@@ -8,15 +8,15 @@
 #' @param dimension A number (or a vector) indicating a dimension of the mesh: \code{2} for two dimensional, \code{3} for three dimensional mesh and \code{c(2,3)} for both of them in one output (default setting).
 #' @param n Optionally, the required number of mesh points. Default setting is \code{n = 10 000}.
 #' @param r Optionally, desired radius of a circular mesh. If not defined, it is computed from the convex hull of sensor locations, based on maximum Euclidean distance from centroid.
-#' @param template A character denoting sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0.
+#' @param template A character denoting the sensor template montage used. Available options are \code{"HCGSN256"} (256-channel HydroCel Geodesic Sensor Net v.1.0), \code{"biosemi128"} (128-channel BioSemi), \code{"biosemi256"} (256-channel BioSemi), and \code{"system1005"} (the 10-05 system).
 #' @param sensor_select Optionally, a vector with sensor labels to select from the template. If not defined, all sensors from the template montage are used to create a mesh.
 #' @param own_coordinates Optionally, a list with own sensor coordinates for mesh building. See Details for more information.
 #' @param type A character indicating the shape of the mesh with 2 possible values: \code{"circle"} for circular mesh, \code{"polygon"} for irregular polygon shape with boundaries defined by sensor locations (default).
 #'
 #' @details
-#' If neither \code{template} nor \code{own_coordinates} is specified, \code{"HCGSN256"} template is used to create the mesh.
+#' If neither \code{template} nor \code{own_coordinates} is specified, the \code{"HCGSN256"} template is used by default to create the mesh.
 #'
-#' In the case of using Geodesic Sensor Net (\code{template = 'HCGSN256'}), the (0,0) point of the resulting 2D mesh corresponds to a reference electrode located at the vertex.
+#' For the provided built-in templates, the (0,0) point of the resulting 2D mesh generally corresponds to the vertex of the head model (e.g., the Cz electrode).
 #'
 #' The number \code{n} for controlling the mesh density is only an approximate value. The final number of mesh nodes depends on the exact shape of the polygon (created as a convex hull of the sensor locations), and is only close to, not exactly equal to, the number \code{n}.
 #'
@@ -25,7 +25,7 @@
 #' \item \code{D2} a tibble or data frame with sensor coordinates in named \code{x} and \code{y} columns,
 #' \item \code{D3} a tibble or data frame with sensor coordinates in named \code{x}, \code{y} and \code{z} columns.
 #' }
-#' To build the appropriate meshes in both dimensions, it is necessary to have the input of 3D sensor locations and their corresponding projection onto a plane; the function itself does not perform this projection.
+#' To build the appropriate meshes in both dimensions, it is necessary to have the input of 3D sensor locations and their corresponding 2D layout; the function itself does not perform a projection onto a plane.
 #' It is also necessary to keep the same sensor locations order in `D2` and `D3` part of the coordinates.
 #'
 #' Note: When specifying the `own_coordinates` and `template` at the same time, the `template` parameter takes precedence and the `own_coordinates` parameter is ignored.
@@ -45,6 +45,8 @@
 #' \item{r}{A radius of the circle used for mesh creating.}
 #'
 #' @references EGI Geodesic Sensor Net Technical Manual (2024)
+#' Oostenveld, R., & Praamstra, P. (2001). The five percent electrode system for high-resolution EEG and ERP measurements. \emph{Clinical Neurophysiology},
+#' 112(4), 713-719. \doi{10.1016/s1388-2457(00)00527-7}
 #'
 #' @import sf
 #' @importFrom stats na.omit
@@ -56,6 +58,9 @@
 #' # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template
 #' # using all electrodes
 #' M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256", type = "circle")
+#'
+#' # Computing polygon 3D mesh with starting number 2000 points for BioSemi 128 template
+#' M_bio <- point_mesh(dimension = 3, n = 2000, template = "biosemi128")
 #'
 #' # Computing polygon 3D mesh with starting number 2000 points and own coordinates
 #' ## Note: the coordinates are the same as for HCGSN256 template, it is
@@ -96,6 +101,9 @@ point_mesh <- function(dimension = c(2,3),
   if (!is.null(template)) {
     coordinates <- switch(template,
                           "HCGSN256" = diegr::HCGSN256,
+                          "biosemi128" = diegr::biosemi128,
+                          "biosemi256" = diegr::biosemi256,
+                          "system1005" = diegr::system1005,
                           stop("Unknown template.")
                           )
     if (!is.null(own_coordinates)) {
@@ -217,68 +225,6 @@ point_mesh <- function(dimension = c(2,3),
     stop("Invalid dimension argument.")
   }
 
-
- # if (identical(dimension, 2)) {
-
-  #  switch(type,
-  #         "circle" = {
-  #           mesh_out <- list(D2 = mesh_circle)
-  #         },
-  #         "polygon" = {
-  #           inside <- sp::point.in.polygon(mesh_circle$x, mesh_circle$y, coords_ch$x, coords_ch$y)
-  #           mesh_polygon <- mesh_circle[inside > 0,]
-  #           mesh_out <- list(D2 = data.frame(x = mesh_polygon[,1], y = mesh_polygon[,2]))
-  #        },
-  #         stop("Invalid type argument.")
-  #  )
-  #} else if (identical(dimension, 3)) {
-  #  if (!is.null(sensor_select)) {
-  #    coords_full <- coordinates$D3
-  #    sensor_index <- which(coords_full$sensor %in% sensor_select)
-  #    coords_xyz <- coords_full[sensor_index,]
-  #  } else {
-  #    coords_xyz <- coordinates$D3
-  #  }
-  #  coords_xyz <- coords_xyz |>
-  #    dplyr::select("x", "y", "z")
-  #  switch(type,
-  #         "circle" = {
-  #           mesh_out <- list(D3 = recompute_3d(coords_xy, coords_xyz, mesh_circle))
-  #         },
-  #         "polygon" = {
-  #           inside <- sp::point.in.polygon(mesh_circle$x, mesh_circle$y, coords_ch$x, coords_ch$y)
-  #           mesh_polygon <- mesh_circle[inside > 0,]
-  #           mesh_out <- list(D3 = recompute_3d(coords_xy, coords_xyz, mesh_polygon))
-  #         },
-  #         stop("Invalid type argument.")
-  #  )
-  #} else if (identical(dimension, c(2, 3)) || identical(dimension, c(3, 2))) {
-  #  if (!is.null(sensor_select)) {
-  #    coords_full <- coordinates$D3
-  #    sensor_index <- which(coords_full$sensor %in% sensor_select)
-  #    coords_xyz <- coords_full[sensor_index,]
-  #  } else {
-  #    coords_xyz <- coordinates$D3
-  #  }
-  #  coords_xyz <- coords_xyz |>
-  #    dplyr::select("x", "y", "z")
-  #  switch(type,
-  #         "circle" = {
-  #           mesh_out <- list(D2 = data.frame(x = mesh_circle[,1], y = mesh_circle[,2]),
-  #                            D3 = recompute_3d(coords_xy, coords_xyz, mesh_circle))
-  #         },
-  #         "polygon" = {
-  #           inside <- sp::point.in.polygon(mesh_circle$x, mesh_circle$y, coords_ch$x, coords_ch$y)
-  #           mesh_polygon <- mesh_circle[inside > 0,]
-  #           mesh_out <- list(D2 = data.frame(x = mesh_polygon[,1], y = mesh_polygon[,2]),
-  #                            D3 = recompute_3d(coords_xy, coords_xyz, mesh_polygon))
-  #         },
-  #         stop("Invalid type argument.")
-  #  )
-  #} else {
-  #  stop("Invalid dimension argument.")
-  #}
-
   mesh_out$template <- template
   mesh_out$r <- r
   class(mesh_out) <- c("mesh", class(mesh_out))
@@ -292,9 +238,9 @@ point_mesh <- function(dimension = c(2,3),
 #' Plot point mesh
 #'
 #' @description
-#' Plots a mesh of points (typically from \code{\link{point_mesh}}, but not necessary) as either a 2D \code{ggplot} or 3D \code{rgl} plot depending on mesh dimension.
+#' Plots a mesh of points (typically from \code{\link{point_mesh}}) as either a 2D \code{ggplot} or 3D \code{rgl} plot depending on the requested dimension.
 #'
-#' @param mesh A data frame or tibble with cartesian coordinates of point mesh to plot. It could be \code{D2} or \code{D3} element of output from \code{\link{point_mesh}} function or any data frame (or tibble) with named x and y (x, y and z, respectively) columns. See Details for more information.
+#' @param mesh An object of class \code{"mesh"} (typically returned by the \code{\link{point_mesh}} function), or another list with the same structure. It must contain dense mesh coordinates in \code{D2} and/or \code{D3} and a \code{template} string indicating the sensor montage used.
 #' @param sensors A logical value indicating whether the sensor locations should also be plotted (default value is \code{TRUE}).
 #' @param label_sensors A logical value indicating whether the sensor labels should also be plotted (default value is \code{FALSE}).
 #' @param sensor_select Optionally, a vector with sensor labels selected from the template during a mesh building. It must be the same as the vector used to create the mesh that the function is supposed to draw, otherwise the final plot will be incorrect.
@@ -302,19 +248,21 @@ point_mesh <- function(dimension = c(2,3),
 #' @param col The colour of mesh points (default colour is gray).
 #' @param cex The \code{cex} (size) argument for points of the mesh.
 #' @param col_sensors The colour of sensor locations points (default colour is green).
-#' @param own_coordinates A data frame or tibble with coordinates of the sensor locations (matching the dimensionality of mesh and containing appropriate coordinate columns). If the value is \code{NULL} and \code{sensors} is set to \code{TRUE}, the HCGSN256 template is used.
+#' @param own_coordinates A data frame or tibble with coordinates of the sensor locations (matching the dimensionality of the mesh and containing appropriate coordinate columns). If the value is \code{NULL} and \code{sensors} is set to \code{TRUE}, the template specified in \code{mesh$template} is used automatically.
+#' @param plot_dim A numeric value (\code{2} or \code{3}) specifying which dimension of the mesh to plot. If \code{NULL} (default), the function automatically plots 3D if available in the \code{mesh} object, otherwise it falls back to 2D.
 #'
 #' @details Please follow the instructions below when entering \code{own_coordinates}:
 #'
-#' The output plot is designed with frontal part of the brain above and occipital part of the brain bottom. The orientation of \code{own_coordinates} should be consistent with this. In other case the results could be distorted.
+#' The output 2D plot is designed with frontal part of the brain above and occipital part of the brain bottom. The orientation of \code{own_coordinates} should be consistent with this. In other case the results could be distorted.
 #'
-#' For displaying 3D rgl plot, the \code{own_coordinates} must contain the x, y and z coordinates of the sensors, otherwise the function does not work correctly.
+#' For displaying 3D rgl plot, the \code{own_coordinates} must contain the \code{D3} part with x, y and z coordinates of the sensors, otherwise the function does not work correctly.
 #'
 #' The order of elements in \code{names_vec} must be consistent with elements of \code{own_coordinates}.
 #'
 #' When both \code{names_vec} and \code{own_coordinates} are provided, it is essential that the length of \code{names_vec} matches the number of rows in \code{own_coordinates}, otherwise the names are not plotted (despite the setting \code{label_sensors = TRUE}).
 #'
-#' @return A `ggplot` object (for 2D mesh) or plots directly to `rgl` 3D viewer (for 3D mesh).
+#' @return A \code{ggplot} object when \code{plot_dim = 2}.
+#' For \code{plot_dim = 3}, the mesh and sensors are drawn in the active \code{rgl} device.
 #'
 #' @seealso [point_mesh()]
 #'
@@ -325,27 +273,26 @@ point_mesh <- function(dimension = c(2,3),
 #' @export
 #'
 #' @examples
-#' # 2D polygon point mesh with all sensors from the HCGSN256 template
-#' # and default settings
+#' # 2D polygon point mesh with all sensors from the BioSemi 128 template
 #' # Note: for nice plot we recommend set par(mar = c(0,0,0,0))
-#' M <- point_mesh(n = 4000, template = "HCGSN256")
-#' plot_point_mesh(M$D2)
+#' M <- point_mesh(n = 4000, template = "biosemi128")
+#' plot_point_mesh(M, plot_dim = 2)
 #'
 #' ## Note: the example opens a rgl 3D viewer
 #' # Plotting 3D polygon point mesh with default settings
 #' rgl::open3d()
-#' plot_point_mesh(M$D3)
+#' plot_point_mesh(M, plot_dim = 3)
 #'
 #' # Plotting 2D circle point mesh with sensors from epochdata as orange points
 #' sensors <- unique(epochdata$sensor)
 #' M <- point_mesh(dim = 2, n = 4000, template = "HCGSN256",
 #' sensor_select = sensors, type = "circle")
-#' plot_point_mesh(M$D2, sensor_select = sensors, col_sensors = "orange")
+#' plot_point_mesh(M, sensor_select = sensors, col_sensors = "orange")
 #'
 #' # Plotting the same mesh with marking only midline electrodes
 #' midline <- HCGSN256$D2[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204),]
 #' names_vec <- HCGSN256$D2$sensor[c(8, 15, 21, 26, 78, 86, 95, 111, 117, 127, 136, 204)]
-#' plot_point_mesh(M$D2, label_sensors = TRUE, names_vec = names_vec, own_coordinates = midline)
+#' plot_point_mesh(M, label_sensors = TRUE, names_vec = names_vec, own_coordinates = midline)
 plot_point_mesh <- function(mesh,
                             sensors = TRUE,
                             label_sensors = FALSE,
@@ -354,7 +301,8 @@ plot_point_mesh <- function(mesh,
                             col = "gray",
                             cex = 0.4,
                             col_sensors = "green",
-                            own_coordinates = NULL ) {
+                            own_coordinates = NULL,
+                            plot_dim = NULL) {
 
   if (!(is.logical(sensors))) {
     stop("Argument 'sensors' has to be logical.")
@@ -367,20 +315,43 @@ plot_point_mesh <- function(mesh,
     stop("With using 'own_coordinates' please define the 'names_vec' or set 'label_sensors' to FALSE.")
   }
 
-  stopifnot(is.data.frame(mesh))
+  if (!is.numeric(plot_dim) || length(plot_dim) != 1 || !plot_dim %in% c(2, 3)) {
+    stop("'plot_dim' must be either 2 or 3.")
+  }
 
-  if (all(c("x", "y", "z") %in% colnames(mesh))) {
-    rgl::points3d(mesh$x, mesh$y, mesh$z, col = col, cex = cex)
+  stopifnot(is.list(mesh))
+
+  has_d3 <- !is.null(mesh$D3)
+  has_d2 <- !is.null(mesh$D2)
+
+  if (!has_d3 && !has_d2) {
+    stop("The 'mesh' input must contain '$D2' or '$D3' representing the dense grid.")
+  }
+
+  if (is.null(mesh$template)) {
+    stop("The 'mesh' input must contain a '$template' string (e.g., 'biosemi128').")
+  }
+
+  template_data <- get(mesh$template)
+
+  if (is.null(plot_dim)) {
+    plot_dim <- ifelse(has_d3, 3, 2)
+  }
+
+  if (plot_dim == 3) {
+    if (!has_d3) stop("The input mesh does not contain 3D coordinates (D3).")
+
+    rgl::points3d(mesh$D3$x, mesh$D3$y, mesh$D3$z, col = col, cex = cex)
 
     if (is.null(own_coordinates)) {
       if (!is.null(sensor_select)) {
-        coords_full <- diegr::HCGSN256$D3
+        coords_full <- template_data$D3
         sensor_index <- which(coords_full$sensor %in% sensor_select)
         own_coordinates <- coords_full[sensor_index,]
         names_vec <- coords_full$sensor[sensor_index]
       } else {
-        own_coordinates <- diegr::HCGSN256$D3
-        names_vec <- diegr::HCGSN256$D3$sensor
+        own_coordinates <- template_data$D3
+        names_vec <- template_data$D3$sensor
       }
     }
 
@@ -399,24 +370,25 @@ plot_point_mesh <- function(mesh,
 
   }
 
-  else if (all(c("x", "y") %in% colnames(mesh))) {
+  else if (plot_dim == 2) {
+    if (!has_d2) stop("The input mesh does not contain 2D coordinates (D2).")
 
     if (is.null(own_coordinates)) {
       if (!is.null(sensor_select)) {
-        coords_full <- diegr::HCGSN256$D2
+        coords_full <- template_data$D2
         sensor_index <- which(coords_full$sensor %in% sensor_select)
         own_coordinates <- coords_full[sensor_index,]
         names_vec <- coords_full$sensor[sensor_index]
       } else {
-        own_coordinates <- diegr::HCGSN256$D2
-        names_vec <- diegr::HCGSN256$D2$sensor
+        own_coordinates <- template_data$D2
+        names_vec <- template_data$D2$sensor
       }
     }
 
-    M <- max(max(mesh[["y"]], na.rm = TRUE), max(own_coordinates[["y"]]))
-    x0 <- mean(mesh[["x"]], na.rm = TRUE)
+    M <- max(max(mesh$D2[["y"]], na.rm = TRUE), max(own_coordinates[["y"]]))
+    x0 <- mean(mesh$D2[["x"]], na.rm = TRUE)
 
-    g <- ggplot(mesh, aes(x = .data$x, y = .data$y)) +
+    g <- ggplot(mesh$D2, aes(x = .data$x, y = .data$y)) +
       geom_point(col = col, size = cex) +
       coord_fixed(ratio = 1) +
       theme_minimal() +

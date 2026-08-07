@@ -21,7 +21,7 @@ point_mesh(
 
 \item{r}{Optionally, desired radius of a circular mesh. If not defined, it is computed from the convex hull of sensor locations, based on maximum Euclidean distance from centroid.}
 
-\item{template}{A character denoting sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0.}
+\item{template}{A character denoting the sensor template montage used. Available options are \code{"HCGSN256"} (256-channel HydroCel Geodesic Sensor Net v.1.0), \code{"biosemi128"} (128-channel BioSemi), \code{"biosemi256"} (256-channel BioSemi), and \code{"system1005"} (the 10-05 system).}
 
 \item{sensor_select}{Optionally, a vector with sensor labels to select from the template. If not defined, all sensors from the template montage are used to create a mesh.}
 
@@ -42,9 +42,9 @@ Function creates an object of class \code{"mesh"}, which is a list of data frame
 For the equivalence between 2D and 3D mesh and the possibility to compare models in different dimensions, the thin-plate spline interpolation model \eqn{\mathbb{R}^2 \rightarrow \mathbb{R}^3} is used for creating 3D mesh.
 }
 \details{
-If neither \code{template} nor \code{own_coordinates} is specified, \code{"HCGSN256"} template is used to create the mesh.
+If neither \code{template} nor \code{own_coordinates} is specified, the \code{"HCGSN256"} template is used by default to create the mesh.
 
-In the case of using Geodesic Sensor Net (\code{template = 'HCGSN256'}), the (0,0) point of the resulting 2D mesh corresponds to a reference electrode located at the vertex.
+For the provided built-in templates, the (0,0) point of the resulting 2D mesh generally corresponds to the vertex of the head model (e.g., the Cz electrode).
 
 The number \code{n} for controlling the mesh density is only an approximate value. The final number of mesh nodes depends on the exact shape of the polygon (created as a convex hull of the sensor locations), and is only close to, not exactly equal to, the number \code{n}.
 
@@ -53,7 +53,7 @@ The \code{own_coordinates} enables computing a mesh from user's own sensor locat
 \item \code{D2} a tibble or data frame with sensor coordinates in named \code{x} and \code{y} columns,
 \item \code{D3} a tibble or data frame with sensor coordinates in named \code{x}, \code{y} and \code{z} columns.
 }
-To build the appropriate meshes in both dimensions, it is necessary to have the input of 3D sensor locations and their corresponding projection onto a plane; the function itself does not perform this projection.
+To build the appropriate meshes in both dimensions, it is necessary to have the input of 3D sensor locations and their corresponding 2D layout; the function itself does not perform a projection onto a plane.
 It is also necessary to keep the same sensor locations order in \code{D2} and \code{D3} part of the coordinates.
 
 Note: When specifying the \code{own_coordinates} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{own_coordinates} parameter is ignored.
@@ -70,6 +70,9 @@ warning.
 # using all electrodes
 M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256", type = "circle")
 
+# Computing polygon 3D mesh with starting number 2000 points for BioSemi 128 template
+M_bio <- point_mesh(dimension = 3, n = 2000, template = "biosemi128")
+
 # Computing polygon 3D mesh with starting number 2000 points and own coordinates
 ## Note: the coordinates are the same as for HCGSN256 template, it is
 ## just a mod example of using the own_coordinates parameter
@@ -84,4 +87,6 @@ M <- point_mesh(n = 3000, template = "HCGSN256", sensor_select = sensors)
 }
 \references{
 EGI Geodesic Sensor Net Technical Manual (2024)
+Oostenveld, R., & Praamstra, P. (2001). The five percent electrode system for high-resolution EEG and ERP measurements. \emph{Clinical Neurophysiology},
+112(4), 713-719. \doi{10.1016/s1388-2457(00)00527-7}
 }
