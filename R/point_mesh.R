@@ -315,10 +315,6 @@ plot_point_mesh <- function(mesh,
     stop("With using 'own_coordinates' please define the 'names_vec' or set 'label_sensors' to FALSE.")
   }
 
-  if (!is.numeric(plot_dim) || length(plot_dim) != 1 || !plot_dim %in% c(2, 3)) {
-    stop("'plot_dim' must be either 2 or 3.")
-  }
-
   stopifnot(is.list(mesh))
 
   has_d3 <- !is.null(mesh$D3)
@@ -336,6 +332,10 @@ plot_point_mesh <- function(mesh,
 
   if (is.null(plot_dim)) {
     plot_dim <- ifelse(has_d3, 3, 2)
+  }
+
+  if (!is.numeric(plot_dim) || length(plot_dim) != 1 || !plot_dim %in% c(2, 3)) {
+    stop("'plot_dim' must be either 2 or 3.")
   }
 
   if (plot_dim == 3) {
