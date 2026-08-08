@@ -38,9 +38,10 @@ plot_topo_mean(
 - mesh:
 
   A `"mesh"` object (or a named list with the same structure) containing
-  at least `D2` element with x and y coordinates of a point mesh used
-  for computing IM model. If not defined, the point mesh with default
-  settings from
+  at least a `D2` element with x and y coordinates of a point mesh used
+  for computing the IM model, and a `template` element specifying the
+  sensor montage. If not defined, the point mesh with default settings
+  from
   [`point_mesh`](https://gerslovaz.github.io/diegr/reference/point_mesh.md)
   function is used.
 
@@ -48,7 +49,8 @@ plot_topo_mean(
 
   Sensor coordinates as a tibble or data frame with named `x`, `y` and
   `sensor` columns. The `sensor` labels must match the labels in sensor
-  column in `data`. If not defined, the HCGSN256 template is used.
+  column in `data`. If not defined, the template specified in
+  `mesh$template` (or the default `"HCGSN256"`) is used.
 
 - template:
 
@@ -94,9 +96,13 @@ divided into three panels: CI lower, mean, CI upper.
 The spline interpolation is done independently for each CI bound and
 average.
 
-Note: When specifying the `coords` and `template` at the same time, the
-`template` parameter takes precedence and the `coords` parameter is
-ignored.
+Note: If a `mesh` object is provided, its internal template name
+(`mesh$template`) overrides the `template` argument to ensure spatial
+consistency.
+
+When custom `coords` are provided, they are always used for plotting the
+sensor locations. The `template` parameter (or `mesh$template`) is then
+used only for generating the background `mesh` if it is not provided.
 
 ## See also
 

@@ -71,11 +71,11 @@ The output in the form of a <code>ggplot</code> object allows to easily edit the
 
 
 <dt id="arg-mesh">mesh<a class="anchor" aria-label="anchor" href="#arg-mesh"></a></dt>
-<dd><p>A <code>"mesh"</code> object (or a named list with the same structure) containing at least <code>D2</code> element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from <code><a href="point_mesh.html">point_mesh</a></code> function is used.</p></dd>
+<dd><p>A <code>"mesh"</code> object (or a named list with the same structure) containing at least a <code>D2</code> element with x and y coordinates of a point mesh used for computing the IM model, and a <code>template</code> element specifying the sensor montage. If not defined, the point mesh with default settings from <code><a href="point_mesh.html">point_mesh</a></code> function is used.</p></dd>
 
 
 <dt id="arg-coords">coords<a class="anchor" aria-label="anchor" href="#arg-coords"></a></dt>
-<dd><p>Sensor coordinates as a tibble or data frame with named <code>x</code>, <code>y</code> and <code>sensor</code> columns. The <code>sensor</code> labels must match the labels in sensor column in <code>data</code>. If not defined, the HCGSN256 template is used.</p></dd>
+<dd><p>Sensor coordinates as a tibble or data frame with named <code>x</code>, <code>y</code> and <code>sensor</code> columns. The <code>sensor</code> labels must match the labels in sensor column in <code>data</code>. If not defined, the template specified in <code>mesh$template</code> (or the default <code>"HCGSN256"</code>) is used.</p></dd>
 
 
 <dt id="arg-template">template<a class="anchor" aria-label="anchor" href="#arg-template"></a></dt>
@@ -109,7 +109,8 @@ The output in the form of a <code>ggplot</code> object allows to easily edit the
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The spline interpolation is done independently for each CI bound and average.</p>
-<p>Note: When specifying the <code>coords</code> and <code>template</code> at the same time, the <code>template</code> parameter takes precedence and the <code>coords</code> parameter is ignored.</p>
+<p>Note: If a <code>mesh</code> object is provided, its internal template name (<code>mesh$template</code>) overrides the <code>template</code> argument to ensure spatial consistency.</p>
+<p>When custom <code>coords</code> are provided, they are always used for plotting the sensor locations. The <code>template</code> parameter (or <code>mesh$template</code>) is then used only for generating the background <code>mesh</code> if it is not provided.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
