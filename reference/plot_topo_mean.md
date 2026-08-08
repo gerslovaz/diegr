@@ -54,9 +54,9 @@ plot_topo_mean(
 
 - template:
 
-  The kind of sensor template montage used. Currently the only available
-  option is `"HCGSN256"` denoting the 256-channel HydroCel Geodesic
-  Sensor Net v.1.0, which is also a default setting.
+  The kind of sensor template montage used. Available options are
+  `"HCGSN256"`, `"biosemi128"`, `"biosemi256"`, and `"system1005"`.
+  Default setting is `"HCGSN256"`.
 
 - col_range:
 
@@ -96,13 +96,12 @@ divided into three panels: CI lower, mean, CI upper.
 The spline interpolation is done independently for each CI bound and
 average.
 
-Note: If a `mesh` object is provided, its internal template name
+Notes: If a `mesh` object is provided, its internal template name
 (`mesh$template`) overrides the `template` argument to ensure spatial
-consistency.
-
-When custom `coords` are provided, they are always used for plotting the
-sensor locations. The `template` parameter (or `mesh$template`) is then
-used only for generating the background `mesh` if it is not provided.
+consistency. When custom `coords` are provided, they are always used for
+plotting the sensor locations. The `template` parameter (or
+`mesh$template`) is then used only for generating the background `mesh`
+if it is not provided.
 
 ## See also
 
