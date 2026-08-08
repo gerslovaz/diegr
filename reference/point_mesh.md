@@ -44,9 +44,10 @@ point_mesh(
 
 - template:
 
-  A character denoting sensor template montage used. Currently the only
-  available option is `"HCGSN256"` denoting the 256-channel HydroCel
-  Geodesic Sensor Net v.1.0.
+  A character denoting the sensor template montage used. Available
+  options are `"HCGSN256"` (256-channel HydroCel Geodesic Sensor Net
+  v.1.0), `"biosemi128"` (128-channel BioSemi), `"biosemi256"`
+  (256-channel BioSemi), and `"system1005"` (the 10-05 system).
 
 - sensor_select:
 
@@ -91,12 +92,12 @@ following components:
 
 ## Details
 
-If neither `template` nor `own_coordinates` is specified, `"HCGSN256"`
-template is used to create the mesh.
+If neither `template` nor `own_coordinates` is specified, the
+`"HCGSN256"` template is used by default to create the mesh.
 
-In the case of using Geodesic Sensor Net (`template = 'HCGSN256'`), the
-(0,0) point of the resulting 2D mesh corresponds to a reference
-electrode located at the vertex.
+For the provided built-in templates, the (0,0) point of the resulting 2D
+mesh generally corresponds to the vertex of the head model (e.g., the Cz
+electrode).
 
 The number `n` for controlling the mesh density is only an approximate
 value. The final number of mesh nodes depends on the exact shape of the
@@ -113,10 +114,10 @@ locations. The input must be a list containing following elements:
   and `z` columns.
 
 To build the appropriate meshes in both dimensions, it is necessary to
-have the input of 3D sensor locations and their corresponding projection
-onto a plane; the function itself does not perform this projection. It
-is also necessary to keep the same sensor locations order in `D2` and
-`D3` part of the coordinates.
+have the input of 3D sensor locations and their corresponding 2D layout;
+the function itself does not perform a projection onto a plane. It is
+also necessary to keep the same sensor locations order in `D2` and `D3`
+part of the coordinates.
 
 Note: When specifying the `own_coordinates` and `template` at the same
 time, the `template` parameter takes precedence and the
@@ -132,7 +133,11 @@ warning.
 
 ## References
 
-EGI Geodesic Sensor Net Technical Manual (2024)
+EGI Geodesic Sensor Net Technical Manual (2024) Oostenveld, R., &
+Praamstra, P. (2001). The five percent electrode system for
+high-resolution EEG and ERP measurements. *Clinical Neurophysiology*,
+112(4), 713-719.
+[doi:10.1016/s1388-2457(00)00527-7](https://doi.org/10.1016/s1388-2457%2800%2900527-7)
 
 ## Examples
 
@@ -140,6 +145,9 @@ EGI Geodesic Sensor Net Technical Manual (2024)
 # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template
 # using all electrodes
 M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256", type = "circle")
+
+# Computing polygon 3D mesh with starting number 2000 points for BioSemi 128 template
+M_bio <- point_mesh(dimension = 3, n = 2000, template = "biosemi128")
 
 # Computing polygon 3D mesh with starting number 2000 points and own coordinates
 ## Note: the coordinates are the same as for HCGSN256 template, it is

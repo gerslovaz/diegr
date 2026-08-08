@@ -309,7 +309,7 @@ plot depending on the input dimension.</p>
 montage is available through <code>sensor_select</code> parameter. For
 consistency between created mesh and its plot use the same vector of
 sensor labels in both functions.</li>
-<li>The input of <code><a href="../reference/plot_point_mesh.html">plot_point_mesh()</a></code> must be only the
+<li>The input of <code><a href="../reference/plot_point_mesh.html">plot_point_mesh()</a></code> must contain the
 relevant part with coordinates - <code>$D2</code> for two dimensional
 and <code>$D3</code> for three dimensional plot.</li>
 <li>If the number of mesh points is large, they are no longer visible in
@@ -325,13 +325,13 @@ speed.</li>
 <span><span class="va">sensors204</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">epochdata</span><span class="op">$</span><span class="va">sensor</span><span class="op">)</span></span>
 <span><span class="va">M1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/point_mesh.html">point_mesh</a></span><span class="op">(</span>template <span class="op">=</span> <span class="st">"HCGSN256"</span>, sensor_select <span class="op">=</span> <span class="va">sensors204</span><span class="op">)</span></span>
 <span><span class="co"># plot output in 2D</span></span>
-<span><span class="fu"><a href="../reference/plot_point_mesh.html">plot_point_mesh</a></span><span class="op">(</span><span class="va">M1</span><span class="op">$</span><span class="va">D2</span>, sensor_select <span class="op">=</span> <span class="va">sensors204</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/plot_point_mesh.html">plot_point_mesh</a></span><span class="op">(</span><span class="va">M1</span>, sensor_select <span class="op">=</span> <span class="va">sensors204</span>, plot_dim <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># creating a circular mesh, only 2D coordinates</span></span>
 <span><span class="va">M2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/point_mesh.html">point_mesh</a></span><span class="op">(</span>dimension <span class="op">=</span> <span class="fl">2</span>, n <span class="op">=</span> <span class="fl">3000</span>, template <span class="op">=</span> <span class="st">"HCGSN256"</span>,</span>
 <span>                 sensor_select <span class="op">=</span> <span class="va">sensors204</span>, type <span class="op">=</span> <span class="st">"circle"</span><span class="op">)</span></span>
 <span><span class="co"># plotting a mesh - function allows different options of the result plot</span></span>
-<span><span class="fu"><a href="../reference/plot_point_mesh.html">plot_point_mesh</a></span><span class="op">(</span><span class="va">M2</span><span class="op">$</span><span class="va">D2</span>, sensor_select <span class="op">=</span> <span class="va">sensors204</span>, col_sensors <span class="op">=</span> <span class="st">"purple"</span>,</span>
+<span><span class="fu"><a href="../reference/plot_point_mesh.html">plot_point_mesh</a></span><span class="op">(</span><span class="va">M2</span>, sensor_select <span class="op">=</span> <span class="va">sensors204</span>, col_sensors <span class="op">=</span> <span class="st">"purple"</span>,</span>
 <span>                label_sensors <span class="op">=</span> <span class="cn">TRUE</span>, cex <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="diegr_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="A schematic representations of an HD-EEG sensor net, showing the arrangement of 204 labeled channels distributed across the entire scalp area together with denser point mesh created for interpolation." width="700"><img src="diegr_files/figure-html/unnamed-chunk-7-2.png" class="r-plt" alt="A schematic representations of an HD-EEG sensor net, showing the arrangement of 204 labeled channels distributed across the entire scalp area together with denser point mesh created for interpolation." width="700"></p>
 <p><code>diegr</code>’s plotting functions also allow users to input the
@@ -627,7 +627,7 @@ Manual</em>. 2024. <a href="https://www.egi.com/knowledge-center" class="externa
 <h4 id="reproducibility-system-requirements-troubleshooting">Reproducibility, System Requirements &amp; Troubleshooting<a class="anchor" aria-label="anchor" href="#reproducibility-system-requirements-troubleshooting"></a>
 </h4>
 <blockquote>
-<p><strong>This document was compiled on 2026-08-05 using R version
+<p><strong>This document was compiled on 2026-08-08 using R version
 4.6.1 and the following package versions:</strong></p>
 <ul>
 <li>

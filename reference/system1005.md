@@ -22,12 +22,13 @@ A list with the following elements:
 - D2:
 
   A tibble with 3 columns containing x and y coordinates and sensor
-  labels in 2D.
+  labels (according to the standard 10-05 naming convention) in 2D.
 
 - D3:
 
   A tibble with 4 columns containing x, y and z coordinates and sensor
-  labels in 3D. See 'Details' for more information.
+  labels (according to the standard 10-05 naming convention) in 3D. See
+  'Details' for more information.
 
 ## Source
 

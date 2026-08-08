@@ -24,7 +24,8 @@ A list with following elements:
 - D3:
 
   A tibble with 4 columns containing x, y and z coordinates and sensor
-  labels in 3D. See 'Details' for more information.
+  labels (according to EGI GSN Technical Manual) in 3D. See 'Details'
+  for more information.
 
 - ROI:
 

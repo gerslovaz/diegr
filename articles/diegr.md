@@ -255,7 +255,7 @@ Notes:
   sensor labels in both functions.
 - The input of
   [`plot_point_mesh()`](https://gerslovaz.github.io/diegr/reference/plot_point_mesh.md)
-  must be only the relevant part with coordinates - `$D2` for two
+  must contain the relevant part with coordinates - `$D2` for two
   dimensional and `$D3` for three dimensional plot.
 - If the number of mesh points is large, they are no longer visible in
   the plot and the mesh looks like a solid surface (as can be seen below
@@ -270,13 +270,13 @@ Notes:
 sensors204 <- unique(epochdata$sensor)
 M1 <- point_mesh(template = "HCGSN256", sensor_select = sensors204)
 # plot output in 2D
-plot_point_mesh(M1$D2, sensor_select = sensors204)
+plot_point_mesh(M1, sensor_select = sensors204, plot_dim = 2)
 
 # creating a circular mesh, only 2D coordinates
 M2 <- point_mesh(dimension = 2, n = 3000, template = "HCGSN256",
                  sensor_select = sensors204, type = "circle")
 # plotting a mesh - function allows different options of the result plot
-plot_point_mesh(M2$D2, sensor_select = sensors204, col_sensors = "purple",
+plot_point_mesh(M2, sensor_select = sensors204, col_sensors = "purple",
                 label_sensors = TRUE, cex = 0.1)
 ```
 
@@ -665,7 +665,7 @@ Electrical Geodesics, Inc.: *Geodesic Sensor Net Technical Manual*.
 
 #### Reproducibility, System Requirements & Troubleshooting
 
-> **This document was compiled on 2026-08-05 using R version 4.6.1 and
+> **This document was compiled on 2026-08-08 using R version 4.6.1 and
 > the following package versions:**
 >
 > - **Primary Packages:**
