@@ -245,7 +245,7 @@ topo_plot <- function(data,
 #' @param data A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: `sensor` with sensor labels and `average`, `ci_low`, `ci_up` with values of average signal and its lower and upper CI bounds in one time point (or precomputed average of multiple time points).
 #' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least a \code{D2} element with x and y coordinates of a point mesh used for computing the IM model, and a \code{template} element specifying the sensor montage. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
 #' @param coords Sensor coordinates as a tibble or data frame with named `x`, `y` and `sensor` columns. The `sensor` labels must match the labels in sensor column in `data`. If not defined, the template specified in `mesh$template` (or the default `"HCGSN256"`) is used.
-#' @param template The kind of sensor template montage used. Currently the only available option is `"HCGSN256"` denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
+#' @param template The kind of sensor template montage used. Available options are `"HCGSN256"`, `"biosemi128"`, `"biosemi256"`, and `"system1005"`. Default setting is `"HCGSN256"`.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input data (average and CI bounds) is used.
 #' @param col_scale Optionally, a colour scale to be utilised for plotting. It should be a list with `colors` and `breaks` components (usually created via \code{\link{create_scale}}). If not defined, it is computed from `col_range`.
 #' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is `FALSE`.
@@ -255,8 +255,7 @@ topo_plot <- function(data,
 #' @details
 #' The spline interpolation is done independently for each CI bound and average.
 #'
-#' Note: If a `mesh` object is provided, its internal template name (`mesh$template`) overrides the `template` argument to ensure spatial consistency.
-#'
+#' Notes: If a `mesh` object is provided, its internal template name (`mesh$template`) overrides the `template` argument to ensure spatial consistency.
 #' When custom \code{coords} are provided, they are always used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
 #'
 #' @return A \code{ggplot} object showing the static topographic map of the signal divided into three panels: CI lower, mean, CI upper.

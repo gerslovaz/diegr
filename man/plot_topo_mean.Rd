@@ -23,7 +23,7 @@ plot_topo_mean(
 
 \item{coords}{Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the template specified in \code{mesh$template} (or the default \code{"HCGSN256"}) is used.}
 
-\item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.}
+\item{template}{The kind of sensor template montage used. Available options are \code{"HCGSN256"}, \code{"biosemi128"}, \code{"biosemi256"}, and \code{"system1005"}. Default setting is \code{"HCGSN256"}.}
 
 \item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input data (average and CI bounds) is used.}
 
@@ -46,8 +46,7 @@ The output in the form of a \code{ggplot} object allows to easily edit the resul
 \details{
 The spline interpolation is done independently for each CI bound and average.
 
-Note: If a \code{mesh} object is provided, its internal template name (\code{mesh$template}) overrides the \code{template} argument to ensure spatial consistency.
-
+Notes: If a \code{mesh} object is provided, its internal template name (\code{mesh$template}) overrides the \code{template} argument to ensure spatial consistency.
 When custom \code{coords} are provided, they are always used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
 }
 \examples{

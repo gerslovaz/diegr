@@ -1,8 +1,8 @@
 #' @title Coordinates of the spherical 10-05 system sensors
 #'
 #' @description A dataset containing the Cartesian coordinates of high-density EEG sensor positions of the 10-05 system in 3D space on an idealized spherical surface, along with their corresponding positions in 2D space.
-#' This template contains 348 possible electrode positions in the 3D space and 335 possible positions for the 2D layout.
-#' The 2D layout contains fewer positions because fiducial markers and extremely low electrodes (such as those on the lower neck and cheeks) are excluded to maintain visual clarity in topographical plots.
+#' This template contains 335 matched electrode positions for both the 3D space and the 2D layout.
+#' Fiducial markers and extremely low electrodes (such as those on the lower neck and cheeks) originally present in the full 10-05 system are excluded from both dimensions to maintain visual clarity and structural consistency in topographical modeling.
 #'
 #' @docType data
 #'

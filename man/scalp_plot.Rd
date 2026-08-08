@@ -21,13 +21,13 @@ scalp_plot(
 
 \item{amplitude}{A character specifying the name of the column from input data with EEG amplitude values.}
 
-\item{mesh}{An object of class \code{"mesh"} (or a named list with the same structure) used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. See details for more information about the structure.}
+\item{mesh}{A \code{"mesh"} object (or a named list with the same structure) containing at least a \code{D3} element with x, y and z coordinates of a point mesh used for computing the IM model, and a \code{template} element specifying the sensor montage. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. See details for more information about the structure.}
 
 \item{tri}{A three column matrix with indices of the vertices of the triangles. Each row represents one triangle, defined by three vertex indices. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from \code{D2} element of the mesh.}
 
-\item{coords}{Sensor coordinates as a tibble or data frame with named \code{x}, \code{y}, \code{z} and \code{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the HCGSN256 template is used.}
+\item{coords}{Sensor coordinates as a tibble or data frame with named \code{x}, \code{y}, \code{z} and \code{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the template specified in \code{mesh$template} (or the default \code{"HCGSN256"}) is used.}
 
-\item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.}
+\item{template}{The kind of sensor template montage used. Available options are \code{"HCGSN256"}, \code{"biosemi128"}, \code{"biosemi256"}, and \code{"system1005"}. Default setting is \code{"HCGSN256"}.}
 
 \item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of interpolated signal is used.}
 
@@ -36,7 +36,8 @@ scalp_plot(
 \item{view}{A character for creating a temporary rotated scene (according to neurological terminology). Possible values are: \code{"superior", "anterior", "posterior", "left", "right"}. If missing, the default view according to user settings is displayed. Note: Input coordinates corresponding to the positions in the HCGSN template are required to obtain an appropriate view.}
 }
 \value{
-A 3D scalp map rendered via \code{rgl::shade3d()} in an interactive window.
+Called for its side effect of drawing a 3D scalp map in an interactive \code{rgl} window.
+It returns an object of class \code{"rglLowLevel"} (an integer vector) containing the IDs of the drawn objects.
 }
 \description{
 Plot a scalp polygon map of the EEG signal amplitude using topographic colour scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^3 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations. The \code{\link[rgl]{shape3d}} function is used for plotting.
@@ -57,9 +58,11 @@ The default used scale is based on topographical colours with zero value always 
 Notes:
 This function focuses on visualization and does not perform any data subsetting. Users are expected to filter the data beforehand using standard dplyr verbs or \code{\link{pick_data}} function.
 
+If a \code{mesh} object is provided, its internal template name (\code{mesh$template}) overrides the \code{template} argument to ensure spatial consistency.
+When custom \code{coords} are provided, they are always used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
+
 For correct rendering of a plot, the function requires an openGL-capable device.
 Displaying the rotated scalp map using the \code{view} argument requires previous call \code{open3d()}.
-When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
 }
 \examples{
 \donttest{
