@@ -19,9 +19,9 @@ plot_topo_mean(
 \arguments{
 \item{data}{A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: \code{sensor} with sensor labels and \code{average}, \code{ci_low}, \code{ci_up} with values of average signal and its lower and upper CI bounds in one time point (or precomputed average of multiple time points).}
 
-\item{mesh}{A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.}
+\item{mesh}{A \code{"mesh"} object (or a named list with the same structure) containing at least a \code{D2} element with x and y coordinates of a point mesh used for computing the IM model, and a \code{template} element specifying the sensor montage. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.}
 
-\item{coords}{Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the HCGSN256 template is used.}
+\item{coords}{Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the template specified in \code{mesh$template} (or the default \code{"HCGSN256"}) is used.}
 
 \item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.}
 
@@ -46,7 +46,9 @@ The output in the form of a \code{ggplot} object allows to easily edit the resul
 \details{
 The spline interpolation is done independently for each CI bound and average.
 
-Note: When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
+Note: If a \code{mesh} object is provided, its internal template name (\code{mesh$template}) overrides the \code{template} argument to ensure spatial consistency.
+
+When custom \code{coords} are provided, they are always used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
 }
 \examples{
 # Plot average topographic map with CI bounds of signal for subject 2 from the time point 10

@@ -8,9 +8,9 @@
 #'
 #' @param data A data frame, tibble or a database table with input data to plot with at least two columns: `sensor` with sensor labels and the column with the EEG amplitude specified in the argument `amplitude`.
 #' @param amplitude A character string naming the column with EEG amplitude values.
-#' @param mesh A `"mesh"` object (or a named list with the same structure) containing at least `D2` element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
-#' @param coords Sensor coordinates as a tibble or data frame with named `x`, `y` and `sensor` columns. The `sensor` labels must match the labels in sensor column in `data`. If not defined, the HCGSN256 template is used.
-#' @param template The kind of sensor template montage used. Currently the only available option is `"HCGSN256"` denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
+#' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least a \code{D2} element with x and y coordinates of a point mesh used for computing the IM model, and a \code{template} element specifying the sensor montage. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
+#' @param coords Sensor coordinates as a tibble or data frame with named `x`, `y` and `sensor` columns. The `sensor` labels must match the labels in sensor column in `data`. If not defined, the template specified in `mesh$template` (or the default `"HCGSN256"`) is used.
+#' @param template The kind of sensor template montage used. Available options are `"HCGSN256"`, `"biosemi128"`, `"biosemi256"`, and `"system1005"`. Default setting is `"HCGSN256"`.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of interpolated signal is used.
 #' @param col_scale Optionally, a colour scale to be utilised for plotting. It should be a list with `colors` and `breaks` components (usually created via \code{\link{create_scale}}). If not defined, it is computed from `col_range`.
 #' @param contour Logical. Indicates, whether contours should be plotted in the graph. Default value is `FALSE`.
@@ -25,7 +25,9 @@
 #' The default used scale is based on topographical colours with zero value always at the border of blue and green shades.
 #'
 #' Notes:
-#' When specifying the `coords` and `template` at the same time, the `template` parameter takes precedence and the `coords` parameter is ignored.
+#' If a `mesh` object is provided, its internal template name (`mesh$template`) overrides the `template` argument to ensure spatial consistency.
+#'
+#' When custom \code{coords} are provided, they are always used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
 #'
 #' This function focuses on visualization and does not perform any data subsetting. Users are expected to filter the data beforehand using standard dplyr verbs or \code{\link{pick_data}} function.
 #'
@@ -93,13 +95,15 @@ topo_plot <- function(data,
     stop("Argument 'label_sensors' has to be logical.")
   }
 
-  if (!is.null(template) && !is.null(coords)) {
-    warning("Both 'template' and 'coords' were specified. Using 'template' and ignoring 'coords'.")
-  }
-
-  if (is.null(template) && is.null(coords)) {
-    # use HCGSN256 template
-    template <- "HCGSN256"
+  if (!missing(mesh) && !is.null(mesh$template)) {
+    if (!is.null(template) && template != mesh$template) {
+      warning(paste0("Provided 'template' (", template, ") differs from 'mesh$template' (", mesh$template, "). Using 'mesh$template' to ensure consistency."))
+    }
+    active_template <- mesh$template
+  } else if (!is.null(template)) {
+    active_template <- template
+  } else {
+    active_template <- "HCGSN256"
   }
 
   if (inherits(data, "tbl_sql") || inherits(data, "tbl_dbi")) {
@@ -108,19 +112,48 @@ topo_plot <- function(data,
 
   sensor_select <- unique(data$sensor)
 
-  if (!is.null(template)) {
-    coords_full <- switch(template,
-                     "HCGSN256" = diegr::HCGSN256$D2,
-                     stop("Unknown template.")
+  if (is.null(coords)) {
+    coords_full <- switch(active_template,
+                            "HCGSN256" = diegr::HCGSN256,
+                            "biosemi128" = diegr::biosemi128,
+                            "biosemi256" = diegr::biosemi256,
+                            "system1005" = diegr::system1005,
+                            stop(
+                              "Unknown template '", template, "'. Supported templates are: ",
+                              paste(c("HCGSN256", "biosemi128", "biosemi256", "system1005"), collapse = ", "),
+                              "."
+                            )
     )
-    sensor_index <- which(coords_full$sensor %in% sensor_select)
-    coords <- coords_full[sensor_index,]
-  }
+
+    missing_in_template <- setdiff(sensor_select, coords_full$D2$sensor)
+
+    if (length(missing_in_template) > 0) {
+      stop(paste0(
+        "Mismatch between data and template. The following sensors are present in 'data' but missing from the template '", active_template, "': ",
+        paste(missing_in_template, collapse = ", ")
+      ))
+    }
+
+    sensor_index <- which(coords_full$D2$sensor %in% sensor_select)
+    coords <- coords_full$D2[sensor_index,]
+  } else {
+    stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
+
+    missing_in_coords <- setdiff(sensor_select, coords$sensor)
+
+    if (length(missing_in_coords) > 0) {
+      stop(paste0(
+        "Mismatch between data and coords. The following sensors are present in 'data' but missing from 'coords': ",
+        paste(missing_in_coords, collapse = ", ")
+      ))
+    }
+      coords <- coords[coords$sensor %in% sensor_select, ]
+    }
 
   stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
 
   if (missing(mesh)) {
-    mesh <- point_mesh(dimension = 2, template = "HCGSN256",
+    mesh <- point_mesh(dimension = 2, template = active_template,
                        sensor_select = sensor_select)
   }
 
@@ -132,11 +165,6 @@ topo_plot <- function(data,
   x0 <- mean(mesh_mat[,1], na.rm = TRUE)
 
   coords_df <- data.frame(x = coords[["x"]], y = coords[["y"]])
-
-
-  if (!all(unique(coords$sensor) %in% data$sensor)) {
-    stop("Mismatch between sensors in data and coords.")
-  }
 
   sensor_order <- as.factor(coords$sensor) # reorder data according to sensor
   data_order <- data |>
@@ -215,8 +243,8 @@ topo_plot <- function(data,
 #' The output in the form of a `ggplot` object allows to easily edit the result image properties.
 #'
 #' @param data A data frame, tibble or a database table with input data to plot. It should be an output from \code{\link{compute_mean}} function or an object with the same structure, containing columns: `sensor` with sensor labels and `average`, `ci_low`, `ci_up` with values of average signal and its lower and upper CI bounds in one time point (or precomputed average of multiple time points).
-#' @param mesh A `"mesh"` object (or a named list with the same structure) containing at least `D2` element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
-#' @param coords Sensor coordinates as a tibble or data frame with named `x`, `y` and `sensor` columns. The `sensor` labels must match the labels in sensor column in `data`. If not defined, the HCGSN256 template is used.
+#' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least a \code{D2} element with x and y coordinates of a point mesh used for computing the IM model, and a \code{template} element specifying the sensor montage. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
+#' @param coords Sensor coordinates as a tibble or data frame with named `x`, `y` and `sensor` columns. The `sensor` labels must match the labels in sensor column in `data`. If not defined, the template specified in `mesh$template` (or the default `"HCGSN256"`) is used.
 #' @param template The kind of sensor template montage used. Currently the only available option is `"HCGSN256"` denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of input data (average and CI bounds) is used.
 #' @param col_scale Optionally, a colour scale to be utilised for plotting. It should be a list with `colors` and `breaks` components (usually created via \code{\link{create_scale}}). If not defined, it is computed from `col_range`.
@@ -227,8 +255,9 @@ topo_plot <- function(data,
 #' @details
 #' The spline interpolation is done independently for each CI bound and average.
 #'
-#' Note: When specifying the `coords` and `template` at the same time, the `template` parameter takes precedence and the `coords` parameter is ignored.
+#' Note: If a `mesh` object is provided, its internal template name (`mesh$template`) overrides the `template` argument to ensure spatial consistency.
 #'
+#' When custom \code{coords} are provided, they are always used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
 #'
 #' @return A \code{ggplot} object showing the static topographic map of the signal divided into three panels: CI lower, mean, CI upper.
 #' @export
@@ -296,30 +325,61 @@ plot_topo_mean <- function(data,
     stop("There are NA's in the 'ci_up' column.")
   }
 
-  if (!is.null(template) && !is.null(coords)) {
-    warning("Both 'template' and 'coords' were specified. Using 'template' and ignoring 'coords'.")
-  }
-
-  if (is.null(template) && is.null(coords)) {
-    # use HCGSN256 template
-    template <- "HCGSN256"
+  if (!missing(mesh) && !is.null(mesh$template)) {
+    if (!is.null(template) && template != mesh$template) {
+      warning(paste0("Provided 'template' (", template, ") differs from 'mesh$template' (", mesh$template, "). Using 'mesh$template' to ensure consistency."))
+    }
+    active_template <- mesh$template
+  } else if (!is.null(template)) {
+    active_template <- template
+  } else {
+    active_template <- "HCGSN256"
   }
 
   sensor_select <- unique(data$sensor)
 
-  if (!is.null(template)) {
-    coords_full <- switch(template,
-                          "HCGSN256" = diegr::HCGSN256$D2,
-                          stop("Unknown template.")
+  if (is.null(coords)) {
+    coords_full <- switch(active_template,
+                          "HCGSN256" = diegr::HCGSN256,
+                          "biosemi128" = diegr::biosemi128,
+                          "biosemi256" = diegr::biosemi256,
+                          "system1005" = diegr::system1005,
+                          stop(
+                            "Unknown template '", template, "'. Supported templates are: ",
+                            paste(c("HCGSN256", "biosemi128", "biosemi256", "system1005"), collapse = ", "),
+                            "."
+                          )
     )
-    sensor_index <- which(coords_full$sensor %in% sensor_select)
-    coords <- coords_full[sensor_index,]
+
+    missing_in_template <- setdiff(sensor_select, coords_full$D2$sensor)
+
+    if (length(missing_in_template) > 0) {
+      stop(paste0(
+        "Mismatch between data and template. The following sensors are present in 'data' but missing from the template '", active_template, "': ",
+        paste(missing_in_template, collapse = ", ")
+      ))
+    }
+
+    sensor_index <- which(coords_full$D2$sensor %in% sensor_select)
+    coords <- coords_full$D2[sensor_index,]
+  } else {
+    stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
+
+    missing_in_coords <- setdiff(sensor_select, coords$sensor)
+
+    if (length(missing_in_coords) > 0) {
+      stop(paste0(
+        "Mismatch between data and coords. The following sensors are present in 'data' but missing from 'coords': ",
+        paste(missing_in_coords, collapse = ", ")
+      ))
+    }
+    coords <- coords[coords$sensor %in% sensor_select, ]
   }
 
   stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
 
   if (missing(mesh)) {
-    mesh <- point_mesh(dimension = 2, template = { template },
+    mesh <- point_mesh(dimension = 2, template = active_template,
                        sensor_select = sensor_select)
   }
 
@@ -408,7 +468,7 @@ plot_topo_mean <- function(data,
     geom_point(data = coords, aes(x = .data$x, y = .data$y), color = "black", cex = 0.7)
 
   if (label_sensors == TRUE) {
-    g <- g + geom_text(data = coords, aes(x = .data$x, y = .data$y, label = rep(coords$sensor, 3)), size = 2, vjust = -0.9)
+    g <- g + geom_text(data = coords, aes(x = .data$x, y = .data$y, label = .data$sensor), size = 2, vjust = -0.9) #label = rep(coords$sensor, 3)
   }
 
   g +
