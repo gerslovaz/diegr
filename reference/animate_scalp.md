@@ -29,7 +29,7 @@ animate_scalp(
 
 - data:
 
-  An input data frame or tibble with at least this required columns:
+  An input data frame or tibble with at least these required columns:
   `time` - the number of time point, `sensor` - the sensor label and the
   column with the EEG amplitude to plot specified in the argument
   `amplitude`.
@@ -40,13 +40,14 @@ animate_scalp(
 
 - mesh:
 
-  An object of class `"mesh"` (or a named list with the same structure)
-  used for computing IM model. If not defined, the polygon point mesh
-  with default settings from
+  A `"mesh"` object (or a named list with the same structure) containing
+  at least a `D3` element with x, y and z coordinates of a point mesh
+  used for computing the IM model, and a `template` element specifying
+  the sensor montage. If not defined, the polygon point mesh with
+  default settings from
   [`point_mesh`](https://gerslovaz.github.io/diegr/reference/point_mesh.md)
-  function is used. See
-  [`scalp_plot`](https://gerslovaz.github.io/diegr/reference/scalp_plot.md)
-  for details about the structure.
+  function is used. See details for more information about the
+  structure.
 
 - tri:
 
@@ -57,15 +58,16 @@ animate_scalp(
 
 - coords:
 
-  Sensor coordinates as a tibble or data frame with named `x`, `y` and
-  `z` columns of sensor coordinates and `sensor` column with sensor
-  names. If not defined, the HCGSN256 template is used.
+  Sensor coordinates as a tibble or data frame with named `x`, `y`, `z`
+  and `sensor` columns. The `sensor` labels must match the labels in
+  sensor column in `data`. If not defined, the template specified in
+  `mesh$template` (or the default `"HCGSN256"`) is used.
 
 - template:
 
-  The kind of sensor template montage used. Currently the only available
-  option is `"HCGSN256"` denoting the 256-channel HydroCel Geodesic
-  Sensor Net v.1.0, which is also a default setting.
+  The kind of sensor template montage used. Available options are
+  `"HCGSN256"`, `"biosemi128"`, `"biosemi256"`, and `"system1005"`.
+  Default setting is `"HCGSN256"`.
 
 - col_range:
 
@@ -130,9 +132,12 @@ previously created triangulation (through `tri` argument) is required.
 Notes: For exporting the video, setting `frames_dir` together with
 `output_path` is required.
 
-When specifying the `coords` and `template` at the same time, the
-`template` parameter takes precedence and the `coords` parameter is
-ignored.
+If a `mesh` object is provided, its internal template name
+(`mesh$template`) overrides the `template` argument to ensure spatial
+consistency. When custom `coords` are provided, they are used for
+plotting the sensor locations. The `template` parameter (or
+`mesh$template`) is then used only for generating the background `mesh`
+if it is not provided.
 
 ## See also
 

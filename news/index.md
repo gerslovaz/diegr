@@ -2,6 +2,10 @@
 
 ## diegr 0.3.0
 
+- Added new sensor templates: BioSemi 128, BioSemi 256, and system
+  10-05.
+- Updated graphical functions to ensure compatibility with the new
+  templates.
 - Added a fallback to
   [`MASS::ginv()`](https://rdrr.io/pkg/MASS/man/ginv.html) for
   ill-conditioned interpolation matrices.
@@ -9,8 +13,9 @@
   [`point_mesh()`](https://gerslovaz.github.io/diegr/reference/point_mesh.md)
   using `sf` instead of the `sp` package.
 - Fixed bugs in
-  [`outliers_epoch()`](https://gerslovaz.github.io/diegr/reference/outliers_epoch.md)
-  and baseline range in examples and documentation.
+  [`outliers_epoch()`](https://gerslovaz.github.io/diegr/reference/outliers_epoch.md),
+  timeline rendering in animations and baseline range in examples and
+  documentation.
 - Added static version of outputs for boxplots.
 - Updated the installation method for the development version in the
   README, edited troubleshooting section in vignette.

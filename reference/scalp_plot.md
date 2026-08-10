@@ -102,7 +102,8 @@ vector) containing the IDs of the drawn objects.
 The parameter `mesh` should optimally be a `"mesh"` object (output from
 [`point_mesh`](https://gerslovaz.github.io/diegr/reference/point_mesh.md)
 function) or a list with the same structure: `D2` data frame with `x`
-and `y` columns and `D3` data frame with `x`, `y` and `z` columns. See
+and `y` columns, `D3` data frame with `x`, `y` and `z` columns and
+`template` element specifying the used template. See
 [`point_mesh`](https://gerslovaz.github.io/diegr/reference/point_mesh.md)
 for more information. In that case, setting the argument `tri` is
 optional, and if it is absent, a triangulation based on the `D2` element
@@ -127,7 +128,7 @@ function.
 
 If a `mesh` object is provided, its internal template name
 (`mesh$template`) overrides the `template` argument to ensure spatial
-consistency. When custom `coords` are provided, they are always used for
+consistency. When custom `coords` are provided, they are used for
 plotting the sensor locations. The `template` parameter (or
 `mesh$template`) is then used only for generating the background `mesh`
 if it is not provided.
