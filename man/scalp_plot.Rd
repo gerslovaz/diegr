@@ -46,7 +46,7 @@ The function assumes that the input data have already been filtered to the desir
 }
 \details{
 The parameter \code{mesh} should optimally be a \code{"mesh"} object (output from \code{\link{point_mesh}} function) or a list with the same structure:
-\code{D2}	data frame with \code{x} and \code{y} columns and \code{D3} data frame with \code{x}, \code{y} and \code{z} columns. See \code{\link{point_mesh}} for more information.
+\code{D2}	data frame with \code{x} and \code{y} columns, \code{D3} data frame with \code{x}, \code{y} and \code{z} columns and \code{template} element specifying the used template. See \code{\link{point_mesh}} for more information.
 In that case, setting the argument \code{tri} is optional, and if it is absent, a triangulation based on the \code{D2} element of the mesh is calculated and used in the plot.
 If the input \code{mesh} contains only 3D coordinates of a point mesh in \code{D3} element, the use of previously created triangulation (through \code{tri} argument) is necessary.
 To compare results between 2D topographical plot and 3D scalp plot use the same mesh in both cases.
@@ -59,7 +59,7 @@ Notes:
 This function focuses on visualization and does not perform any data subsetting. Users are expected to filter the data beforehand using standard dplyr verbs or \code{\link{pick_data}} function.
 
 If a \code{mesh} object is provided, its internal template name (\code{mesh$template}) overrides the \code{template} argument to ensure spatial consistency.
-When custom \code{coords} are provided, they are always used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
+When custom \code{coords} are provided, they are used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
 
 For correct rendering of a plot, the function requires an openGL-capable device.
 Displaying the rotated scalp map using the \code{view} argument requires previous call \code{open3d()}.

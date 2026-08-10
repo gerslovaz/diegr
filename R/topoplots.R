@@ -150,7 +150,7 @@ topo_plot <- function(data,
       coords <- coords[coords$sensor %in% sensor_select, ]
     }
 
-  stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
+  #stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
 
   if (missing(mesh)) {
     mesh <- point_mesh(dimension = 2, template = active_template,
@@ -375,7 +375,7 @@ plot_topo_mean <- function(data,
     coords <- coords[coords$sensor %in% sensor_select, ]
   }
 
-  stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
+  #stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
 
   if (missing(mesh)) {
     mesh <- point_mesh(dimension = 2, template = active_template,

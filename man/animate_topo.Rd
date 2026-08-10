@@ -22,7 +22,7 @@ animate_topo(
 )
 }
 \arguments{
-\item{data}{An input data frame or tibble with at least this required columns: \code{time} - the number of time point,\code{sensor} - the sensor label and the column with the EEG amplitude to plot specified in the argument \code{amplitude}.}
+\item{data}{An input data frame or tibble with at least these required columns: \code{time} - the number of time point,\code{sensor} - the sensor label and the column with the EEG amplitude to plot specified in the argument \code{amplitude}.}
 
 \item{amplitude}{A character specifying the name of the column from input data with EEG amplitude values.}
 
@@ -32,11 +32,11 @@ animate_topo(
 
 \item{t0}{Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).}
 
-\item{mesh}{A \code{"mesh"} object (or a named list with the same structure) containing at least \code{D2} element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.}
+\item{mesh}{A \code{"mesh"} object (or a named list with the same structure) containing at least a \code{D2} element with x and y coordinates of a point mesh used for computing the IM model, and a \code{template} element specifying the sensor montage. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.}
 
-\item{coords}{Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} columns of sensor coordinates and \code{sensor} column with sensor names. If not defined, the HCGSN256 template is used.}
+\item{coords}{Sensor coordinates as a tibble or data frame with named \code{x}, \code{y} and \code{sensor} columns. The \code{sensor} labels must match the labels in sensor column in \code{data}. If not defined, the template specified in \code{mesh$template} (or the default \code{"HCGSN256"}) is used.}
 
-\item{template}{The kind of sensor template montage used. Currently the only available option is \code{"HCGSN256"} denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.}
+\item{template}{The kind of sensor template montage used. Available options are \code{"HCGSN256"}, \code{"biosemi128"}, \code{"biosemi256"}, and \code{"system1005"}. Default setting is \code{"HCGSN256"}.}
 
 \item{col_range}{A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of interpolated signal is used.}
 
@@ -63,7 +63,9 @@ For more details about required mesh structure see \code{\link{point_mesh}} func
 The time part of input data is assumed to be in numbers of time points, conversion to ms takes place inside the function for drawing the timeline labels.
 Due to the flexibility of the function (e.g. to mark and animate only a short section from the entire time course or to compare different data in the same time interval), it allows to enter and plot user-defined time ranges. If some values of the time are outside the \code{t_lim} range, the function writes a warning message - in that case the animation is still rendered, but the timeline will not match reality.
 
-Note: When specifying the \code{coords} and \code{template} at the same time, the \code{template} parameter takes precedence and the \code{coords} parameter is ignored.
+Notes: If a \code{mesh} object is provided, its internal template name (\code{mesh$template}) overrides the \code{template} argument to ensure spatial consistency.
+
+When custom \code{coords} are provided, they are always used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
 }
 \examples{
 \donttest{

@@ -2,14 +2,14 @@
 #'
 #' @description Display a topographic animation of the change in amplitude over time. The function enables direct rendering in Rstudio Viewer or saving the animation in gif format to the chosen location.
 #'
-#' @param data An input data frame or tibble with at least this required columns: `time` - the number of time point,`sensor` - the sensor label and the column with the EEG amplitude to plot specified in the argument `amplitude`.
+#' @param data An input data frame or tibble with at least these required columns: `time` - the number of time point,`sensor` - the sensor label and the column with the EEG amplitude to plot specified in the argument `amplitude`.
 #' @param amplitude A character specifying the name of the column from input data with EEG amplitude values.
 #' @param t_lim A numeric vector of length 2 with limits of time points (i.e., the length of the timeline displayed below the animation).
 #' @param FS The sampling frequency. Default value is 250 Hz.
 #' @param t0 Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).
-#' @param mesh A `"mesh"` object (or a named list with the same structure) containing at least `D2` element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
-#' @param coords Sensor coordinates as a tibble or data frame with named `x`, `y` columns of sensor coordinates and `sensor` column with sensor names. If not defined, the HCGSN256 template is used.
-#' @param template The kind of sensor template montage used. Currently the only available option is `"HCGSN256"` denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
+#' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least a \code{D2} element with x and y coordinates of a point mesh used for computing the IM model, and a \code{template} element specifying the sensor montage. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
+#' @param coords Sensor coordinates as a tibble or data frame with named `x`, `y` and `sensor` columns. The `sensor` labels must match the labels in sensor column in `data`. If not defined, the template specified in `mesh$template` (or the default `"HCGSN256"`) is used.
+#' @param template The kind of sensor template montage used. Available options are `"HCGSN256"`, `"biosemi128"`, `"biosemi256"`, and `"system1005"`. Default setting is `"HCGSN256"`.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of interpolated signal is used.
 #' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from `col_range`.
 #' @param show_legend Logical. Indicates, whether legend should be displayed beside the graph. Default value is `TRUE`.
@@ -23,7 +23,9 @@
 #' The time part of input data is assumed to be in numbers of time points, conversion to ms takes place inside the function for drawing the timeline labels.
 #' Due to the flexibility of the function (e.g. to mark and animate only a short section from the entire time course or to compare different data in the same time interval), it allows to enter and plot user-defined time ranges. If some values of the time are outside the `t_lim` range, the function writes a warning message - in that case the animation is still rendered, but the timeline will not match reality.
 #'
-#' Note: When specifying the `coords` and `template` at the same time, the `template` parameter takes precedence and the `coords` parameter is ignored.
+#' Notes: If a `mesh` object is provided, its internal template name (`mesh$template`) overrides the `template` argument to ensure spatial consistency.
+#'
+#' When custom \code{coords} are provided, they are always used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
 #'
 #' @return
 #' If `output_path` is `NULL`, the function prints the animation to the RStudio Viewer.
@@ -93,30 +95,61 @@ animate_topo <- function(data,
     stop("'t0' must be a numeric value.")
   }
 
-  if (!is.null(template) && !is.null(coords)) {
-    warning("Both 'template' and 'coords' were specified. Using 'template' and ignoring 'coords'.")
-  }
-
-  if (is.null(template) && is.null(coords)) {
-    # use HCGSN256 template
-    template <- "HCGSN256"
+  if (!missing(mesh) && !is.null(mesh$template)) {
+    if (!is.null(template) && template != mesh$template) {
+      warning(paste0("Provided 'template' (", template, ") differs from 'mesh$template' (", mesh$template, "). Using 'mesh$template' to ensure consistency."))
+    }
+    active_template <- mesh$template
+  } else if (!is.null(template)) {
+    active_template <- template
+  } else {
+    active_template <- "HCGSN256"
   }
 
   sensor_select <- unique(data$sensor)
 
-  if (!is.null(template)) {
-    coords_full <- switch(template,
-                          "HCGSN256" = diegr::HCGSN256$D2,
-                          stop("Unknown template.")
+  if (is.null(coords)) {
+    coords_full <- switch(active_template,
+                          "HCGSN256" = diegr::HCGSN256,
+                          "biosemi128" = diegr::biosemi128,
+                          "biosemi256" = diegr::biosemi256,
+                          "system1005" = diegr::system1005,
+                          stop(
+                            "Unknown template '", template, "'. Supported templates are: ",
+                            paste(c("HCGSN256", "biosemi128", "biosemi256", "system1005"), collapse = ", "),
+                            "."
+                          )
     )
-    sensor_index <- which(coords_full$sensor %in% sensor_select)
-    coords <- coords_full[sensor_index,]
+
+    missing_in_template <- setdiff(sensor_select, coords_full$D2$sensor)
+
+    if (length(missing_in_template) > 0) {
+      stop(paste0(
+        "Mismatch between data and template. The following sensors are present in 'data' but missing from the template '", active_template, "': ",
+        paste(missing_in_template, collapse = ", ")
+      ))
+    }
+
+    sensor_index <- which(coords_full$D2$sensor %in% sensor_select)
+    coords <- coords_full$D2[sensor_index,]
+  } else {
+    stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
+
+    missing_in_coords <- setdiff(sensor_select, coords$sensor)
+
+    if (length(missing_in_coords) > 0) {
+      stop(paste0(
+        "Mismatch between data and coords. The following sensors are present in 'data' but missing from 'coords': ",
+        paste(missing_in_coords, collapse = ", ")
+      ))
+    }
+    coords <- coords[coords$sensor %in% sensor_select, ]
   }
 
-  stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
+  #stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
 
   if (missing(mesh)) {
-    mesh <- point_mesh(dimension = 2, template = template,
+    mesh <- point_mesh(dimension = 2, template = active_template,
                        sensor_select = sensor_select)
   }
 
@@ -137,10 +170,13 @@ animate_topo <- function(data,
   }
 
   k0 <- 1000 / FS
-  k <- range(t_lim)[2] - range(t_lim)[1]
-  time_positions <- seq(x_range[1], x_range[2], length.out = k + 1)
+  t_range <- range(t_lim)
+  k <- t_range[2] - t_range[1]
   time_range <- sort(unique(newdata$time))
-  timeline <- tibble(time = time_range, x = time_positions[time_range], y = y_l)
+
+  x_span <- x_range[2] - x_range[1]
+  x_coords <- x_range[1] + (time_range - t_range[1]) * x_span / k
+  timeline <- tibble(time = time_range, x = x_coords, y = y_l)
 
   if (is.null(col_scale)) {
 
@@ -300,12 +336,12 @@ prepare_anim_structure <- function(data,
 #'
 #' @description Display a topographic 3D scalp animation of the change in amplitude over time. The function enables direct rendering in Rstudio Viewer or saving the animation in MP4 format or individual frames in PNG format to the chosen location.
 #'
-#' @param data An input data frame or tibble with at least this required columns: `time` - the number of time point, `sensor` - the sensor label and the column with the EEG amplitude to plot specified in the argument `amplitude`.
+#' @param data An input data frame or tibble with at least these required columns: `time` - the number of time point, `sensor` - the sensor label and the column with the EEG amplitude to plot specified in the argument `amplitude`.
 #' @param amplitude A character string naming the column with EEG amplitude values.
-#' @param mesh An object of class `"mesh"` (or a named list with the same structure) used for computing IM model. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. See \code{\link{scalp_plot}} for details about the structure.
+#' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least a \code{D3} element with x, y and z coordinates of a point mesh used for computing the IM model, and a \code{template} element specifying the sensor montage. If not defined, the polygon point mesh with default settings from \code{\link{point_mesh}} function is used. See details for more information about the structure.
 #' @param tri A matrix with indices of the triangles. If missing, the triangulation is computed using \code{\link{make_triangulation}} function from `D2` element of the mesh.
-#' @param coords Sensor coordinates as a tibble or data frame with named `x`, `y` and `z` columns of sensor coordinates and `sensor` column with sensor names. If not defined, the HCGSN256 template is used.
-#' @param template The kind of sensor template montage used. Currently the only available option is `"HCGSN256"` denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
+#' @param coords Sensor coordinates as a tibble or data frame with named `x`, `y`, `z` and `sensor` columns. The `sensor` labels must match the labels in sensor column in `data`. If not defined, the template specified in `mesh$template` (or the default `"HCGSN256"`) is used.
+#' @param template The kind of sensor template montage used. Available options are `"HCGSN256"`, `"biosemi128"`, `"biosemi256"`, and `"system1005"`. Default setting is `"HCGSN256"`.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of interpolated signal is used.
 #' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from `col_range`.
 #' @param sec The time interval used between individual animation frames, in seconds (default: 0.3).
@@ -322,7 +358,8 @@ prepare_anim_structure <- function(data,
 #' Notes:
 #' For exporting the video, setting `frames_dir` together with `output_path` is required.
 #'
-#' When specifying the `coords` and `template` at the same time, the `template` parameter takes precedence and the `coords` parameter is ignored.
+#' If a `mesh` object is provided, its internal template name (`mesh$template`) overrides the `template` argument to ensure spatial consistency.
+#' When custom \code{coords} are provided, they are used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
 #'
 #' @return
 #' The output depends on the provided arguments:
@@ -643,9 +680,9 @@ prepare_anim_structure_CI <- function(data,
 #' @param t_lim Limits of time points (i.e., the length of the timeline displayed below the animation).
 #' @param FS The sampling frequency. Default value is 250 Hz.
 #' @param t0 Index of the zero time point, i.e. point, where 0 ms should be marked (most often time of the stimulus or time of the response).
-#' @param mesh A `"mesh"` object (or a named list with the same structure) containing at least `D2` element with x and y coordinates of a point mesh used for computing IM model. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
-#' @param coords Sensor coordinates as a tibble or data frame with named `x`, `y` columns of sensor coordinates and `sensor` column with sensor names. If not defined, the HCGSN256 template is used.
-#' @param template The kind of sensor template montage used. Currently the only available option is `"HCGSN256"` denoting the 256-channel HydroCel Geodesic Sensor Net v.1.0, which is also a default setting.
+#' @param mesh A \code{"mesh"} object (or a named list with the same structure) containing at least a \code{D2} element with x and y coordinates of a point mesh used for computing the IM model, and a \code{template} element specifying the sensor montage. If not defined, the point mesh with default settings from \code{\link{point_mesh}} function is used.
+#' @param coords Sensor coordinates as a tibble or data frame with named `x`, `y` and `sensor` columns. The `sensor` labels must match the labels in sensor column in `data`. If not defined, the template specified in `mesh$template` (or the default `"HCGSN256"`) is used.
+#' @param template The kind of sensor template montage used. Available options are `"HCGSN256"`, `"biosemi128"`, `"biosemi256"`, and `"system1005"`. Default setting is `"HCGSN256"`.
 #' @param col_range A vector with minimum and maximum value of the amplitude used in the colour palette for plotting. If not defined, the range of the input signal is used.
 #' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from `col_range`.
 #' @param show_legend Logical. Indicates, whether legend should be displayed below the graph. Default value is `TRUE`.
@@ -654,7 +691,8 @@ prepare_anim_structure_CI <- function(data,
 #' @param ... Additional parameters for animation according to [gganimate::animate].
 #'
 #' @details
-#' Note: When specifying the `coords` and `template` at the same time, the `template` parameter takes precedence and the `coords` parameter is ignored.
+#' Notes: If a `mesh` object is provided, its internal template name (`mesh$template`) overrides the `template` argument to ensure spatial consistency.
+#' When custom \code{coords} are provided, they are always used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
 #'
 #' @returns
 #' If `output_path` is `NULL`, the function prints the animation to the RStudio Viewer.
@@ -732,30 +770,59 @@ animate_topo_mean <- function(data,
     stop("There are NA's in the 'ci_up' column.")
   }
 
-  if (!is.null(template) && !is.null(coords)) {
-    warning("Both 'template' and 'coords' were specified. Using 'template' and ignoring 'coords'.")
-  }
-
-  if (is.null(template) && is.null(coords)) {
-    # use HCGSN256 template
-    template <- "HCGSN256"
+  if (!missing(mesh) && !is.null(mesh$template)) {
+    if (!is.null(template) && template != mesh$template) {
+      warning(paste0("Provided 'template' (", template, ") differs from 'mesh$template' (", mesh$template, "). Using 'mesh$template' to ensure consistency."))
+    }
+    active_template <- mesh$template
+  } else if (!is.null(template)) {
+    active_template <- template
+  } else {
+    active_template <- "HCGSN256"
   }
 
   sensor_select <- unique(data$sensor)
 
-  if (!is.null(template)) {
-    coords_full <- switch(template,
-                          "HCGSN256" = diegr::HCGSN256$D2,
-                          stop("Unknown template.")
+  if (is.null(coords)) {
+    coords_full <- switch(active_template,
+                          "HCGSN256" = diegr::HCGSN256,
+                          "biosemi128" = diegr::biosemi128,
+                          "biosemi256" = diegr::biosemi256,
+                          "system1005" = diegr::system1005,
+                          stop(
+                            "Unknown template '", template, "'. Supported templates are: ",
+                            paste(c("HCGSN256", "biosemi128", "biosemi256", "system1005"), collapse = ", "),
+                            "."
+                          )
     )
-    sensor_index <- which(coords_full$sensor %in% sensor_select)
-    coords <- coords_full[sensor_index,]
+
+    missing_in_template <- setdiff(sensor_select, coords_full$D2$sensor)
+
+    if (length(missing_in_template) > 0) {
+      stop(paste0(
+        "Mismatch between data and template. The following sensors are present in 'data' but missing from the template '", active_template, "': ",
+        paste(missing_in_template, collapse = ", ")
+      ))
+    }
+
+    sensor_index <- which(coords_full$D2$sensor %in% sensor_select)
+    coords <- coords_full$D2[sensor_index,]
+  } else {
+    stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
+
+    missing_in_coords <- setdiff(sensor_select, coords$sensor)
+
+    if (length(missing_in_coords) > 0) {
+      stop(paste0(
+        "Mismatch between data and coords. The following sensors are present in 'data' but missing from 'coords': ",
+        paste(missing_in_coords, collapse = ", ")
+      ))
+    }
+    coords <- coords[coords$sensor %in% sensor_select, ]
   }
 
-  stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
-
   if (missing(mesh)) {
-    mesh <- point_mesh(dimension = 2, template = { template },
+    mesh <- point_mesh(dimension = 2, template = active_template,
                        sensor_select = sensor_select)
   }
 
@@ -779,9 +846,10 @@ animate_topo_mean <- function(data,
   t_range <- range(t_lim)
   k <- range(t_lim)[2] - range(t_lim)[1]
   x_marg <- 0.03 * k
-  time_positions <- seq(t_range[1], t_range[2], length.out = k + 1)
+
   time_range <- sort(unique(newdata$time))
-  timeline <- tibble(time = time_range, x = time_positions[time_range], y = 0)
+  timeline <- tibble(time = time_range, x = time_range, y = 0)
+
 
 
   if (is.null(col_scale)) {
@@ -846,8 +914,10 @@ animate_topo_mean <- function(data,
       axis.text = element_blank(),
       axis.title = element_blank()
     ) +
-    xlim(t_range[1] - x_marg , t_range[2] + x_marg) +
-    ylim(-0.25,0.25) +
+    coord_cartesian(
+      xlim = c(t_range[1] - x_marg, t_range[2] + x_marg),
+      ylim = c(-0.25, 0.25)
+    ) +
     annotate(geom = "point", x = t_range[1], y = 0, col = "black", pch = 3) +
     annotate(geom = "text", x = t_range[1], y = 0.2, label = paste0((min(t_lim) - t0) * k0)) +
     annotate(geom = "point", x = t_range[2], y = 0, col = "black", pch = 3) +

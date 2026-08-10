@@ -17,7 +17,7 @@
 #'
 #' @details
 #' The parameter `mesh` should optimally be a `"mesh"` object (output from \code{\link{point_mesh}} function) or a list with the same structure:
-#' `D2`	data frame with `x` and `y` columns and `D3` data frame with `x`, `y` and `z` columns. See \code{\link{point_mesh}} for more information.
+#' `D2`	data frame with `x` and `y` columns, `D3` data frame with `x`, `y` and `z` columns and `template` element specifying the used template. See \code{\link{point_mesh}} for more information.
 #' In that case, setting the argument `tri` is optional, and if it is absent, a triangulation based on the `D2` element of the mesh is calculated and used in the plot.
 #' If the input `mesh` contains only 3D coordinates of a point mesh in `D3` element, the use of previously created triangulation (through `tri` argument) is necessary.
 #' To compare results between 2D topographical plot and 3D scalp plot use the same mesh in both cases.
@@ -30,7 +30,7 @@
 #' This function focuses on visualization and does not perform any data subsetting. Users are expected to filter the data beforehand using standard dplyr verbs or \code{\link{pick_data}} function.
 #'
 #' If a `mesh` object is provided, its internal template name (`mesh$template`) overrides the `template` argument to ensure spatial consistency.
-#' When custom \code{coords} are provided, they are always used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
+#' When custom \code{coords} are provided, they are used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
 #'
 #' For correct rendering of a plot, the function requires an openGL-capable device.
 #' Displaying the rotated scalp map using the `view` argument requires previous call `open3d()`.
@@ -135,8 +135,6 @@ scalp_plot <- function(data,
     coords <- coords[coords$sensor %in% sensor_select, ]
   }
 
-  stop_if_missing_cols(coords, required_cols = c("x", "y", "z", "sensor"))
-
   if (missing(mesh)) {
     if (!is.null(tri)) {
       stop("The argument 'mesh' must be provided when argument 'tri' is specified.")
@@ -165,8 +163,8 @@ scalp_plot <- function(data,
 
   sensor_order <- as.factor(coords$sensor) # reorder data according to sensor
   data_order <- data |>
-    mutate(sensor = factor(.data$sensor, levels = sensor_order)) |>
-    arrange(.data$sensor)
+    dplyr::mutate(sensor = factor(.data$sensor, levels = sensor_order)) |>
+    dplyr::arrange(.data$sensor)
 
 
   y_hat <- IM(coords_xyz, data_order[[amplitude]], mesh3)$Y_hat
