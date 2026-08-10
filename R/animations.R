@@ -28,8 +28,8 @@
 #' When custom \code{coords} are provided, they are always used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
 #'
 #' @return
-#' If `output_path` is `NULL`, the function prints the animation to the RStudio Viewer.
-#' If `output_path` is specified, the animation is saved to the given file path and not displayed.
+#' If `output_path` is `NULL`, the function returns a `gganim` object and prints the animation to the RStudio Viewer.
+#' If `output_path` is specified, the animation is saved to the given file path and the function invisibly returns `NULL`.
 #'
 #' @export
 #'
@@ -362,10 +362,8 @@ prepare_anim_structure <- function(data,
 #' When custom \code{coords} are provided, they are used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
 #'
 #' @return
-#' The output depends on the provided arguments:
-#' - If `frames_dir` is specified, individual animation frames (PNG) are saved to that directory.
-#' - If also `output_path` is specified, a video (MP4) is created and saved using the `av` package.
-#' - Otherwise, the animation is displayed in an interactive rgl window.
+#' If `frames_dir` is `NULL`, the function creates an interactive 3D animation in the \code{rgl} window and invisibly returns \code{NULL}.
+#' If `frames_dir` is specified, individual animation frames (PNG) are saved. If `output_path` is also specified, an MP4 video is encoded and the function invisibly returns \code{NULL}.
 #'
 #' @seealso Static version: \code{\link{scalp_plot}}, animated 2D topo map: \code{\link{animate_topo}}
 #'
@@ -694,9 +692,9 @@ prepare_anim_structure_CI <- function(data,
 #' Notes: If a `mesh` object is provided, its internal template name (`mesh$template`) overrides the `template` argument to ensure spatial consistency.
 #' When custom \code{coords} are provided, they are always used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
 #'
-#' @returns
-#' If `output_path` is `NULL`, the function prints the animation to the RStudio Viewer.
-#' If `output_path` is specified, the animation is saved to the given file path and not displayed. The `gifski` and `magick` packages are required for animation export.
+#' @return
+#' If `output_path` is `NULL`, the function returns a `magick-image` object containing the animated frames and prints it to the RStudio Viewer.
+#' If `output_path` is specified, the animation is saved as a GIF to the given file path and the function invisibly returns `NULL`. The `gifski` and `magick` packages are required for animation export.
 #'
 #' @seealso \code{\link{animate_topo}}, \code{\link{compute_mean}}, \code{\link{baseline_correction}}, static version: \code{\link{plot_topo_mean}}
 #'

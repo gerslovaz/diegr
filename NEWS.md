@@ -1,5 +1,6 @@
 # diegr 0.3.0
 
+* Added functions for creating interactive surface plots.
 * Added new sensor templates: BioSemi 128, BioSemi 256, and system 10-05.
 * Updated graphical functions to ensure compatibility with the new templates.
 * Added a fallback to `MASS::ginv()` for ill-conditioned interpolation matrices.

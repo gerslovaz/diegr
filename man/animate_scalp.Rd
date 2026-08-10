@@ -48,12 +48,8 @@ animate_scalp(
 \item{cleanup}{Logical. Indicates, if all the PNG files should be deleted after encoding video. Default value is \code{TRUE}.}
 }
 \value{
-The output depends on the provided arguments:
-\itemize{
-\item If \code{frames_dir} is specified, individual animation frames (PNG) are saved to that directory.
-\item If also \code{output_path} is specified, a video (MP4) is created and saved using the \code{av} package.
-\item Otherwise, the animation is displayed in an interactive rgl window.
-}
+If \code{frames_dir} is \code{NULL}, the function creates an interactive 3D animation in the \code{rgl} window and invisibly returns \code{NULL}.
+If \code{frames_dir} is specified, individual animation frames (PNG) are saved. If \code{output_path} is also specified, an MP4 video is encoded and the function invisibly returns \code{NULL}.
 }
 \description{
 Display a topographic 3D scalp animation of the change in amplitude over time. The function enables direct rendering in Rstudio Viewer or saving the animation in MP4 format or individual frames in PNG format to the chosen location.
