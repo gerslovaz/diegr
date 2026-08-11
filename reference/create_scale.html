@@ -43,7 +43,12 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">create_scale</span><span class="op">(</span><span class="va">col_range</span>, k <span class="op">=</span> <span class="cn">NULL</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"topo"</span>, <span class="st">"redblue"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">create_scale</span><span class="op">(</span></span>
+<span>  <span class="va">col_range</span>,</span>
+<span>  k <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"redblue"</span>, <span class="st">"topo"</span><span class="op">)</span>,</span>
+<span>  symmetric <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -59,7 +64,11 @@
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p>A character indicating the type of color palette to create. Available options: <code>"topo"</code> (default value) for topographical palette and <code>"redblue"</code> for red-blue palette, see Details for more information.</p></dd>
+<dd><p>A character indicating the type of color palette to create. Available options: <code>"redblue"</code> (default value) for red-blue palette and <code>"topo"</code> for topographical palette, see Details for more information.</p></dd>
+
+
+<dt id="arg-symmetric">symmetric<a class="anchor" aria-label="anchor" href="#arg-symmetric"></a></dt>
+<dd><p>A logical value indicating whether the color range should be strictly symmetrized around zero. Defaults to <code>TRUE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -77,6 +86,9 @@
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The topographical palette (<code>type = "topo"</code>) is created according to topographical colours: negative values correspond to shades of blue and purple and positive values to shades of green, yellow and red. The zero value of the variable is always at the border of blue and green shades.</p>
 <p>The red-blue palette (<code>type = "redblue"</code>) has negative values corresponding to shades of blue and positive values corresponding to shades of red.</p>
+<p>By default (<code>symmetric = TRUE</code>), to guarantee true perceptual uniformity and equal visual emphasis, the provided <code>col_range</code> is additionally automatically symmetrized around zero based on its maximum absolute value. For example, an input range of <code>c(-2, 5)</code> is internally expanded to <code>c(-5, 5)</code>.</p>
+<p>For the default <code>redblue</code> palette, this symmetrization ensures that equivalent positive and negative amplitudes are mapped to identical color intensities. Furthermore, the <code>redblue</code> palette strictly anchors the zero-point to a neutral background color, preventing false perceptual boundaries. (Note that while the legacy <code>topo</code> palette is also symmetrized, it retains its characteristic blue-green transition at zero).</p>
+<p>Setting <code>symmetric = FALSE</code> disables this zero-centering expansion, which may be useful for strictly unipolar data or heavily skewed distributions, though it sacrifices equal visual emphasis for opposite polarities.</p>
 <p>To compare results for different subjects or conditions, set the same <code>col_range</code> for all cases. Otherwise, the colours are assigned separately in each plot and are not consistent with each other.</p>
 <p>The parameter <code>k</code> is set by default with respect to the range of <code>col_range</code> as follows:</p><ul><li><p><code>k = 0.1</code> for range \(\leq 30\),</p></li>
 <li><p><code>k = 0.03</code> for range \(\geq 70\),</p></li>
@@ -88,15 +100,15 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create red-blue scale on interval (-10,10) with default step number</span></span></span>
 <span class="r-in"><span><span class="fu">create_scale</span><span class="op">(</span>col_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>,<span class="fl">10</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"redblue"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $colors</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "#2E5A87" "#5A7EA2" "#86A3BE" "#B2C8DA" "#DFEDF6" "#E4CCC6" "#D59CA2"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8] "#C66C7F" "#B73C5B" "#A90C38"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "#2E5A87" "#5F80A2" "#91A7BE" "#C3CED9" "#F5F5F5" "#F5F5F5" "#E2BAC5"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8] "#CF8096" "#BC4667" "#A90C38"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $breaks</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] -10  -8  -6  -4  -2   0   2   4   6   8  10</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Create topographic scale on interval c(-5,10) with small k (finer division)</span></span></span>
-<span class="r-in"><span><span class="va">CStopo</span> <span class="op">&lt;-</span> <span class="fu">create_scale</span><span class="op">(</span>col_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">5</span>, <span class="fl">10</span><span class="op">)</span>, k <span class="op">=</span> <span class="fl">0.02</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Create an asymmetric topographic scale on interval c(-5,10) with small k (finer division)</span></span></span>
+<span class="r-in"><span><span class="va">CStopo</span> <span class="op">&lt;-</span> <span class="fu">create_scale</span><span class="op">(</span>col_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">5</span>, <span class="fl">10</span><span class="op">)</span>, k <span class="op">=</span> <span class="fl">0.02</span>, type <span class="op">=</span> <span class="st">"topo"</span>, symmetric <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># plot colours of the scale as points</span></span></span>
 <span class="r-in"><span><span class="va">k_col</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">CStopo</span><span class="op">$</span><span class="va">colors</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">k_col</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">k_col</span><span class="op">)</span>, col <span class="op">=</span> <span class="va">CStopo</span><span class="op">$</span><span class="va">colors</span>, pch <span class="op">=</span> <span class="fl">16</span>,</span></span>

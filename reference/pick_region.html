@@ -45,6 +45,7 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pick_region</span><span class="op">(</span></span>
 <span>  coords <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  template <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  hemisphere <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"left"</span>, <span class="st">"right"</span>, <span class="st">"midline"</span><span class="op">)</span>,</span>
 <span>  region <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"frontal"</span>, <span class="st">"central"</span>, <span class="st">"parietal"</span>, <span class="st">"occipital"</span>, <span class="st">"temporal"</span>, <span class="st">"face"</span><span class="op">)</span>,</span>
 <span>  ROI <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -57,7 +58,11 @@
 
 
 <dl><dt id="arg-coords">coords<a class="anchor" aria-label="anchor" href="#arg-coords"></a></dt>
-<dd><p>A data frame, matrix or named tibble with numeric columns of "x" and "y" sensor coordinates. If not defined, HCGSN256 template is used. See details for more information about coordinate requirements.</p></dd>
+<dd><p>A data frame, matrix or named tibble with numeric columns of "x" and "y" sensor coordinates. If not defined, the default template coordinates are used.</p></dd>
+
+
+<dt id="arg-template">template<a class="anchor" aria-label="anchor" href="#arg-template"></a></dt>
+<dd><p>The kind of sensor template montage used. Available options are <code>"HCGSN256"</code>, <code>"biosemi128"</code>, <code>"biosemi256"</code>, and <code>"system1005"</code>. Default setting is <code>"HCGSN256"</code>.</p></dd>
 
 
 <dt id="arg-hemisphere">hemisphere<a class="anchor" aria-label="anchor" href="#arg-hemisphere"></a></dt>
@@ -82,11 +87,10 @@
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>If the <code>coords</code> input is data frame or matrix with no named columns, the first column is considered as "x" coordinate and second as "y" coordinate.
-For the correct selection of the hemisphere with own coordinates, it is necessary that the 2D layout is oriented with the nose up and that the midline electrodes should have a zero x-coordinate (or approximately zero within tolerance). Otherwise, the results will not match reality.</p>
+    <p>For the correct selection of the hemisphere with own coordinates, it is necessary that the 2D layout is oriented with the nose up and that the midline electrodes should have a zero x-coordinate (or approximately zero within tolerance). Otherwise, the results will not match reality.</p>
 <p>Notes:
 The option <code>hemisphere = "left"</code> (respectively <code>hemisphere = "right"</code>) means only the left hemisphere without the midline. If you want to include midline as well, use <code>hemisphere = c("left", "midline")</code> (respectively <code>hemisphere = c("right", "midline")</code>).</p>
-<p>The matching of region/hemisphere is exact and the function will stop with an the function stops with an error if no coordinates match the requested <code>region</code> and <code>hemisphere</code> combination.</p>
+<p>The matching of region/hemisphere is exact and the function will stop with an error if no coordinates match the requested <code>region</code> and <code>hemisphere</code> combination.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

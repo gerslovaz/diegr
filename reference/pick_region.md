@@ -8,6 +8,7 @@ combination of both) from the specified sensor coordinates.
 ``` r
 pick_region(
   coords = NULL,
+  template = NULL,
   hemisphere = c("left", "right", "midline"),
   region = c("frontal", "central", "parietal", "occipital", "temporal", "face"),
   ROI = NULL,
@@ -20,8 +21,14 @@ pick_region(
 - coords:
 
   A data frame, matrix or named tibble with numeric columns of "x" and
-  "y" sensor coordinates. If not defined, HCGSN256 template is used. See
-  details for more information about coordinate requirements.
+  "y" sensor coordinates. If not defined, the default template
+  coordinates are used.
+
+- template:
+
+  The kind of sensor template montage used. Available options are
+  `"HCGSN256"`, `"biosemi128"`, `"biosemi256"`, and `"system1005"`.
+  Default setting is `"HCGSN256"`.
 
 - hemisphere:
 
@@ -57,13 +64,10 @@ A tibble or data frame subset of `coords` filtered by the selected
 
 ## Details
 
-If the `coords` input is data frame or matrix with no named columns, the
-first column is considered as "x" coordinate and second as "y"
-coordinate. For the correct selection of the hemisphere with own
-coordinates, it is necessary that the 2D layout is oriented with the
-nose up and that the midline electrodes should have a zero x-coordinate
-(or approximately zero within tolerance). Otherwise, the results will
-not match reality.
+For the correct selection of the hemisphere with own coordinates, it is
+necessary that the 2D layout is oriented with the nose up and that the
+midline electrodes should have a zero x-coordinate (or approximately
+zero within tolerance). Otherwise, the results will not match reality.
 
 Notes: The option `hemisphere = "left"` (respectively
 `hemisphere = "right"`) means only the left hemisphere without the
@@ -72,8 +76,8 @@ midline. If you want to include midline as well, use
 `hemisphere = c("right", "midline")`).
 
 The matching of region/hemisphere is exact and the function will stop
-with an the function stops with an error if no coordinates match the
-requested `region` and `hemisphere` combination.
+with an error if no coordinates match the requested `region` and
+`hemisphere` combination.
 
 ## See also
 

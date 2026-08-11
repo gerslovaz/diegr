@@ -7,6 +7,10 @@
   10-05.
 - Updated graphical functions to ensure compatibility with the new
   templates.
+- Changed default palette in
+  [`create_scale()`](https://gerslovaz.github.io/diegr/reference/create_scale.md)
+  to a perceptually uniform `"redblue"` scale and added range
+  symmetrization around zero.
 - Added a fallback to
   [`MASS::ginv()`](https://rdrr.io/pkg/MASS/man/ginv.html) for
   ill-conditioned interpolation matrices.

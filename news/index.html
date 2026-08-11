@@ -41,6 +41,7 @@
 <ul><li>Added functions for creating interactive surface plots.</li>
 <li>Added new sensor templates: BioSemi 128, BioSemi 256, and system 10-05.</li>
 <li>Updated graphical functions to ensure compatibility with the new templates.</li>
+<li>Changed default palette in <code><a href="../reference/create_scale.html">create_scale()</a></code> to a perceptually uniform <code>"redblue"</code> scale and added range symmetrization around zero.</li>
 <li>Added a fallback to <code><a href="https://rdrr.io/pkg/MASS/man/ginv.html" class="external-link">MASS::ginv()</a></code> for ill-conditioned interpolation matrices.</li>
 <li>Rewrote <code><a href="../reference/point_mesh.html">point_mesh()</a></code> using <code>sf</code> instead of the <code>sp</code> package.</li>
 <li>Fixed bugs in <code><a href="../reference/outliers_epoch.html">outliers_epoch()</a></code>, timeline rendering in animations and baseline range in examples and documentation.</li>
