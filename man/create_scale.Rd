@@ -4,14 +4,21 @@
 \alias{create_scale}
 \title{Create colour scale used in topographic figures}
 \usage{
-create_scale(col_range, k = NULL, type = c("topo", "redblue"))
+create_scale(
+  col_range,
+  k = NULL,
+  type = c("redblue", "topo"),
+  symmetric = TRUE
+)
 }
 \arguments{
 \item{col_range}{A numeric vector with required range of the variable to be plotted in the colour scale.}
 
 \item{k}{A number from interval (0,1) indicating a sequence step for the colour palette. The smaller number, the finer division of the data range interval. See Details for more information about auto-computing if \code{NULL}.}
 
-\item{type}{A character indicating the type of color palette to create. Available options: \code{"topo"} (default value) for topographical palette and \code{"redblue"} for red-blue palette, see Details for more information.}
+\item{type}{A character indicating the type of color palette to create. Available options: \code{"redblue"} (default value) for red-blue palette and \code{"topo"} for topographical palette, see Details for more information.}
+
+\item{symmetric}{A logical value indicating whether the color range should be strictly symmetrized around zero. Defaults to \code{TRUE}.}
 }
 \value{
 A list with two components:
@@ -27,6 +34,12 @@ The topographical palette (\code{type = "topo"}) is created according to topogra
 
 The red-blue palette (\code{type = "redblue"}) has negative values corresponding to shades of blue and positive values corresponding to shades of red.
 
+By default (\code{symmetric = TRUE}), to guarantee true perceptual uniformity and equal visual emphasis, the provided \code{col_range} is additionally automatically symmetrized around zero based on its maximum absolute value. For example, an input range of \code{c(-2, 5)} is internally expanded to \code{c(-5, 5)}.
+
+For the default \code{redblue} palette, this symmetrization ensures that equivalent positive and negative amplitudes are mapped to identical color intensities. Furthermore, the \code{redblue} palette strictly anchors the zero-point to a neutral background color, preventing false perceptual boundaries. (Note that while the legacy \code{topo} palette is also symmetrized, it retains its characteristic blue-green transition at zero).
+
+Setting \code{symmetric = FALSE} disables this zero-centering expansion, which may be useful for strictly unipolar data or heavily skewed distributions, though it sacrifices equal visual emphasis for opposite polarities.
+
 To compare results for different subjects or conditions, set the same \code{col_range} for all cases. Otherwise, the colours are assigned separately in each plot and are not consistent with each other.
 
 The parameter \code{k} is set by default with respect to the range of \code{col_range} as follows:
@@ -40,8 +53,8 @@ The parameter \code{k} is set by default with respect to the range of \code{col_
 # Create red-blue scale on interval (-10,10) with default step number
 create_scale(col_range = c(-10,10), type = "redblue")
 
-# Create topographic scale on interval c(-5,10) with small k (finer division)
-CStopo <- create_scale(col_range = c(-5, 10), k = 0.02)
+# Create an asymmetric topographic scale on interval c(-5,10) with small k (finer division)
+CStopo <- create_scale(col_range = c(-5, 10), k = 0.02, type = "topo", symmetric = FALSE)
 # plot colours of the scale as points
 k_col <- length(CStopo$colors)
 plot(1:k_col, rep(1, k_col), col = CStopo$colors, pch = 16,

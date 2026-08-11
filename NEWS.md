@@ -3,6 +3,7 @@
 * Added functions for creating interactive surface plots.
 * Added new sensor templates: BioSemi 128, BioSemi 256, and system 10-05.
 * Updated graphical functions to ensure compatibility with the new templates.
+* Changed default palette in `create_scale()` to a perceptually uniform `"redblue"` scale and added range symmetrization around zero.
 * Added a fallback to `MASS::ginv()` for ill-conditioned interpolation matrices.
 * Rewrote `point_mesh()` using `sf` instead of the `sp` package.
 * Fixed bugs in `outliers_epoch()`, timeline rendering in animations and baseline range in examples and documentation.
