@@ -204,6 +204,8 @@ Functions supporting HD-EEG data processing, analysis and visualization
   : Baseline correction
 - [`compute_mean()`](https://gerslovaz.github.io/diegr/reference/compute_mean.md)
   : Calculate mean in temporal or spatial domain
+- [`check_structure()`](https://gerslovaz.github.io/diegr/reference/check_structure.md)
+  : Check data structure and print inferred hierarchy
 - [`create_scale()`](https://gerslovaz.github.io/diegr/reference/create_scale.md)
   : Create colour scale used in topographic figures
 - [`make_triangulation()`](https://gerslovaz.github.io/diegr/reference/make_triangulation.md)
