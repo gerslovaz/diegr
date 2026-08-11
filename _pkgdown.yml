@@ -27,6 +27,7 @@ reference:
   contents:
     - baseline_correction
     - compute_mean
+    - check_structure
     - create_scale
     - make_triangulation
     - outliers_epoch

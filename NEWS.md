@@ -1,6 +1,6 @@
 # diegr 0.3.0
 
-* Added functions for creating interactive surface plots.
+* Added functions for creating interactive surface plots and checking data structure.
 * Added new sensor templates: BioSemi 128, BioSemi 256, and system 10-05.
 * Updated graphical functions to ensure compatibility with the new templates.
 * Changed default palette in `create_scale()` to a perceptually uniform `"redblue"` scale and added range symmetrization around zero.
