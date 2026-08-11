@@ -28,6 +28,8 @@ import(dplyr)
 import(gganimate)
 import(ggplot2)
 import(plotly, except = last_plot)
+import(plotly, except = last_plot)
+
 import(rgl)
 import(sf)
 importFrom(dplyr,arrange)

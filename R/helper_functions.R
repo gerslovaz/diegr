@@ -115,36 +115,123 @@ check_grouping_vars <- function(data,
   invisible(NULL)
 }
 
-#' Validate column of data for NA presence
+#' Validate column of data for NA presence and report affected groups
 #'
 #' Checks whether specified column in the data contains `NA` values.
 #' Works with both in-memory data frames and database tables (via \pkg{dbplyr}).
 #'
 #' @param data A data frame or a database table (e.g. a `tbl_sql`).
 #' @param col Character with name of column to check.
+#' @param group_vars Optional character vector of grouping variables to report.
 #'
 #' @return Invisibly returns `NULL`. The function is used for its side effect - warning.
 #' @keywords internal
 #'
+#' @importFrom rlang .data
+#' @import dplyr
+#'
 #' @noRd
 warn_if_na <- function(data,
-                       col) {
+                       col,
+                       group_vars = NULL) {
+
+  avail_groups <- character(0)
+
+  if (!is.null(group_vars)) {
+    avail_groups <- intersect(group_vars, colnames(data))
+  }
 
   has_na <- data |>
-    filter(is.na(.data[[col]])) |>
-    collect(n = 1) |>
-    nrow() > 0
+    dplyr::filter(is.na(.data[[col]])) |>
+    dplyr::summarise(has_na = dplyr::n() > 0) |>
+    dplyr::pull(has_na)
 
-  if (has_na) {
+  if (!isTRUE(has_na)) {
+    return(invisible(FALSE))
+  }
+
+  if (length(avail_groups) > 0) {
+
+    # Count affected observations
+    n_affected <- data |>
+      dplyr::filter(is.na(.data[[col]])) |>
+      dplyr::summarise(n = dplyr::n()) |>
+      dplyr::pull(n)
+
+    # Collect only the first 10 groups
+    affected_groups <- data |>
+      dplyr::filter(is.na(.data[[col]])) |>
+      dplyr::distinct(
+        dplyr::across(dplyr::all_of(avail_groups))
+      ) |>
+      head(11) |>
+      dplyr::collect()
+
+    more_groups <- nrow(affected_groups) > 10
+
+    if (more_groups) {
+      affected_groups <- affected_groups |>
+        head(10)
+    }
+
+    # Convert group values to readable text
+    for (g in avail_groups) {
+      affected_groups[[g]] <- paste0(
+        g, ": ", affected_groups[[g]]
+      )
+    }
+
+    affected_str <- affected_groups |>
+      tidyr::unite(
+        "combo",
+        dplyr::everything(),
+        sep = ", "
+      ) |>
+      dplyr::pull("combo") |>
+      paste(collapse = " | ")
+
+    if (more_groups) {
+      affected_str <- paste0(
+        affected_str,
+        " | ... (more affected observations exist)"
+      )
+    }
+
     warning(
-      sprintf("There are NA's in '%s' column, the resulting mean is computed without corresponding rows.", col),
+      sprintf(
+        paste0(
+          "NA values in '%s' were excluded from the calculation. ",
+          "%d observation(s) were affected: [%s]"
+        ),
+        col,
+        n_affected,
+        affected_str
+      ),
+      call. = FALSE
+    )
+
+  } else {
+
+    n_affected <- data |>
+      dplyr::filter(is.na(.data[[col]])) |>
+      dplyr::summarise(n = dplyr::n()) |>
+      dplyr::pull(n)
+
+    warning(
+      sprintf(
+        paste0(
+          "NA values in '%s' were excluded from the calculation. ",
+          "%d observation(s) were affected."
+        ),
+        col,
+        n_affected
+      ),
       call. = FALSE
     )
   }
 
-  invisible(has_na)
+  invisible(TRUE)
 }
-
 
 
 #' Validate D3 part of mesh object

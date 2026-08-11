@@ -39,7 +39,7 @@
 #' - Setting `type = "point"` without specifying `R`: the bounds are computed using standard error of the mean and approximation by the Student distribution.
 #' - Setting `type = "jack"`: the bounds are computed using jackknife standard error of the mean and approximation by the Student t-distribution. Note: used method assumes equal variance and symmetric distribution, which may be problematic for very small samples.
 #'
-#' Note: If there are `NA`'s in `amplitude` or `weights_col` columns, corresponding rows are ignored in the average calculation and function prints a warning message.
+#' Note: If there are `NA`'s in `amplitude`, `weights_col` or other columns, corresponding rows are ignored in the average calculation and function prints a warning message.
 #'
 #'
 #' @return A tibble with resulting average and CI bounds according to the chosen `level`, `domain` and `alpha` arguments. The statistics are saved in columns
@@ -120,14 +120,12 @@ compute_mean <- function(data,
   )
 
   if (!is.null(weights_col)) {
-    warn_if_na(data, weights_col)
     required_cols <- c(amplitude, domain_col, weights_col)
   } else {
     required_cols <- c(amplitude, domain_col)
   }
 
   stop_if_missing_cols(data, required_cols = required_cols)
-  warn_if_na(data, amplitude)
 
   if (level == "sensor" && domain == "space") {
     id_sym <- rlang::sym("time")
@@ -138,6 +136,16 @@ compute_mean <- function(data,
   group_vars <- set_group_vars(data, domain, level)
   check_grouping_vars(data, group_vars, action = "warn")
 
+  vars <- if (!is.null(weights_col)) c(amplitude, weights_col, group_vars, level) else c(amplitude, group_vars, level)
+  vars <- unique(vars)
+
+  for (col_name in vars) {
+    warn_if_na(data, col = col_name, group_vars = c(group_vars,level))
+  }
+
+  data <- data |>
+    tidyr::drop_na(dplyr::any_of(group_vars))
+
   if (type == "point") { # pointwise average
     if (is.null(weights_col)) {
       data <- data |>
@@ -146,12 +154,7 @@ compute_mean <- function(data,
       weights_col <- "help_weights_col"
     }
 
-    vars <- c(amplitude, weights_col)
-
-    data_clean <- data |> # remove rows with NA
-      tidyr::drop_na(any_of(vars))
-
-    output_df <- pointwise_mean(data_clean, amp_name = amplitude,
+    output_df <- pointwise_mean(data, amp_name = amplitude,
                                 group_vars = group_vars,
                                 weights_col = weights_col,
                                 R = R, alpha = alpha)
@@ -205,16 +208,25 @@ pointwise_mean <- function(data,
 
   avg_data_grouped <- data |>
     summarise(
-      n_eff = sum(.data[[weights_col]], na.rm = TRUE),
-      avg_col = sum(.data[[amp_name]] * .data[[weights_col]], na.rm = TRUE) / sum(.data[[weights_col]], na.rm = TRUE),
-      n_out = sum(!is.na(.data[[weights_col]])),
-      se = {
-        n_eff = sum(.data[[weights_col]], na.rm = TRUE)
-        avg_col = sum(.data[[amp_name]] * .data[[weights_col]], na.rm = TRUE) / n_eff
-        sqrt(
-        sum(.data[[weights_col]] * (.data[[amp_name]] - avg_col)^2, na.rm = TRUE) / ((n_eff - 1) * n_eff)
-        )
+      n_out = sum(!is.na(.data[[amp_name]]) & !is.na(.data[[weights_col]])),
+      n_eff = sum(if_else(!is.na(.data[[amp_name]]), as.numeric(.data[[weights_col]]), 0), na.rm = TRUE),      #n_eff = sum(.data[[weights_col]], na.rm = TRUE),
+      #avg_col = sum(.data[[amp_name]] * .data[[weights_col]], na.rm = TRUE) / sum(.data[[weights_col]], na.rm = TRUE),
+      avg_col = sum(.data[[amp_name]] * .data[[weights_col]], na.rm = TRUE) / n_eff,
+      se = sqrt(sum(.data[[weights_col]] * (.data[[amp_name]] - avg_col)^2, na.rm = TRUE) / ((n_eff - 1) * n_eff)),
+      #n_out = sum(!is.na(.data[[weights_col]])),
+      #se = {
+      #  n_eff = sum(.data[[weights_col]], na.rm = TRUE)
+      #  avg_col = sum(.data[[amp_name]] * .data[[weights_col]], na.rm = TRUE) / n_eff
+      #  sqrt(
+      #  sum(.data[[weights_col]] * (.data[[amp_name]] - avg_col)^2, na.rm = TRUE) / ((n_eff - 1) * n_eff)
+      #  )
+      #},
+      se = if (n_out > 1) {
+        sqrt(sum(.data[[weights_col]] * (.data[[amp_name]] - avg_col)^2, na.rm = TRUE) / ((n_eff - 1) * n_eff))
+      } else {
+        NA_real_
       },
+
       CI =
         if (!is.null(R)) {
           list(compute_CI_boot(
@@ -240,11 +252,12 @@ pointwise_mean <- function(data,
   } else { # standard CI using Student distribution
     avg_data <- avg_data_grouped |>
       mutate(
-        ci_low = .data$avg_col -
-          qt(1 - (1 - alpha) / 2, .data$n_eff - 1) * .data$se,
-        ci_up  = .data$avg_col +
-          qt(1 - (1 - alpha) / 2, .data$n_eff - 1) * .data$se
-      )
+        safe_df = pmax(.data$n_eff - 1, 1),
+        t_val   = qt(1 - (1 - alpha) / 2, .data$safe_df),
+        ci_low = .data$avg_col - .data$t_val * .data$se,
+        ci_up  = .data$avg_col + .data$t_val * .data$se
+      ) |>
+      dplyr::select(-"safe_df", -"t_val")
   }
 
   newnames <- c(n = "n_out", average = "avg_col")
@@ -280,10 +293,17 @@ leave_one_mean <- function(x,
                            id,
                            alpha) {
 
+  valid_mask <- !is.na(x) & !is.na(id)
+  x <- x[valid_mask]
+  id <- id[valid_mask]
+
     vec_ids <- unique(id)
     n <- length(vec_ids)
     if (n <= 1) {
-      stop("There is no jackknife mean for less than 2 elements.")
+      return(list(average = NA_real_,
+                  se = NA_real_,
+                  ci_low = NA_real_,
+                  ci_up = NA_real_))
     }
 
     means <- vapply(vec_ids, function(i) {
