@@ -18,6 +18,10 @@ Functions for visualization of HD-EEG data
   : Plot boxplots of response times
 - [`interactive_waveforms()`](https://gerslovaz.github.io/diegr/reference/interactive_waveforms.md)
   : Plot interactive waveform graph
+- [`interactive_surfaceplot()`](https://gerslovaz.github.io/diegr/reference/interactive_surfaceplot.md)
+  : Interactive 3D surface topographic plot of EEG signal
+- [`interactive_surfaceplot_curves()`](https://gerslovaz.github.io/diegr/reference/interactive_surfaceplot_curves.md)
+  : Interactive 3D surface plot of EEG signal over time
 - [`plot_point_mesh()`](https://gerslovaz.github.io/diegr/reference/plot_point_mesh.md)
   : Plot point mesh
 - [`plot_time_mean()`](https://gerslovaz.github.io/diegr/reference/plot_time_mean.md)

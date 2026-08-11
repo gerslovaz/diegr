@@ -107,10 +107,11 @@ animate_topo_mean(
 
 ## Value
 
-If `output_path` is `NULL`, the function prints the animation to the
-RStudio Viewer. If `output_path` is specified, the animation is saved to
-the given file path and not displayed. The `gifski` and `magick`
-packages are required for animation export.
+If `output_path` is `NULL`, the function returns a `magick-image` object
+containing the animated frames and prints it to the RStudio Viewer. If
+`output_path` is specified, the animation is saved as a GIF to the given
+file path and the function invisibly returns `NULL`. The `gifski` and
+`magick` packages are required for animation export.
 
 ## Details
 

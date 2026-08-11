@@ -118,8 +118,8 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>If <code>output_path</code> is <code>NULL</code>, the function prints the animation to the RStudio Viewer.
-If <code>output_path</code> is specified, the animation is saved to the given file path and not displayed. The <code>gifski</code> and <code>magick</code> packages are required for animation export.</p>
+    <p>If <code>output_path</code> is <code>NULL</code>, the function returns a <code>magick-image</code> object containing the animated frames and prints it to the RStudio Viewer.
+If <code>output_path</code> is specified, the animation is saved as a GIF to the given file path and the function invisibly returns <code>NULL</code>. The <code>gifski</code> and <code>magick</code> packages are required for animation export.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

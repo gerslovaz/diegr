@@ -27,6 +27,14 @@ A list with the following elements:
   labels (according to the BioSemi naming convention) in 3D. See
   'Details' for more information.
 
+- ROI:
+
+  A factor containing the name of the region to which the corresponding
+  sensor belongs. The levels are: "central", "frontal", "occipital",
+  "parietal", and "temporal". Sensors were assigned to anatomical
+  regions based on their closest spatial proximity (3D Euclidean
+  distance) to the standardized 10-05 system electrodes.
+
 ## Source
 
 The MNE-Python GitHub repository,

@@ -30,6 +30,13 @@ A list with the following elements:
   labels (according to the standard 10-05 naming convention) in 3D. See
   'Details' for more information.
 
+- ROI:
+
+  A factor containing the name of the region to which the corresponding
+  sensor belongs. The levels are: "central", "frontal", "occipital",
+  "parietal", and "temporal". See Details for more information about
+  assigning sensors to locations.
+
 ## Source
 
 The MNE-Python GitHub repository,
@@ -48,6 +55,11 @@ The axis orientation in the 3D case is as follows:
   of the sphere. The electrodes are symmetrically distributed across
   this perfect spherical surface and the electrode Cz is located exactly
   at the apex of the sphere at coordinates (0, 0, 1).
+
+The electrodes are mapped to anatomical regions (`ROI`) based on their
+name prefixes. Boundary electrodes are assigned to their closest primary
+region (e.g., 'FC' and 'FCC' are grouped under Central, while 'FFC' is
+Frontal; 'PO' is assigned to Occipital, and 'CP' to Parietal).
 
 The coordinates originate from the MNE-Python GitHub repository.
 

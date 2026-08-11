@@ -110,9 +110,10 @@ animate_topo(
 
 ## Value
 
-If `output_path` is `NULL`, the function prints the animation to the
-RStudio Viewer. If `output_path` is specified, the animation is saved to
-the given file path and not displayed.
+If `output_path` is `NULL`, the function returns a `gganim` object and
+prints the animation to the RStudio Viewer. If `output_path` is
+specified, the animation is saved to the given file path and the
+function invisibly returns `NULL`.
 
 ## Details
 

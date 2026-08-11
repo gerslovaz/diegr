@@ -60,6 +60,9 @@ Fiducial markers and extremely low electrodes (such as those on the lower neck a
 <dt>D3</dt>
 <dd><p>A tibble with 4 columns containing x, y and z coordinates and sensor labels (according to the standard 10-05 naming convention) in 3D. See 'Details' for more information.</p></dd>
 
+<dt>ROI</dt>
+<dd><p>A factor containing the name of the region to which the corresponding sensor belongs. The levels are: "central", "frontal", "occipital", "parietal", and "temporal". See Details for more information about assigning sensors to locations.</p></dd>
+
 
 </dl></div>
     <div class="section level2">
@@ -75,7 +78,8 @@ Because this is an idealized spherical model, the origin (0, 0, 0) represents th
 geometric center of the sphere. The electrodes are symmetrically distributed across
 this perfect spherical surface and the electrode Cz is located exactly at
 the apex of the sphere at coordinates (0, 0, 1).</p></li>
-</ul><p>The coordinates originate from the MNE-Python GitHub repository.</p>
+</ul><p>The electrodes are mapped to anatomical regions (<code>ROI</code>) based on their name prefixes. Boundary electrodes are assigned to their closest primary region (e.g., 'FC' and 'FCC' are grouped under Central, while 'FFC' is Frontal; 'PO' is assigned to Occipital, and 'CP' to Parietal).</p>
+<p>The coordinates originate from the MNE-Python GitHub repository.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

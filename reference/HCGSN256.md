@@ -29,7 +29,7 @@ A list with following elements:
 
 - ROI:
 
-  Factor containing the name of the region to which the corresponding
+  A factor containing the name of the region to which the corresponding
   sensor belongs. The levels are: "central", "frontal", "occipital",
   "parietal", "temporal" and "face" for electrodes from the face area.
 

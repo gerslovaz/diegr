@@ -57,6 +57,9 @@ This template contains 256 electrode positions in the 3D space and for the 2D la
 <dt>D3</dt>
 <dd><p>A tibble with 4 columns containing x, y and z coordinates and sensor labels (according to the BioSemi naming convention) in 3D. See 'Details' for more information.</p></dd>
 
+<dt>ROI</dt>
+<dd><p>A factor containing the name of the region to which the corresponding sensor belongs. The levels are: "central", "frontal", "occipital", "parietal", and "temporal". Sensors were assigned to anatomical regions based on their closest spatial proximity (3D Euclidean distance) to the standardized 10-05 system electrodes.</p></dd>
+
 
 </dl></div>
     <div class="section level2">

@@ -106,15 +106,11 @@ animate_scalp(
 
 ## Value
 
-The output depends on the provided arguments:
-
-- If `frames_dir` is specified, individual animation frames (PNG) are
-  saved to that directory.
-
-- If also `output_path` is specified, a video (MP4) is created and saved
-  using the `av` package.
-
-- Otherwise, the animation is displayed in an interactive rgl window.
+If `frames_dir` is `NULL`, the function creates an interactive 3D
+animation in the `rgl` window and invisibly returns `NULL`. If
+`frames_dir` is specified, individual animation frames (PNG) are saved.
+If `output_path` is also specified, an MP4 video is encoded and the
+function invisibly returns `NULL`.
 
 ## Details
 
