@@ -14,6 +14,8 @@ reference:
     - boxplot_subject
     - boxplot_rt
     - interactive_waveforms
+    - interactive_surfaceplot
+    - interactive_surfaceplot_curves
     - plot_point_mesh
     - plot_time_mean
     - plot_topo_mean

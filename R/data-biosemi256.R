@@ -11,6 +11,7 @@
 #' \describe{
 #'   \item{D2}{A tibble with 3 columns containing x and y coordinates and sensor labels (according to the BioSemi naming convention) in 2D.}
 #'   \item{D3}{A tibble with 4 columns containing x, y and z coordinates and sensor labels (according to the BioSemi naming convention) in 3D. See 'Details' for more information.}
+#'   \item{ROI}{A factor containing the name of the region to which the corresponding sensor belongs. The levels are: "central", "frontal", "occipital", "parietal", and "temporal". Sensors were assigned to anatomical regions based on their closest spatial proximity (3D Euclidean distance) to the standardized 10-05 system electrodes.}
 #'    }
 #'
 #' @details
