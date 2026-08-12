@@ -93,6 +93,8 @@ outliers_epoch <- function(data,
   group_vars <- intersect(c("group", "subject", "sensor", "condition", "time"), names(data))
   check_grouping_vars(data, vars = group_vars, action = "warn")
 
+  warn_if_na(data, amplitude, c(group_vars, "epoch"))
+
   if (method == "iqr") {
     outdata <- newdata |>
       dplyr::group_by(dplyr::across(all_of(group_vars))) |>
@@ -108,7 +110,8 @@ outliers_epoch <- function(data,
 
     outdata <- newdata |>
       dplyr::group_by(dplyr::across(all_of(group_vars))) |>
-      dplyr::mutate(outliers = .data[[amplitude]] < quantile(.data[[amplitude]], 1 - p) | .data[[amplitude]] > quantile(.data[[amplitude]], p)) |>
+      dplyr::mutate(outliers = .data[[amplitude]] < quantile(.data[[amplitude]], 1 - p, na.rm = TRUE) |
+                      .data[[amplitude]] > quantile(.data[[amplitude]], p, na.rm = TRUE)) |>
       dplyr::filter(.data$outliers == TRUE) |>
       dplyr::ungroup()
   }
@@ -116,7 +119,8 @@ outliers_epoch <- function(data,
   if (method == "hampel") {
     outdata <- newdata |>
       dplyr::group_by(dplyr::across(all_of(group_vars))) |>
-      dplyr::mutate(outliers = .data[[amplitude]] < median(.data[[amplitude]]) - k_mad * mad(.data[[amplitude]], constant = 1) | .data[[amplitude]] > median(.data[[amplitude]]) + k_mad * mad(.data[[amplitude]], constant = 1)) |>
+      dplyr::mutate(outliers = .data[[amplitude]] < median(.data[[amplitude]], na.rm = TRUE) - k_mad * mad(.data[[amplitude]], constant = 1, na.rm = TRUE) |
+                               .data[[amplitude]] > median(.data[[amplitude]], na.rm = TRUE) + k_mad * mad(.data[[amplitude]], constant = 1, na.rm = TRUE)) |>
       dplyr::filter(.data$outliers == TRUE) |>
       dplyr::ungroup()
   }

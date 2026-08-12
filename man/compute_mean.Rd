@@ -79,7 +79,7 @@ For each average value, the upper and lower bounds of the point confidence inter
 \item Setting \code{type = "jack"}: the bounds are computed using jackknife standard error of the mean and approximation by the Student t-distribution. Note: used method assumes equal variance and symmetric distribution, which may be problematic for very small samples.
 }
 
-Note: If there are \code{NA}'s in \code{amplitude} or \code{weights_col} columns, corresponding rows are ignored in the average calculation and function prints a warning message.
+Note: If there are \code{NA}'s in \code{amplitude}, \code{weights_col} or other columns, corresponding rows are ignored in the average calculation and function prints a warning message.
 }
 \examples{
 # Average (pointwise) raw signal for subject 1 and electrode E1

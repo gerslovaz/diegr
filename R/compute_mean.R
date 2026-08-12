@@ -210,9 +210,9 @@ pointwise_mean <- function(data,
     summarise(
       n_out = sum(!is.na(.data[[amp_name]]) & !is.na(.data[[weights_col]])),
       n_eff = sum(if_else(!is.na(.data[[amp_name]]), as.numeric(.data[[weights_col]]), 0), na.rm = TRUE),      #n_eff = sum(.data[[weights_col]], na.rm = TRUE),
-      #avg_col = sum(.data[[amp_name]] * .data[[weights_col]], na.rm = TRUE) / sum(.data[[weights_col]], na.rm = TRUE),
-      avg_col = sum(.data[[amp_name]] * .data[[weights_col]], na.rm = TRUE) / n_eff,
-      se = sqrt(sum(.data[[weights_col]] * (.data[[amp_name]] - avg_col)^2, na.rm = TRUE) / ((n_eff - 1) * n_eff)),
+      avg_col = sum(.data[[amp_name]] * .data[[weights_col]], na.rm = TRUE) / sum(if_else(!is.na(.data[[amp_name]]), as.numeric(.data[[weights_col]]), 0), na.rm = TRUE),
+      #avg_col = sum(.data[[amp_name]] * .data[[weights_col]], na.rm = TRUE) / n_eff,
+      #se = sqrt(sum(.data[[weights_col]] * (.data[[amp_name]] - avg_col)^2, na.rm = TRUE) / ((n_eff - 1) * n_eff)),
       #n_out = sum(!is.na(.data[[weights_col]])),
       #se = {
       #  n_eff = sum(.data[[weights_col]], na.rm = TRUE)
@@ -221,7 +221,9 @@ pointwise_mean <- function(data,
       #  sum(.data[[weights_col]] * (.data[[amp_name]] - avg_col)^2, na.rm = TRUE) / ((n_eff - 1) * n_eff)
       #  )
       #},
-      se = if (n_out > 1) {
+      se = if (sum(!is.na(.data[[amp_name]]) & !is.na(.data[[weights_col]])) > 1) {
+        n_eff = sum(if_else(!is.na(.data[[amp_name]]), as.numeric(.data[[weights_col]]), 0), na.rm = TRUE)
+        avg_col = sum(.data[[amp_name]] * .data[[weights_col]], na.rm = TRUE) / n_eff
         sqrt(sum(.data[[weights_col]] * (.data[[amp_name]] - avg_col)^2, na.rm = TRUE) / ((n_eff - 1) * n_eff))
       } else {
         NA_real_

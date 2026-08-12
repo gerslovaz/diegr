@@ -7,7 +7,7 @@
 baseline_correction(data, baseline_range, type = "absolute")
 }
 \arguments{
-\item{data}{A data frame, tibble or a database table with input data, required columns: \code{time} and \code{signal}. Optional columns: \code{group}, \code{subject}, \code{sensor}, \code{condition} and \code{epoch}, if present, are included in the grouping structure.}
+\item{data}{A data frame, tibble or a database table with input data, required columns: \code{time}, \code{epoch} and \code{signal}. Optional columns: \code{group}, \code{subject}, \code{sensor}, and \code{condition}, if present, are included in the grouping structure, see Details.}
 
 \item{baseline_range}{A numeric vector of time points used as the baseline (e.g., \code{baseline_range = 125:250}).}
 
@@ -24,10 +24,13 @@ Compute amplitude values corrected to the selected baseline.
 The function computes a baseline value within each epoch and subtracts it from the signal.
 }
 \details{
-If the values from \code{baseline_range} vector extend beyond the range of the \code{time} column, the baseline computation proceeds as follows:
+Grouping logic for baseline correction: The function relies on a strict grouping hierarchy: \verb{"group" > "subject" > "sensor" > "condition" > "epoch"}.
+The function dynamically identifies which of the optional variables are present in the data, preserves their hierarchical order, and uses them to group the data.
+
+Dealing with \code{baseline_range}: If the values from \code{baseline_range} vector extend beyond the range of the \code{time} column, the baseline computation proceeds as follows:
 \enumerate{
 \item If a part of the \code{baseline_range} vector is in the \code{time} column and part is outside its range, the baseline correction is computed only from the part inside a \code{time} range.
-\item If the whole \code{baseline_range} vector is out of the \code{time} range, the \code{baseline} and also the \code{signal_base} values of the output are \code{NA}'s.
+\item If the whole \code{baseline_range} vector is out of the \code{time} range, the \code{baseline} and also the \code{signal_base} values of the output are \code{NA}s.
 In both cases, the function returns the output data along with a warning.
 }
 

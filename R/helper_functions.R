@@ -128,6 +128,7 @@ check_grouping_vars <- function(data,
 #' @keywords internal
 #'
 #' @importFrom rlang .data
+#' @importFrom utils head
 #' @import dplyr
 #'
 #' @noRd

@@ -7,14 +7,17 @@
 #' The function computes a baseline value within each epoch and subtracts it from the signal.
 #'
 #'
-#' @param data A data frame, tibble or a database table with input data, required columns: `time` and `signal`. Optional columns: `group`, `subject`, `sensor`, `condition` and `epoch`, if present, are included in the grouping structure.
+#' @param data A data frame, tibble or a database table with input data, required columns: `time`, `epoch` and `signal`. Optional columns: `group`, `subject`, `sensor`, and `condition`, if present, are included in the grouping structure, see Details.
 #' @param baseline_range A numeric vector of time points used as the baseline (e.g., \code{baseline_range = 125:250}).
 #' @param type A character specifying the type of baseline correction. Currently, only \code{"absolute"} is supported, any other value results in an error.
 #'
 #' @details
-#' If the values from `baseline_range` vector extend beyond the range of the `time` column, the baseline computation proceeds as follows:
+#' Grouping logic for baseline correction: The function relies on a strict grouping hierarchy: `"group" > "subject" > "sensor" > "condition" > "epoch"`.
+#' The function dynamically identifies which of the optional variables are present in the data, preserves their hierarchical order, and uses them to group the data.
+#'
+#' Dealing with `baseline_range`: If the values from `baseline_range` vector extend beyond the range of the `time` column, the baseline computation proceeds as follows:
 #' 1. If a part of the `baseline_range` vector is in the `time` column and part is outside its range, the baseline correction is computed only from the part inside a `time` range.
-#' 2. If the whole `baseline_range` vector is out of the `time` range, the `baseline` and also the `signal_base` values of the output are `NA`'s.
+#' 2. If the whole `baseline_range` vector is out of the `time` range, the `baseline` and also the `signal_base` values of the output are `NA`s.
 #' In both cases, the function returns the output data along with a warning.
 #'
 #' Notes:
@@ -70,16 +73,14 @@ baseline_correction <- function(data,
     stop("Only 'absolute' baseline correction is implemented now.")
   }
 
-  stop_if_missing_cols(data, required_cols = c("time", "signal"))
+  stop_if_missing_cols(data, required_cols = c("time", "signal", "epoch"))
 
-  # check NA's in signal column
-  na_check <- data |>
-    dplyr::summarise(has_na = any(is.na(.data$signal))) |>
-    dplyr::collect()
+  potential_hierarchy <- c("group", "subject", "sensor", "condition", "epoch")
+  group_vars <- intersect(potential_hierarchy, colnames(data))
 
-  if (na_check$has_na) {
-    warning("There are NA's in `signal` column, these values are ignored in baseline computation.")
-  }
+  check_grouping_vars(data, vars = group_vars, action = "warn")
+
+  warn_if_na(data, "signal", group_vars)
 
   # check baseline time range
   existing_times <- data |>
@@ -91,11 +92,6 @@ baseline_correction <- function(data,
   if (!all(baseline_range %in% existing_times)) {
     warning("Some 'baseline_range' values are not present in the 'time' column.")
   }
-
-  potential_hierarchy <- c("group", "subject", "sensor", "condition", "epoch")
-  group_vars <- intersect(potential_hierarchy, colnames(data))
-
-  check_grouping_vars(data, vars = group_vars, action = "warn")
 
   basel_data <- data |>
     dplyr::filter(.data$time >= !!min(baseline_range, na.rm = TRUE),
