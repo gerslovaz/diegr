@@ -74,7 +74,9 @@ The function computes a baseline value within each epoch and subtracts it from t
 <dt>baseline</dt>
 <dd><p>A baseline value used for correction.</p></dd>
 
-</dl></div>
+
+</dl><p>Additionally, the returned object carries an <code>"diegr_metadata"</code> attribute with metadata.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Grouping logic for baseline correction: The function relies on a strict grouping hierarchy: <code>"group" &gt; "subject" &gt; "sensor" &gt; "condition" &gt; "epoch"</code>.

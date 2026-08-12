@@ -42,6 +42,9 @@ A data frame/tibble with added columns:
 
   A baseline value used for correction.
 
+Additionally, the returned object carries an `"diegr_metadata"`
+attribute with metadata.
+
 ## Details
 
 Grouping logic for baseline correction: The function relies on a strict
