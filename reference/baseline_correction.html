@@ -54,7 +54,7 @@ The function computes a baseline value within each epoch and subtracts it from t
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A data frame, tibble or a database table with input data, required columns: <code>time</code> and <code>signal</code>. Optional columns: <code>group</code>, <code>subject</code>, <code>sensor</code>, <code>condition</code> and <code>epoch</code>, if present, are included in the grouping structure.</p></dd>
+<dd><p>A data frame, tibble or a database table with input data, required columns: <code>time</code>, <code>epoch</code> and <code>signal</code>. Optional columns: <code>group</code>, <code>subject</code>, <code>sensor</code>, and <code>condition</code>, if present, are included in the grouping structure, see Details.</p></dd>
 
 
 <dt id="arg-baseline-range">baseline_range<a class="anchor" aria-label="anchor" href="#arg-baseline-range"></a></dt>
@@ -77,8 +77,10 @@ The function computes a baseline value within each epoch and subtracts it from t
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>If the values from <code>baseline_range</code> vector extend beyond the range of the <code>time</code> column, the baseline computation proceeds as follows:</p><ol><li><p>If a part of the <code>baseline_range</code> vector is in the <code>time</code> column and part is outside its range, the baseline correction is computed only from the part inside a <code>time</code> range.</p></li>
-<li><p>If the whole <code>baseline_range</code> vector is out of the <code>time</code> range, the <code>baseline</code> and also the <code>signal_base</code> values of the output are <code>NA</code>'s.
+    <p>Grouping logic for baseline correction: The function relies on a strict grouping hierarchy: <code>"group" &gt; "subject" &gt; "sensor" &gt; "condition" &gt; "epoch"</code>.
+The function dynamically identifies which of the optional variables are present in the data, preserves their hierarchical order, and uses them to group the data.</p>
+<p>Dealing with <code>baseline_range</code>: If the values from <code>baseline_range</code> vector extend beyond the range of the <code>time</code> column, the baseline computation proceeds as follows:</p><ol><li><p>If a part of the <code>baseline_range</code> vector is in the <code>time</code> column and part is outside its range, the baseline correction is computed only from the part inside a <code>time</code> range.</p></li>
+<li><p>If the whole <code>baseline_range</code> vector is out of the <code>time</code> range, the <code>baseline</code> and also the <code>signal_base</code> values of the output are <code>NA</code>s.
 In both cases, the function returns the output data along with a warning.</p></li>
 </ol><p>Notes:</p><ul><li><p>Rows with <code>NA</code> values in the <code>signal</code> column are ignored
 when computing the baseline, and a warning is issued.</p></li>

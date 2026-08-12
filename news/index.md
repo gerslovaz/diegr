@@ -12,6 +12,11 @@
   [`create_scale()`](https://gerslovaz.github.io/diegr/reference/create_scale.md)
   to a perceptually uniform `"redblue"` scale and added range
   symmetrization around zero.
+- Updated dealing with `NA` values within
+  [`compute_mean()`](https://gerslovaz.github.io/diegr/reference/compute_mean.md),
+  [`outliers_epoch()`](https://gerslovaz.github.io/diegr/reference/outliers_epoch.md)
+  and
+  [`baseline_correction()`](https://gerslovaz.github.io/diegr/reference/baseline_correction.md).
 - Added a fallback to
   [`MASS::ginv()`](https://rdrr.io/pkg/MASS/man/ginv.html) for
   ill-conditioned interpolation matrices.

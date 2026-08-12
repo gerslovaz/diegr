@@ -16,9 +16,9 @@ baseline_correction(data, baseline_range, type = "absolute")
 - data:
 
   A data frame, tibble or a database table with input data, required
-  columns: `time` and `signal`. Optional columns: `group`, `subject`,
-  `sensor`, `condition` and `epoch`, if present, are included in the
-  grouping structure.
+  columns: `time`, `epoch` and `signal`. Optional columns: `group`,
+  `subject`, `sensor`, and `condition`, if present, are included in the
+  grouping structure, see Details.
 
 - baseline_range:
 
@@ -44,8 +44,16 @@ A data frame/tibble with added columns:
 
 ## Details
 
-If the values from `baseline_range` vector extend beyond the range of
-the `time` column, the baseline computation proceeds as follows:
+Grouping logic for baseline correction: The function relies on a strict
+grouping hierarchy:
+`"group" > "subject" > "sensor" > "condition" > "epoch"`. The function
+dynamically identifies which of the optional variables are present in
+the data, preserves their hierarchical order, and uses them to group the
+data.
+
+Dealing with `baseline_range`: If the values from `baseline_range`
+vector extend beyond the range of the `time` column, the baseline
+computation proceeds as follows:
 
 1.  If a part of the `baseline_range` vector is in the `time` column and
     part is outside its range, the baseline correction is computed only
@@ -53,7 +61,7 @@ the `time` column, the baseline computation proceeds as follows:
 
 2.  If the whole `baseline_range` vector is out of the `time` range, the
     `baseline` and also the `signal_base` values of the output are
-    `NA`'s. In both cases, the function returns the output data along
+    `NA`s. In both cases, the function returns the output data along
     with a warning.
 
 Notes:
