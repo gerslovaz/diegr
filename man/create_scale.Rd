@@ -25,6 +25,8 @@ A list with two components:
 \item{colors}{A vector with hexadecimal codes of palette colours.}
 \item{breaks}{A vector with breaks for cutting the data range.}
 The list is intended for use in \code{\link[ggplot2]{scale_fill_gradientn}} or similar plotting calls.
+
+Additionally, the returned object carries an \code{"diegr_metadata"} attribute with metadata such as the actual \code{k} used for creating a scale etc.
 }
 \description{
 Create colour scale used in topographic figures

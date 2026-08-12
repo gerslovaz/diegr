@@ -36,6 +36,8 @@ Returns a list of class \code{"mesh"} containing some (or all) of the following 
 \item{D3}{A data frame with \code{x}, \code{y} and \code{z} coordinates of the created three dimensional point mesh.}
 \item{template}{A character indicating the template of the sensor coordinates used for mesh computing.}
 \item{r}{A radius of the circle used for mesh creating.}
+
+Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata such as the actual number of generated mesh points, the template used, etc.
 }
 \description{
 Function creates an object of class \code{"mesh"}, which is a list of data frames with coordinates of a regular (in the sense of the equidistant distance between mesh nodes) mesh of points on the space defined by sensor coordinates. Circular or polygonal shape of the result mesh is available.
@@ -69,6 +71,8 @@ warning.
 # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template
 # using all electrodes
 M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256", type = "circle")
+# Inspect the attached metadata
+attr(M, "diegr_metadata")
 
 # Computing polygon 3D mesh with starting number 2000 points for BioSemi 128 template
 M_bio <- point_mesh(dimension = 3, n = 2000, template = "biosemi128")

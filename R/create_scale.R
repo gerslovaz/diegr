@@ -28,6 +28,8 @@
 #' \item{breaks}{A vector with breaks for cutting the data range.}
 #' The list is intended for use in \code{\link[ggplot2]{scale_fill_gradientn}} or similar plotting calls.
 #'
+#' Additionally, the returned object carries an `"diegr_metadata"` attribute with metadata such as the actual `k` used for creating a scale etc.
+#'
 #' @export
 #'
 #' @examples
@@ -51,7 +53,7 @@ create_scale <- function(col_range,
     stop("The argument 'col_range' must be a numeric vector of two distinct values.")
   }
 
-  if (symmetric){
+  if (symmetric) {
     max_abs <- max(abs(col_range), na.rm = TRUE)
     col_range <- c(-max_abs, max_abs)
   }
@@ -91,7 +93,22 @@ create_scale <- function(col_range,
     stop("Unknown 'type' argument.")
   }
 
-  return(list(colors = scale_color, breaks = breaks))
+  out_object <- list(colors = scale_color, breaks = breaks)
+
+  scale_meta <- list(
+    step = "create_scale",
+    timestamp = Sys.time(),
+    package_version = as.character(utils::packageVersion("diegr")),
+    scale_parameters = list(
+      col_range_used = col_range,
+      symmetric_applied = symmetric,
+      k_used = k
+    )
+  )
+
+  attr(out_object, "diegr_metadata") <- scale_meta
+
+  return(out_object)
 }
 
 #' Create HSV-based topo-color ramp for negative EEG values

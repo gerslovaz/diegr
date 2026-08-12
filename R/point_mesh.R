@@ -44,6 +44,8 @@
 #' \item{template}{A character indicating the template of the sensor coordinates used for mesh computing.}
 #' \item{r}{A radius of the circle used for mesh creating.}
 #'
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata such as the actual number of generated mesh points, the template used, etc.
+#'
 #' @references EGI Geodesic Sensor Net Technical Manual (2024)
 #' Oostenveld, R., & Praamstra, P. (2001). The five percent electrode system for high-resolution EEG and ERP measurements. \emph{Clinical Neurophysiology},
 #' 112(4), 713-719. \doi{10.1016/s1388-2457(00)00527-7}
@@ -58,6 +60,8 @@
 #' # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template
 #' # using all electrodes
 #' M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256", type = "circle")
+#' # Inspect the attached metadata
+#' attr(M, "diegr_metadata")
 #'
 #' # Computing polygon 3D mesh with starting number 2000 points for BioSemi 128 template
 #' M_bio <- point_mesh(dimension = 3, n = 2000, template = "biosemi128")
@@ -225,6 +229,25 @@ point_mesh <- function(dimension = c(2,3),
     stop("Invalid dimension argument.")
   }
 
+  actual_n <- if (!is.null(mesh_out$D2)) nrow(mesh_out$D2) else nrow(mesh_out$D3)
+
+  mesh_meta <- list(
+    step = "point_mesh",
+    timestamp = Sys.time(),
+    package_version = as.character(utils::packageVersion("diegr")),
+    mesh_parameters = list(
+      dimension = dimension,
+      start_n = n,
+      density = actual_n,
+      radius = r,
+      template = if (!is.null(template)) template else "own_coordinates",
+      sensor_subset = if (!is.null(sensor_select)) "subset" else "all",
+      shape_type = type
+    )
+  )
+
+  attr(mesh_out, "diegr_metadata") <- mesh_meta
+
   mesh_out$template <- template
   mesh_out$r <- r
   class(mesh_out) <- c("mesh", class(mesh_out))
@@ -261,10 +284,12 @@ point_mesh <- function(dimension = c(2,3),
 #'
 #' When both \code{names_vec} and \code{own_coordinates} are provided, it is essential that the length of \code{names_vec} matches the number of rows in \code{own_coordinates}, otherwise the names are not plotted (despite the setting \code{label_sensors = TRUE}).
 #'
-#' @return A \code{ggplot} object when \code{plot_dim = 2}.
+#' @return A \code{ggplot} object when \code{plot_dim = 2}. Additionally, the returned ggplot object carries an `"diegr_metadata"` attribute with metadata such as the actual number of generated mesh points, the template used, etc.
+#'
 #' For \code{plot_dim = 3}, the mesh and sensors are drawn in the active \code{rgl} device.
 #'
-#' @seealso [point_mesh()]
+#'
+#' @seealso \code{\link{point_mesh}}
 #'
 #' @import rgl
 #' @import ggplot2
@@ -336,6 +361,16 @@ plot_point_mesh <- function(mesh,
 
   if (!is.numeric(plot_dim) || length(plot_dim) != 1 || !plot_dim %in% c(2, 3)) {
     stop("'plot_dim' must be either 2 or 3.")
+  }
+
+  mesh_meta <- attr(mesh, "diegr_metadata")
+
+  if (!is.null(mesh_meta)) {
+    plot_step <- list(
+      step = "plot_point_mesh",
+      timestamp = Sys.time()
+    )
+    mesh_meta$history <- append(mesh_meta$history, list(plot_step))
   }
 
   if (plot_dim == 3) {
@@ -416,7 +451,11 @@ plot_point_mesh <- function(mesh,
         }
     }
 
-    g
+    if (!is.null(mesh_meta)) {
+      attr(g, "diegr_metadata") <- mesh_meta
+    }
+
+    return(g)
   }
   else
     stop("The mesh input does not have x and y column.")
