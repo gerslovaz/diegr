@@ -24,6 +24,8 @@
 #'
 #' @return A `plotly` or `ggplot2` object with boxplots of EEG amplitude for individual epochs.
 #'
+#' Additionally, the returned object carries an `"diegr_metadata"` attribute with metadata.
+#'
 #' @import dplyr
 #' @import ggplot2
 #' @importFrom rlang .data
@@ -67,6 +69,27 @@ boxplot_epoch <- function(data,
     label = ""
   }
 
+  data_meta <- attr(data, "diegr_metadata")
+
+  if (is.null(data_meta)) {
+    data_meta <- list(
+      package_version = as.character(utils::packageVersion("diegr")),
+      history = list()
+    )
+  }
+
+    plot_step <- list(
+      step = "boxplot_epoch",
+      timestamp = Sys.time(),
+      params = list(
+        amplitude = amplitude,
+        time_lim = time_lim,
+        epochs_selected = if (is.null(epoch)) "all" else epoch,
+        interactivity = interactivity
+      )
+    )
+    data_meta$history <- append(data_meta$history, list(plot_step))
+
   if (interactivity) {
     fig <- plot_ly(db_df, x = ~time, y = as.formula(paste0("~.data$", amplitude))) |>
       add_boxplot(hovertext = paste("Epoch :", db_df$epoch))
@@ -87,11 +110,13 @@ boxplot_epoch <- function(data,
       ) |>
       config(mathjax = mathjax_config)
 
+    attr(fig, "diegr_metadata") <- data_meta
+
     return(fig)
   }
 
   # static graph
-  ggplot2::ggplot(
+  g <- ggplot2::ggplot(
     db_df,
     ggplot2::aes(
       x = .data$time,
@@ -110,6 +135,10 @@ boxplot_epoch <- function(data,
       y = expression(mu * "V")
     ) +
     ggplot2::theme_minimal()
+
+  attr(g, "diegr_metadata") <- data_meta
+
+  return(g)
 
 }
 
@@ -140,6 +169,8 @@ boxplot_epoch <- function(data,
 #' @seealso \code{\link{boxplot_epoch}}
 #'
 #' @return A `plotly` or `ggplot2` object with boxplots of EEG amplitude across subjects.
+#'
+#' Additionally, the returned object carries an `"diegr_metadata"` attribute with metadata.
 #'
 #' @import dplyr
 #' @import ggplot2
@@ -180,6 +211,27 @@ boxplot_subject <- function(data,
     dplyr::select("time", "subject", {{ amplitude }})
   db_df <- collect(db_sub)
 
+  data_meta <- attr(data, "diegr_metadata")
+
+  if (is.null(data_meta)) {
+    data_meta <- list(
+      package_version = as.character(utils::packageVersion("diegr")),
+      history = list()
+    )
+  }
+
+  plot_step <- list(
+    step = "boxplot_subject",
+    timestamp = Sys.time(),
+    params = list(
+      amplitude = amplitude,
+      time_lim = time_lim,
+      subjects_selected = if (is.null(subject)) "all" else subject,
+      interactivity = interactivity
+    )
+  )
+  data_meta$history <- append(data_meta$history, list(plot_step))
+
   if (!is.null(title_label)) {
     label <- title_label
   } else {
@@ -206,11 +258,13 @@ boxplot_subject <- function(data,
       ) |>
       config(mathjax = mathjax_config)
 
+    attr(fig, "diegr_metadata") <- data_meta
+
     return(fig)
   }
 
   # static graph
-  ggplot2::ggplot(
+  g <- ggplot2::ggplot(
     db_df,
     ggplot2::aes(
       x = .data$time,
@@ -230,6 +284,10 @@ boxplot_subject <- function(data,
     ) +
     ggplot2::theme_minimal()
 
+  attr(g, "diegr_metadata") <- data_meta
+
+  return(g)
+
 }
 
 
@@ -247,6 +305,8 @@ boxplot_subject <- function(data,
 #' @param interactivity Logical. Determines whether to render an interactive `plotly` graph (default) or a static `ggplot` graph.
 #'
 #' @return A `plotly` or `ggplot2` object with boxplots of response times.
+#'
+#' Additionally, the returned object carries an `"diegr_metadata"` attribute with metadata.
 #'
 #' @import dplyr
 #' @import ggplot2
@@ -292,6 +352,26 @@ boxplot_rt <- function(data,
     dplyr::select(dplyr::all_of(select_cols))
   data <- collect(data)
 
+  data_meta <- attr(data, "diegr_metadata")
+
+  if (is.null(data_meta)) {
+    data_meta <- list(
+      package_version = as.character(utils::packageVersion("diegr")),
+      history = list()
+    )
+  }
+
+  plot_step <- list(
+    step = "boxplot_rt",
+    timestamp = Sys.time(),
+    params = list(
+      subjects_selected = if (is.null(subject)) "all" else subject,
+      interactivity = interactivity
+    )
+  )
+  data_meta$history <- append(data_meta$history, list(plot_step))
+
+
   if (interactivity) {
     args <- list(
       data = data,
@@ -314,11 +394,13 @@ boxplot_rt <- function(data,
         yaxis = list(title = "Response time (ms)")
       )
 
+    attr(fig, "diegr_metadata") <- data_meta
+
     return(fig)
   }
 
   # static graph
-  ggplot2::ggplot(
+  g <- ggplot2::ggplot(
     data,
     ggplot2::aes(
       x = .data$subject,
@@ -340,4 +422,8 @@ boxplot_rt <- function(data,
       fill = if (has_condition) "Condition" else NULL
     ) +
     ggplot2::theme_minimal()
+
+  attr(g, "diegr_metadata") <- data_meta
+
+  return(g)
 }

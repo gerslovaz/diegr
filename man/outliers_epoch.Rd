@@ -37,6 +37,8 @@ A list with following components:
 \item{epoch_table}{A data frame with epoch ID and the number of time points in which the epoch was evaluated as outlier. (Only epochs with occurrence of outliers in at least one time point are included.)}
 \item{outliers_data}{A data frame with subset of data corresponding to the outliers found. (The full record for each flagged point from \code{epoch_table}.)}
 With the setting \code{print_tab = TRUE}, the \code{epoch_table} is also printed to the console.
+
+Additionally, the returned object carries an \code{"diegr_metadata"} attribute with metadata such as method used for outlier detection etc.
 }
 \description{
 Function identifies epochs with outlier values in a numeric EEG amplitude variable in chosen time points.

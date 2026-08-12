@@ -27,7 +27,7 @@
 #'
 #' Weighted vs un-weighted average (`type = "point"`):
 #' - If `weights_col` is `NULL`, each observation is treated equally (with weight = 1), producing a standard un-weighted mean, standard errors (SE), and CI.
-#' - If `weight_cols` is provided, a weighted average is computed using the values in the specified column as weights. SE and CI are computed based on the weighted variance.
+#' - If `weights_col` is provided, a weighted average is computed using the values in the specified column as weights. SE and CI are computed based on the weighted variance.
 #'
 #' Computing standard error of the mean:
 #' - For `type = "point"`, the standard error is computed as sample standard deviation divided by square root of the sample size for standard mean or its weighted alternative (if `weights_col` is specified).
@@ -39,7 +39,7 @@
 #' - Setting `type = "point"` without specifying `R`: the bounds are computed using standard error of the mean and approximation by the Student distribution.
 #' - Setting `type = "jack"`: the bounds are computed using jackknife standard error of the mean and approximation by the Student t-distribution. Note: used method assumes equal variance and symmetric distribution, which may be problematic for very small samples.
 #'
-#' Note: If there are `NA`'s in `amplitude`, `weights_col` or other columns, corresponding rows are ignored in the average calculation and function prints a warning message.
+#' Note: If there are `NA`s in `amplitude`, `weights_col` or other columns, corresponding rows are ignored in the average calculation and function prints a warning message.
 #'
 #'
 #' @return A tibble with resulting average and CI bounds according to the chosen `level`, `domain` and `alpha` arguments. The statistics are saved in columns
@@ -49,6 +49,8 @@
 #' - `ci_low` for lower bound of the confidence interval and
 #' - `ci_up` for upper bound of the confidence interval.
 #'
+#' Additionally, the returned object carries an `"diegr_metadata"` attribute with metadata such as level and domain used in computing etc.
+#'
 #' @export
 #'
 #' @references Efron B., Tibshirani RJ. \emph{An Introduction to the Bootstrap.} Chapman & Hall/CRC; 1994.
@@ -56,7 +58,7 @@
 #' @importFrom rlang .data
 #' @importFrom stats qt
 #' @importFrom tidyr drop_na
-#' @import dplyr
+#' @importFrom dplyr mutate any_of
 #'
 #'
 #'
@@ -165,6 +167,34 @@ compute_mean <- function(data,
                                 alpha = alpha)
   }
 
+  data_meta <- attr(data, "diegr_metadata")
+
+  if (is.null(data_meta)) {
+    data_meta <- list(
+      package_version = as.character(utils::packageVersion("diegr")),
+      history = list()
+    )
+  }
+
+  user_weights <- if (!is.null(weights_col) && weights_col == "help_weights_col") NULL else weights_col
+
+  mean_step <- list(
+    step = "compute_mean",
+    timestamp = Sys.time(),
+    params = list(
+      amplitude = amplitude,
+      domain = domain,
+      level = level,
+      type = type,
+      weights_used = user_weights,
+      R = if (type == "point") R else NULL,
+      alpha = alpha
+    )
+  )
+
+  data_meta$history <- append(data_meta$history, list(mean_step))
+  attr(output_df, "diegr_metadata") <- data_meta
+
   return(output_df)
 
 }
@@ -211,16 +241,7 @@ pointwise_mean <- function(data,
       n_out = sum(!is.na(.data[[amp_name]]) & !is.na(.data[[weights_col]])),
       n_eff = sum(if_else(!is.na(.data[[amp_name]]), as.numeric(.data[[weights_col]]), 0), na.rm = TRUE),      #n_eff = sum(.data[[weights_col]], na.rm = TRUE),
       avg_col = sum(.data[[amp_name]] * .data[[weights_col]], na.rm = TRUE) / sum(if_else(!is.na(.data[[amp_name]]), as.numeric(.data[[weights_col]]), 0), na.rm = TRUE),
-      #avg_col = sum(.data[[amp_name]] * .data[[weights_col]], na.rm = TRUE) / n_eff,
-      #se = sqrt(sum(.data[[weights_col]] * (.data[[amp_name]] - avg_col)^2, na.rm = TRUE) / ((n_eff - 1) * n_eff)),
-      #n_out = sum(!is.na(.data[[weights_col]])),
-      #se = {
-      #  n_eff = sum(.data[[weights_col]], na.rm = TRUE)
-      #  avg_col = sum(.data[[amp_name]] * .data[[weights_col]], na.rm = TRUE) / n_eff
-      #  sqrt(
-      #  sum(.data[[weights_col]] * (.data[[amp_name]] - avg_col)^2, na.rm = TRUE) / ((n_eff - 1) * n_eff)
-      #  )
-      #},
+
       se = if (sum(!is.na(.data[[amp_name]]) & !is.na(.data[[weights_col]])) > 1) {
         n_eff = sum(if_else(!is.na(.data[[amp_name]]), as.numeric(.data[[weights_col]]), 0), na.rm = TRUE)
         avg_col = sum(.data[[amp_name]] * .data[[weights_col]], na.rm = TRUE) / n_eff

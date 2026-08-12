@@ -41,6 +41,8 @@ A tibble with resulting average and CI bounds according to the chosen \code{leve
 \item \code{ci_low} for lower bound of the confidence interval and
 \item \code{ci_up} for upper bound of the confidence interval.
 }
+
+Additionally, the returned object carries an \code{"diegr_metadata"} attribute with metadata such as level and domain used in computing etc.
 }
 \description{
 Calculate a pointwise or a jackknife (leave-one-out) average signal across temporal or spatial domain together with standard error and pointwise confidence interval (CI) bounds.
@@ -62,7 +64,7 @@ The function assumes input adapted to the desired level of averaging (i.e. for \
 Weighted vs un-weighted average (\code{type = "point"}):
 \itemize{
 \item If \code{weights_col} is \code{NULL}, each observation is treated equally (with weight = 1), producing a standard un-weighted mean, standard errors (SE), and CI.
-\item If \code{weight_cols} is provided, a weighted average is computed using the values in the specified column as weights. SE and CI are computed based on the weighted variance.
+\item If \code{weights_col} is provided, a weighted average is computed using the values in the specified column as weights. SE and CI are computed based on the weighted variance.
 }
 
 Computing standard error of the mean:
@@ -79,7 +81,7 @@ For each average value, the upper and lower bounds of the point confidence inter
 \item Setting \code{type = "jack"}: the bounds are computed using jackknife standard error of the mean and approximation by the Student t-distribution. Note: used method assumes equal variance and symmetric distribution, which may be problematic for very small samples.
 }
 
-Note: If there are \code{NA}'s in \code{amplitude}, \code{weights_col} or other columns, corresponding rows are ignored in the average calculation and function prints a warning message.
+Note: If there are \code{NA}s in \code{amplitude}, \code{weights_col} or other columns, corresponding rows are ignored in the average calculation and function prints a warning message.
 }
 \examples{
 # Average (pointwise) raw signal for subject 1 and electrode E1

@@ -35,6 +35,8 @@
 #' \item{outliers_data}{A data frame with subset of data corresponding to the outliers found. (The full record for each flagged point from `epoch_table`.)}
 #' With the setting `print_tab = TRUE`, the `epoch_table` is also printed to the console.
 #'
+#' Additionally, the returned object carries an `"diegr_metadata"` attribute with metadata such as method used for outlier detection etc.
+#'
 #' @importFrom grDevices boxplot.stats
 #' @importFrom stats lm mad median quantile sd
 #' @importFrom rlang .data
@@ -143,5 +145,37 @@ outliers_epoch <- function(data,
    outdata <- outdata |>
      dplyr::select(-"outliers")
 
-  invisible(list(epoch_table = epoch_tbl, outliers_data = outdata))
+   data_meta <- attr(data, "diegr_metadata")
+
+   if (is.null(data_meta)) {
+     data_meta <- list(
+       package_version = as.character(utils::packageVersion("diegr")),
+       history = list()
+     )
+   }
+
+   step_params <- list(
+     amplitude = amplitude,
+     time_subset = if (!is.null(time)) "subset" else "all",
+     method = method
+   )
+
+   # add parameters according to the method
+   if (method == "iqr") step_params$k_iqr <- k_iqr
+   if (method == "percentile") step_params$p <- p
+   if (method == "hampel") step_params$k_mad <- k_mad
+
+   outlier_step <- list(
+     step = "outliers_epoch",
+     timestamp = Sys.time(),
+     params = step_params
+   )
+
+   data_meta$history <- append(data_meta$history, list(outlier_step))
+
+  out_list <- list(epoch_table = epoch_tbl, outliers_data = outdata)
+
+  attr(out_list, "diegr_metadata") <- data_meta
+
+  invisible(out_list)
 }

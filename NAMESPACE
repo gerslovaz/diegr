@@ -32,6 +32,7 @@ import(plotly, except = last_plot)
 
 import(rgl)
 import(sf)
+importFrom(dplyr,any_of)
 importFrom(dplyr,arrange)
 importFrom(dplyr,collect)
 importFrom(dplyr,distinct)

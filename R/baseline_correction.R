@@ -32,6 +32,9 @@
 #' @return A data frame/tibble with added columns:
 #' \item{signal_base}{Signal corrected by subtracting the baseline for each epoch.}
 #' \item{baseline}{A baseline value used for correction.}
+#'
+#' Additionally, the returned object carries an `"diegr_metadata"` attribute with metadata.
+#'
 #' @export
 #'
 #' @importFrom rlang .data
@@ -93,6 +96,25 @@ baseline_correction <- function(data,
     warning("Some 'baseline_range' values are not present in the 'time' column.")
   }
 
+  data_meta <- attr(data, "diegr_metadata")
+
+  if (is.null(data_meta)) {
+    data_meta <- list(
+      package_version = as.character(utils::packageVersion("diegr")),
+      history = list()
+    )
+  }
+
+  baseline_step <- list(
+    step = "baseline_correction",
+    timestamp = Sys.time(),
+    params = list(
+      baseline_range = baseline_range,
+      type = type
+    )
+  )
+  data_meta$history <- append(data_meta$history, list(baseline_step))
+
   basel_data <- data |>
     dplyr::filter(.data$time >= !!min(baseline_range, na.rm = TRUE),
                   .data$time <= !!max(baseline_range, na.rm = TRUE)) |>
@@ -101,8 +123,11 @@ baseline_correction <- function(data,
 
   newdata <- data |>
     dplyr::left_join(basel_data, by = group_vars) |>
-    dplyr::mutate(signal_base = .data$signal - .data$baseline)
+    dplyr::mutate(signal_base = .data$signal - .data$baseline) |>
+    dplyr::collect()
 
-  return(dplyr::collect(newdata))
+  attr(newdata, "diegr_metadata") <- data_meta
+
+  return(newdata)
 
 }
