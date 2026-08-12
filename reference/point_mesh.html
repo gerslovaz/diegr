@@ -104,7 +104,9 @@ For the equivalence between 2D and 3D mesh and the possibility to compare models
 <dt>r</dt>
 <dd><p>A radius of the circle used for mesh creating.</p></dd>
 
-</dl></div>
+
+</dl><p>Additionally, the returned object carries a <code>"diegr_metadata"</code> attribute with metadata such as the actual number of generated mesh points, the template used, etc.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>If neither <code>template</code> nor <code>own_coordinates</code> is specified, the <code>"HCGSN256"</code> template is used by default to create the mesh.</p>
@@ -134,6 +136,40 @@ Oostenveld, R., &amp; Praamstra, P. (2001). The five percent electrode system fo
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Computing circle 2D mesh with starting number 4000 points for HCGSN256 template</span></span></span>
 <span class="r-in"><span><span class="co"># using all electrodes</span></span></span>
 <span class="r-in"><span><span class="va">M</span> <span class="op">&lt;-</span> <span class="fu">point_mesh</span><span class="op">(</span>dimension <span class="op">=</span> <span class="fl">2</span>, n <span class="op">=</span> <span class="fl">4000</span>, template <span class="op">=</span> <span class="st">"HCGSN256"</span>, type <span class="op">=</span> <span class="st">"circle"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Inspect the attached metadata</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">M</span>, <span class="st">"diegr_metadata"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $step</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "point_mesh"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $timestamp</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2026-08-12 14:09:20 UTC"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $package_version</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "0.2.0"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $mesh_parameters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $mesh_parameters$dimension</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $mesh_parameters$start_n</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $mesh_parameters$density</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6077</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $mesh_parameters$radius</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 483</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $mesh_parameters$template</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "HCGSN256"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $mesh_parameters$sensor_subset</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "all"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $mesh_parameters$shape_type</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "circle"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Computing polygon 3D mesh with starting number 2000 points for BioSemi 128 template</span></span></span>
 <span class="r-in"><span><span class="va">M_bio</span> <span class="op">&lt;-</span> <span class="fu">point_mesh</span><span class="op">(</span>dimension <span class="op">=</span> <span class="fl">3</span>, n <span class="op">=</span> <span class="fl">2000</span>, template <span class="op">=</span> <span class="st">"biosemi128"</span><span class="op">)</span></span></span>

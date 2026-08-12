@@ -90,6 +90,10 @@ following components:
 
   A radius of the circle used for mesh creating.
 
+Additionally, the returned object carries a `"diegr_metadata"` attribute
+with metadata such as the actual number of generated mesh points, the
+template used, etc.
+
 ## Details
 
 If neither `template` nor `own_coordinates` is specified, the
@@ -145,6 +149,40 @@ high-resolution EEG and ERP measurements. *Clinical Neurophysiology*,
 # Computing circle 2D mesh with starting number 4000 points for HCGSN256 template
 # using all electrodes
 M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256", type = "circle")
+# Inspect the attached metadata
+attr(M, "diegr_metadata")
+#> $step
+#> [1] "point_mesh"
+#> 
+#> $timestamp
+#> [1] "2026-08-12 14:09:20 UTC"
+#> 
+#> $package_version
+#> [1] "0.2.0"
+#> 
+#> $mesh_parameters
+#> $mesh_parameters$dimension
+#> [1] 2
+#> 
+#> $mesh_parameters$start_n
+#> [1] 4000
+#> 
+#> $mesh_parameters$density
+#> [1] 6077
+#> 
+#> $mesh_parameters$radius
+#> [1] 483
+#> 
+#> $mesh_parameters$template
+#> [1] "HCGSN256"
+#> 
+#> $mesh_parameters$sensor_subset
+#> [1] "all"
+#> 
+#> $mesh_parameters$shape_type
+#> [1] "circle"
+#> 
+#> 
 
 # Computing polygon 3D mesh with starting number 2000 points for BioSemi 128 template
 M_bio <- point_mesh(dimension = 3, n = 2000, template = "biosemi128")

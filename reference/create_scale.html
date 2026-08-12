@@ -81,6 +81,7 @@
 <dd><p>A vector with breaks for cutting the data range.</p></dd>
 
 </dl><p>The list is intended for use in <code><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_fill_gradientn</a></code> or similar plotting calls.</p>
+<p>Additionally, the returned object carries an <code>"diegr_metadata"</code> attribute with metadata such as the actual <code>k</code> used for creating a scale etc.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -105,6 +106,27 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $breaks</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] -10  -8  -6  -4  -2   0   2   4   6   8  10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"diegr_metadata")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"diegr_metadata")$step</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "create_scale"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"diegr_metadata")$timestamp</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2026-08-12 14:09:08 UTC"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"diegr_metadata")$package_version</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "0.2.0"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"diegr_metadata")$scale_parameters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"diegr_metadata")$scale_parameters$col_range_used</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -10  10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"diegr_metadata")$scale_parameters$symmetric_applied</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"diegr_metadata")$scale_parameters$k_used</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create an asymmetric topographic scale on interval c(-5,10) with small k (finer division)</span></span></span>

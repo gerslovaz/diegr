@@ -54,6 +54,10 @@ The list is intended for use in
 [`scale_fill_gradientn`](https://ggplot2.tidyverse.org/reference/scale_gradient.html)
 or similar plotting calls.
 
+Additionally, the returned object carries an `"diegr_metadata"`
+attribute with metadata such as the actual `k` used for creating a scale
+etc.
+
 ## Details
 
 The topographical palette (`type = "topo"`) is created according to
@@ -108,6 +112,27 @@ create_scale(col_range = c(-10,10), type = "redblue")
 #> 
 #> $breaks
 #>  [1] -10  -8  -6  -4  -2   0   2   4   6   8  10
+#> 
+#> attr(,"diegr_metadata")
+#> attr(,"diegr_metadata")$step
+#> [1] "create_scale"
+#> 
+#> attr(,"diegr_metadata")$timestamp
+#> [1] "2026-08-12 14:09:08 UTC"
+#> 
+#> attr(,"diegr_metadata")$package_version
+#> [1] "0.2.0"
+#> 
+#> attr(,"diegr_metadata")$scale_parameters
+#> attr(,"diegr_metadata")$scale_parameters$col_range_used
+#> [1] -10  10
+#> 
+#> attr(,"diegr_metadata")$scale_parameters$symmetric_applied
+#> [1] TRUE
+#> 
+#> attr(,"diegr_metadata")$scale_parameters$k_used
+#> [1] 0.1
+#> 
 #> 
 
 # Create an asymmetric topographic scale on interval c(-5,10) with small k (finer division)
