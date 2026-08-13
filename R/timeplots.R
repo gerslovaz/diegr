@@ -29,6 +29,8 @@
 #'
 #' @return A `plotly` object showing an interactive time series of the signal according to the chosen level.
 #'
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata such as plot and data details.
+#'
 #' @import ggplot2
 #' @rawNamespace import(plotly, except = last_plot)
 #' @importFrom grDevices rainbow
@@ -157,11 +159,38 @@ interactive_waveforms <- function(data,
     mathjax_config <- NULL
   }
 
-  p |> plotly::layout(xaxis = list(title = "Time (ms)"),
+  p <- p |> plotly::layout(xaxis = list(title = "Time (ms)"),
             yaxis = list(title = y_label),
             showlegend = FALSE
             ) |>
      config(mathjax = mathjax_config)
+
+  data_meta <- attr(data, "diegr_metadata")
+
+  if (is.null(data_meta)) data_meta <- list(history = list())
+
+  plot_step <- list(
+    step = "interactive_waveforms",
+    timestamp = Sys.time(),
+    params = list(
+      amplitude_column = amplitude,
+      level = level,
+      FS = FS,
+      null_timepoint = t0,
+      palette = col_palette,
+      average_plotted = avg
+    )
+  )
+
+  plot_metadata <- list(
+    package_version = tryCatch(as.character(utils::packageVersion("diegr")), error = function(e) "unknown"),
+    data_history = data_meta$history,
+    plot_info = plot_step
+  )
+
+  attr(p, "diegr_metadata") <- plot_metadata
+
+  return(p)
 
 }
 
@@ -189,6 +218,9 @@ interactive_waveforms <- function(data,
 #'
 #'
 #' @returns A `ggplot` object showing the time course of the average EEG signal with pointwise confidence intervals.
+#'
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata such as plot and data details.
+#'
 #' @export
 #'
 #' @import ggplot2
@@ -252,10 +284,6 @@ plot_time_mean <- function(data,
     warning("There are NA's in the 'average' column, these values are ignored in the plot.")
   }
 
-  if (any(is.na(data[["average"]]))) {
-    warning("There are NA's in the 'average' column, these values are ignored in the plot.")
-  }
-
   if (any(is.na(data[["ci_low"]]))) {
     warning("There are NA's in the 'ci_low' column, these values are ignored in the plot.")
   }
@@ -304,6 +332,29 @@ plot_time_mean <- function(data,
   if (!is.null(y_limits)) { # expand the limits
     g <- g + coord_cartesian(ylim = y_limits)
   }
+
+  data_meta <- attr(data, "diegr_metadata")
+
+  if (is.null(data_meta)) data_meta <- list(history = list())
+
+  plot_step <- list(
+    step = "plot_time_mean",
+    timestamp = Sys.time(),
+    params = list(
+      condition_column = condition_column,
+      FS = FS,
+      null_timepoint = t0,
+      y_limits = y_limits
+    )
+  )
+
+  plot_metadata <- list(
+    package_version = tryCatch(as.character(utils::packageVersion("diegr")), error = function(e) "unknown"),
+    data_history = data_meta$history,
+    plot_info = plot_step
+  )
+
+  attr(g, "diegr_metadata") <- plot_metadata
 
   return(g)
 }

@@ -15,6 +15,8 @@
 #'
 #' @return A \code{plotly} widget object containing the interactive 3D surface plot.
 #'
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata such as details about the data and plot.
+#'
 #' @seealso \code{\link{interactive_surfaceplot_curves}}, \code{\link{scalp_plot}}
 #'
 #' @export
@@ -177,6 +179,33 @@ interactive_surfaceplot <- function(data,
       )
   }
 
+  data_meta <- attr(data, "diegr_metadata")
+  mesh_meta <- attr(mesh, "diegr_metadata")
+  scale_meta <- attr(col_scale, "diegr_metadata")
+
+  if (is.null(data_meta)) data_meta <- list(history = list())
+  if (is.null(mesh_meta)) mesh_meta <- list(mesh_parameters = list())
+  if (is.null(scale_meta)) scale_meta <- list(scale_parameters = list())
+
+  plot_step <- list(
+    step = "interactive_surfaceplot",
+    timestamp = Sys.time(),
+    params = list(
+      amplitude_column = amplitude,
+      template = active_template
+    )
+  )
+
+  plot_metadata <- list(
+    package_version = tryCatch(as.character(utils::packageVersion("diegr")), error = function(e) "unknown"),
+    data_history = data_meta$history,
+    mesh_info = mesh_meta$mesh_parameters,
+    scale_info = scale_meta$scale_parameters,
+    plot_info = plot_step
+  )
+
+  attr(fig, "diegr_metadata") <- plot_metadata
+
   return(fig)
 }
 
@@ -221,6 +250,8 @@ make_plotly_scale <- function(col_scale) {
 #' @param col_scale Optionally, a colour scale to be utilised for plotting. If not defined, it is computed from `col_range`.
 #'
 #' @return A \code{plotly} widget object containing the interactive 3D surface plot.
+#'
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata.
 #'
 #' @seealso \code{\link{interactive_surfaceplot}}, \code{\link{plot_topo_mean}}
 #'
@@ -312,6 +343,29 @@ interactive_surfaceplot_curves <- function(data,
       )
     )
   )
+
+  data_meta <- attr(data, "diegr_metadata")
+  scale_meta <- attr(col_scale, "diegr_metadata")
+
+  if (is.null(data_meta)) data_meta <- list(history = list())
+  if (is.null(scale_meta)) scale_meta <- list(scale_parameters = list())
+
+  plot_step <- list(
+    step = "interactive_surfaceplot_curves",
+    timestamp = Sys.time(),
+    params = list(
+      amplitude_column = amplitude
+    )
+  )
+
+  plot_metadata <- list(
+    package_version = tryCatch(as.character(utils::packageVersion("diegr")), error = function(e) "unknown"),
+    data_history = data_meta$history,
+    scale_info = scale_meta$scale_parameters,
+    plot_info = plot_step
+  )
+
+  attr(fig, "diegr_metadata") <- plot_metadata
 
   return(fig)
 }

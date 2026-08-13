@@ -53,6 +53,8 @@ animate_topo(
 \value{
 If \code{output_path} is \code{NULL}, the function returns a \code{gganim} object and prints the animation to the RStudio Viewer.
 If \code{output_path} is specified, the animation is saved to the given file path and the function invisibly returns \code{NULL}.
+
+Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata such as details about the mesh used for plotting.
 }
 \description{
 Display a topographic animation of the change in amplitude over time. The function enables direct rendering in Rstudio Viewer or saving the animation in gif format to the chosen location.

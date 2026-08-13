@@ -50,6 +50,8 @@ animate_topo_mean(
 \value{
 If \code{output_path} is \code{NULL}, the function returns a \code{magick-image} object containing the animated frames and prints it to the RStudio Viewer.
 If \code{output_path} is specified, the animation is saved as a GIF to the given file path and the function invisibly returns \code{NULL}. The \code{gifski} and \code{magick} packages are required for animation export.
+
+Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata such as details about the mesh used for plotting.
 }
 \description{
 An animation of the average signal time course as a topographic map along with the lower and upper bounds of the confidence interval. In the output, three facets are plotted per frame: CI lower, average, CI upper.

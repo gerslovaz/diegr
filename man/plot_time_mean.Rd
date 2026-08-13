@@ -37,6 +37,8 @@ plot_time_mean(
 }
 \value{
 A \code{ggplot} object showing the time course of the average EEG signal with pointwise confidence intervals.
+
+Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata such as plot and data details.
 }
 \description{
 Plot a time course of the average EEG signal amplitude with pointwise confidence intervals (CIs), colour-coded by a user-defined grouping variable such as experimental condition, subject or group. If the \code{condition_column} is \code{NULL}, all observations are treated as a single condition.

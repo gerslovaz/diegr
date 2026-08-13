@@ -50,6 +50,8 @@ animate_scalp(
 \value{
 If \code{frames_dir} is \code{NULL}, the function creates an interactive 3D animation in the \code{rgl} window and invisibly returns \code{NULL}.
 If \code{frames_dir} is specified, individual animation frames (PNG) are saved. If \code{output_path} is also specified, an MP4 video is encoded and the function invisibly returns \code{NULL}.
+
+Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata such as details about the mesh used for plotting.
 }
 \description{
 Display a topographic 3D scalp animation of the change in amplitude over time. The function enables direct rendering in Rstudio Viewer or saving the animation in MP4 format or individual frames in PNG format to the chosen location.

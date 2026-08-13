@@ -37,6 +37,8 @@ interactive_waveforms(
 }
 \value{
 A \code{plotly} object showing an interactive time series of the signal according to the chosen level.
+
+Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata such as plot and data details.
 }
 \description{
 Function for plotting time series of EEG signal colour-coded by epoch, condition, channel, subject or group (depending on selected \code{level} parameter) an interactive \code{plotly} graph. The function assumes that the input data have already been filtered to the desired subset according to the \code{level}.

@@ -31,6 +31,8 @@
 #' If `output_path` is `NULL`, the function returns a `gganim` object and prints the animation to the RStudio Viewer.
 #' If `output_path` is specified, the animation is saved to the given file path and the function invisibly returns `NULL`.
 #'
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata such as details about the mesh used for plotting.
+#'
 #' @export
 #'
 #' @seealso Static version: \code{\link{topo_plot}}, animated 3D scalp map: \code{\link{animate_scalp}}
@@ -146,8 +148,6 @@ animate_topo <- function(data,
     coords <- coords[coords$sensor %in% sensor_select, ]
   }
 
-  #stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
-
   if (missing(mesh)) {
     mesh <- point_mesh(dimension = 2, template = active_template,
                        sensor_select = sensor_select)
@@ -243,16 +243,54 @@ animate_topo <- function(data,
 
   g <- g + gganimate::transition_manual(.data$time) # animation
 
+  data_meta <- attr(data, "diegr_metadata")
+  mesh_meta <- attr(mesh, "diegr_metadata")
+  scale_meta <- attr(col_scale, "diegr_metadata")
+
+  if (is.null(data_meta)) data_meta <- list(history = list())
+  if (is.null(mesh_meta)) mesh_meta <- list(mesh_parameters = list())
+  if (is.null(scale_meta)) scale_meta <- list(scale_parameters = list())
+
+  plot_step <- list(
+    step = "animate_topo",
+    timestamp = Sys.time(),
+    params = list(
+      amplitude_column = amplitude,
+      t_lim = t_lim,
+      FS = FS,
+      null_time = t0,
+      template = active_template,
+      output_path = output_path
+    )
+  )
+
+  plot_metadata <- list(
+    package_version = tryCatch(as.character(utils::packageVersion("diegr")), error = function(e) "unknown"),
+    data_history = data_meta$history,
+    mesh_info = mesh_meta$mesh_parameters,
+    scale_info = scale_meta$scale_parameters,
+    plot_info = plot_step
+  )
+
+
   if (!is.null(output_path)) {
     if (!requireNamespace("gifski", quietly = TRUE)) {
       stop("To export animation, the 'gifski' package is required.")
     }
     anim <- gganimate::animate(g, renderer = gganimate::gifski_renderer(), ...)
 
+    attr(anim, "diegr_metadata") <- plot_metadata
+
     gganimate::anim_save(output_path, animation = anim)
     message("Animation saved into: ", output_path)
+
+    invisible(anim)
   } else {
-  print(gganimate::animate(g, ...))
+  anim <- gganimate::animate(g, ...)
+  attr(anim, "diegr_metadata") <- plot_metadata
+
+  print(anim)
+  invisible(anim)
 }
 
 }
@@ -364,6 +402,8 @@ prepare_anim_structure <- function(data,
 #' @return
 #' If `frames_dir` is `NULL`, the function creates an interactive 3D animation in the \code{rgl} window and invisibly returns \code{NULL}.
 #' If `frames_dir` is specified, individual animation frames (PNG) are saved. If `output_path` is also specified, an MP4 video is encoded and the function invisibly returns \code{NULL}.
+#'
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata such as details about the mesh used for plotting.
 #'
 #' @seealso Static version: \code{\link{scalp_plot}}, animated 2D topo map: \code{\link{animate_topo}}
 #'
@@ -505,6 +545,43 @@ animate_scalp <- function(data,
       })
     }
   }
+
+  data_meta <- attr(data, "diegr_metadata")
+  mesh_meta <- attr(mesh, "diegr_metadata")
+  scale_meta <- attr(col_scale, "diegr_metadata")
+
+  if (is.null(data_meta)) data_meta <- list(history = list())
+  if (is.null(mesh_meta)) mesh_meta <- list(mesh_parameters = list())
+  if (is.null(scale_meta)) scale_meta <- list(scale_parameters = list())
+
+  plot_step <- list(
+    step = "animate_scalp",
+    timestamp = Sys.time(),
+    params = list(
+      amplitude_column = amplitude,
+      template = template,
+      sec = sec,
+      framerate = framerate
+    )
+  )
+
+  plot_metadata <- list(
+    package_version = tryCatch(as.character(utils::packageVersion("diegr")), error = function(e) "unknown"),
+    data_history = data_meta$history,
+    mesh_info = mesh_meta$mesh_parameters,
+    scale_info = scale_meta$scale_parameters,
+    plot_info = plot_step
+  )
+
+  anim_result <- list(
+    status = "completed",
+    mode = if (!is.null(frames_dir)) "export" else "live_preview",
+    total_frames = length(unique(newdata$time)),
+    output_path = output_path
+  )
+
+  attr(anim_result, "diegr_metadata") <- plot_metadata
+  invisible(anim_result)
 
 }
 
@@ -695,6 +772,8 @@ prepare_anim_structure_CI <- function(data,
 #' @return
 #' If `output_path` is `NULL`, the function returns a `magick-image` object containing the animated frames and prints it to the RStudio Viewer.
 #' If `output_path` is specified, the animation is saved as a GIF to the given file path and the function invisibly returns `NULL`. The `gifski` and `magick` packages are required for animation export.
+#'
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata such as details about the mesh used for plotting.
 #'
 #' @seealso \code{\link{animate_topo}}, \code{\link{compute_mean}}, \code{\link{baseline_correction}}, static version: \code{\link{plot_topo_mean}}
 #'
@@ -941,6 +1020,36 @@ animate_topo_mean <- function(data,
     new_gif <- c(new_gif, combined)
   }
 
+  data_meta <- attr(data, "diegr_metadata")
+  mesh_meta <- attr(mesh, "diegr_metadata")
+  scale_meta <- attr(col_scale, "diegr_metadata")
+
+  if (is.null(data_meta)) data_meta <- list(history = list())
+  if (is.null(mesh_meta)) mesh_meta <- list(mesh_parameters = list())
+  if (is.null(scale_meta)) scale_meta <- list(scale_parameters = list())
+
+  plot_step <- list(
+    step = "animate_topo_mean",
+    timestamp = Sys.time(),
+    params = list(
+      t_lim = t_lim,
+      FS = FS,
+      null_time = t0,
+      template = active_template,
+      output_path = output_path
+    )
+  )
+
+  plot_metadata <- list(
+    package_version = tryCatch(as.character(utils::packageVersion("diegr")), error = function(e) "unknown"),
+    data_history = data_meta$history,
+    mesh_info = mesh_meta$mesh_parameters,
+    scale_info = scale_meta$scale_parameters,
+    plot_info = plot_step
+  )
+
+  attr(new_gif, "diegr_metadata") <- plot_metadata
+
   if (!is.null(output_path)) {
     if (!requireNamespace("gifski", quietly = TRUE)) {
       stop("To export animation, the 'gifski' package is required.")
@@ -951,6 +1060,8 @@ animate_topo_mean <- function(data,
   } else {
     print(new_gif)
   }
+
+  invisible(new_gif)
 
 }
 

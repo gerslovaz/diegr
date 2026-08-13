@@ -25,6 +25,8 @@ interactive_surfaceplot_curves(
 }
 \value{
 A \code{plotly} widget object containing the interactive 3D surface plot.
+
+Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata.
 }
 \description{
 Creates an interactive 3D surface plot displaying the EEG signal amplitude across different sensors and time points.
