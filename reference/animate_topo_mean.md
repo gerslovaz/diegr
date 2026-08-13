@@ -113,6 +113,9 @@ containing the animated frames and prints it to the RStudio Viewer. If
 file path and the function invisibly returns `NULL`. The `gifski` and
 `magick` packages are required for animation export.
 
+Additionally, the returned object carries a `"diegr_metadata"` attribute
+with metadata such as details about the mesh used for plotting.
+
 ## Details
 
 Notes: If a `mesh` object is provided, its internal template name

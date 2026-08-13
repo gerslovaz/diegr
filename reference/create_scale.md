@@ -117,7 +117,7 @@ create_scale(col_range = c(-10,10), type = "redblue")
 #> [1] "create_scale"
 #> 
 #> attr(,"diegr_metadata")$timestamp
-#> [1] "2026-08-13 11:38:17 UTC"
+#> [1] "2026-08-13 13:56:48 UTC"
 #> 
 #> attr(,"diegr_metadata")$package_version
 #> [1] "0.2.0"

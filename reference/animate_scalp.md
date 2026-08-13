@@ -112,6 +112,9 @@ animation in the `rgl` window and invisibly returns `NULL`. If
 If `output_path` is also specified, an MP4 video is encoded and the
 function invisibly returns `NULL`.
 
+Additionally, the returned object carries a `"diegr_metadata"` attribute
+with metadata such as details about the mesh used for plotting.
+
 ## Details
 
 Setting the parameter `tri` requires defining a `mesh` parameter. The

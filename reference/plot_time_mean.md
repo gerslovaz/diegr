@@ -83,6 +83,9 @@ plot_time_mean(
 A `ggplot` object showing the time course of the average EEG signal with
 pointwise confidence intervals.
 
+Additionally, the returned object carries a `"diegr_metadata"` attribute
+with metadata such as plot and data details.
+
 ## Details
 
 The output in the form of a ggplot object allows to easily edit the

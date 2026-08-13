@@ -155,7 +155,7 @@ attr(M, "diegr_metadata")
 #> [1] "point_mesh"
 #> 
 #> $timestamp
-#> [1] "2026-08-13 11:38:28 UTC"
+#> [1] "2026-08-13 13:56:59 UTC"
 #> 
 #> $package_version
 #> [1] "0.2.0"
