@@ -54,9 +54,8 @@ The list is intended for use in
 [`scale_fill_gradientn`](https://ggplot2.tidyverse.org/reference/scale_gradient.html)
 or similar plotting calls.
 
-Additionally, the returned object carries an `"diegr_metadata"`
-attribute with metadata such as the actual `k` used for creating a scale
-etc.
+Additionally, the returned object carries a `"diegr_metadata"` attribute
+with metadata such as the actual `k` used for creating the scale.
 
 ## Details
 
@@ -118,7 +117,7 @@ create_scale(col_range = c(-10,10), type = "redblue")
 #> [1] "create_scale"
 #> 
 #> attr(,"diegr_metadata")$timestamp
-#> [1] "2026-08-12 17:03:11 UTC"
+#> [1] "2026-08-13 11:38:17 UTC"
 #> 
 #> attr(,"diegr_metadata")$package_version
 #> [1] "0.2.0"

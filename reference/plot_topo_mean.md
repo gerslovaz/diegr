@@ -91,6 +91,9 @@ plot_topo_mean(
 A `ggplot` object showing the static topographic map of the signal
 divided into three panels: CI lower, mean, CI upper.
 
+Additionally, the returned object carries a `"diegr_metadata"` attribute
+with metadata such as details about the mesh used for plotting.
+
 ## Details
 
 The spline interpolation is done independently for each CI bound and

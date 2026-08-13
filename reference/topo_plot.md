@@ -95,6 +95,9 @@ topo_plot(
 A `ggplot` object showing an interpolated topographic map of EEG
 amplitude.
 
+Additionally, the returned object carries a `"diegr_metadata"` attribute
+with metadata such as details about the mesh used for plotting.
+
 ## Details
 
 For more details about required mesh structure see

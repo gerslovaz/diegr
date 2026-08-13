@@ -42,8 +42,8 @@ A data frame/tibble with added columns:
 
   A baseline value used for correction.
 
-Additionally, the returned object carries an `"diegr_metadata"`
-attribute with metadata.
+Additionally, the returned object carries a `"diegr_metadata"` attribute
+with metadata.
 
 ## Details
 

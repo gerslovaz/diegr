@@ -84,8 +84,8 @@ plot_point_mesh(
 ## Value
 
 A `ggplot` object when `plot_dim = 2`. Additionally, the returned ggplot
-object carries an `"diegr_metadata"` attribute with metadata such as the
-actual number of generated mesh points, the template used, etc.
+object carries a `"diegr_metadata"` attribute with metadata such as the
+actual number of generated mesh points or the template used.
 
 For `plot_dim = 3`, the mesh and sensors are drawn in the active `rgl`
 device.

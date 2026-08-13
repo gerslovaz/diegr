@@ -91,8 +91,8 @@ following components:
   A radius of the circle used for mesh creating.
 
 Additionally, the returned object carries a `"diegr_metadata"` attribute
-with metadata such as the actual number of generated mesh points, the
-template used, etc.
+with metadata such as the actual number of generated mesh points or the
+template used.
 
 ## Details
 
@@ -155,7 +155,7 @@ attr(M, "diegr_metadata")
 #> [1] "point_mesh"
 #> 
 #> $timestamp
-#> [1] "2026-08-12 17:03:22 UTC"
+#> [1] "2026-08-13 11:38:28 UTC"
 #> 
 #> $package_version
 #> [1] "0.2.0"
