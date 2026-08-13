@@ -38,6 +38,8 @@
 #' @return Called for its side effect of drawing a 3D scalp map in an interactive \code{rgl} window.
 #' It returns an object of class \code{"rglLowLevel"} (an integer vector) containing the IDs of the drawn objects.
 #'
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata such as details about the mesh used for plotting.
+#'
 #' @export
 #'
 #' @seealso \code{\link{point_mesh}}, \code{\link{make_triangulation}}, \code{\link{create_scale}}, animated version: \code{\link{animate_scalp}}
@@ -183,9 +185,11 @@ scalp_plot <- function(data,
 
 
   if (missing(view)) {
-    rgl::shade3d(rgl::mesh3d(x = mesh3$x, y = mesh3$y, z = mesh3$z, triangles = t(tri)),
+    view_used <- "default"
+    shape_id <- rgl::shade3d(rgl::mesh3d(x = mesh3$x, y = mesh3$y, z = mesh3$z, triangles = t(tri)),
                  col = y_col, lit = FALSE)
   } else {
+    view_used <- view
     U0 <- diag(4)
     Upost <- rgl::rotate3d(U0, pi/2, -1,0,0)
 
@@ -207,10 +211,40 @@ scalp_plot <- function(data,
 
     rgl::par3d(userMatrix = U) # rotate view
 
-    rgl::shade3d(rgl::mesh3d(x = mesh3$x, y = mesh3$y, z = mesh3$z, triangles = t(tri)),
+    shape_id <- rgl::shade3d(rgl::mesh3d(x = mesh3$x, y = mesh3$y, z = mesh3$z, triangles = t(tri)),
                  col = y_col, lit = FALSE)
 
     rgl::useSubscene3d(current) # original subscene
   }
+
+  data_meta <- attr(data, "diegr_metadata")
+  mesh_meta <- attr(mesh, "diegr_metadata")
+  scale_meta <- attr(col_scale, "diegr_metadata")
+
+  if (is.null(data_meta)) data_meta <- list(history = list())
+  if (is.null(mesh_meta)) mesh_meta <- list(mesh_parameters = list())
+  if (is.null(scale_meta)) scale_meta <- list(scale_parameters = list())
+
+  plot_step <- list(
+    step = "scalp_plot",
+    timestamp = Sys.time(),
+    params = list(
+      amplitude_column = amplitude,
+      template = active_template,
+      view = view_used
+    )
+  )
+
+  plot_metadata <- list(
+    package_version = tryCatch(as.character(utils::packageVersion("diegr")), error = function(e) "unknown"),
+    data_history = data_meta$history,
+    mesh_info = mesh_meta$mesh_parameters,
+    scale_info = scale_meta$scale_parameters,
+    plot_info = plot_step
+  )
+
+  attr(shape_id, "diegr_metadata") <- plot_metadata
+
+  invisible(shape_id)
 
  }

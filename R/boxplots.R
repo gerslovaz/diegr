@@ -24,7 +24,7 @@
 #'
 #' @return A `plotly` or `ggplot2` object with boxplots of EEG amplitude for individual epochs.
 #'
-#' Additionally, the returned object carries an `"diegr_metadata"` attribute with metadata.
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata.
 #'
 #' @import dplyr
 #' @import ggplot2
@@ -170,7 +170,7 @@ boxplot_epoch <- function(data,
 #'
 #' @return A `plotly` or `ggplot2` object with boxplots of EEG amplitude across subjects.
 #'
-#' Additionally, the returned object carries an `"diegr_metadata"` attribute with metadata.
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata.
 #'
 #' @import dplyr
 #' @import ggplot2
@@ -306,7 +306,7 @@ boxplot_subject <- function(data,
 #'
 #' @return A `plotly` or `ggplot2` object with boxplots of response times.
 #'
-#' Additionally, the returned object carries an `"diegr_metadata"` attribute with metadata.
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata.
 #'
 #' @import dplyr
 #' @import ggplot2

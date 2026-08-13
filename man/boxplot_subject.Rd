@@ -32,7 +32,7 @@ boxplot_subject(
 \value{
 A \code{plotly} or \code{ggplot2} object with boxplots of EEG amplitude across subjects.
 
-Additionally, the returned object carries an \code{"diegr_metadata"} attribute with metadata.
+Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata.
 }
 \description{
 Function for plotting interactive or static boxplots of EEG amplitude across subjects for a single epoch and channel, within a specified time interval. The function assumes data from a single epoch and a single sensor.

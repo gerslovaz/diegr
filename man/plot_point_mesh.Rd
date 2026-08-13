@@ -39,7 +39,7 @@ plot_point_mesh(
 \item{plot_dim}{A numeric value (\code{2} or \code{3}) specifying which dimension of the mesh to plot. If \code{NULL} (default), the function automatically plots 3D if available in the \code{mesh} object, otherwise it falls back to 2D.}
 }
 \value{
-A \code{ggplot} object when \code{plot_dim = 2}. Additionally, the returned ggplot object carries an \code{"diegr_metadata"} attribute with metadata such as the actual number of generated mesh points, the template used, etc.
+A \code{ggplot} object when \code{plot_dim = 2}. Additionally, the returned ggplot object carries a \code{"diegr_metadata"} attribute with metadata such as the actual number of generated mesh points or the template used.
 
 For \code{plot_dim = 3}, the mesh and sensors are drawn in the active \code{rgl} device.
 }

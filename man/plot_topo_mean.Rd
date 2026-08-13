@@ -37,6 +37,8 @@ plot_topo_mean(
 }
 \value{
 A \code{ggplot} object showing the static topographic map of the signal divided into three panels: CI lower, mean, CI upper.
+
+Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata such as details about the mesh used for plotting.
 }
 \description{
 Plot a topographic circle or polygon map of the average EEG signal amplitude and its lower and upper confidence interval bounds using topographic colour scale.

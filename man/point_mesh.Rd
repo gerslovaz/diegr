@@ -37,7 +37,7 @@ Returns a list of class \code{"mesh"} containing some (or all) of the following 
 \item{template}{A character indicating the template of the sensor coordinates used for mesh computing.}
 \item{r}{A radius of the circle used for mesh creating.}
 
-Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata such as the actual number of generated mesh points, the template used, etc.
+Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata such as the actual number of generated mesh points or the template used.
 }
 \description{
 Function creates an object of class \code{"mesh"}, which is a list of data frames with coordinates of a regular (in the sense of the equidistant distance between mesh nodes) mesh of points on the space defined by sensor coordinates. Circular or polygonal shape of the result mesh is available.

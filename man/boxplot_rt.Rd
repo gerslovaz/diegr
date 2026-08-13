@@ -17,7 +17,7 @@ colour-code the boxplots.}
 \value{
 A \code{plotly} or \code{ggplot2} object with boxplots of response times.
 
-Additionally, the returned object carries an \code{"diegr_metadata"} attribute with metadata.
+Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata.
 }
 \description{
 Function for plotting interactive or static boxplots of response time in individual epochs for selected subjects. Both the static \code{ggplot} output and the interactive \code{plotly} output can be easily customized and edited, while the interactive \code{plotly} output additionally allows easy identification of the epoch numbers corresponding to outliers.

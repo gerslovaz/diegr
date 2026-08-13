@@ -40,6 +40,8 @@ topo_plot(
 }
 \value{
 A \code{ggplot} object showing an interpolated topographic map of EEG amplitude.
+
+Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata such as details about the mesh used for plotting.
 }
 \description{
 Plot a topographic circle or polygon map of the EEG signal amplitude using topographic colour scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^2 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations.

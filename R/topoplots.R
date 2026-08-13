@@ -32,6 +32,9 @@
 #' This function focuses on visualization and does not perform any data subsetting. Users are expected to filter the data beforehand using standard dplyr verbs or \code{\link{pick_data}} function.
 #'
 #' @return A `ggplot` object showing an interpolated topographic map of EEG amplitude.
+#'
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata such as details about the mesh used for plotting.
+#'
 #' @export
 #'
 #' @seealso \code{\link{point_mesh}}, animated version: \code{\link{animate_topo}}, average topo map: \code{\link{plot_topo_mean}}
@@ -228,9 +231,38 @@ topo_plot <- function(data,
     g <- g + geom_text(data = coords_df, aes(label = .data$sensor), size = 2, vjust = -0.9)
   }
 
-  g +
+  g <- g +
     annotate("segment", x = x0, y = M + 0.07 * abs(M), xend = x0 - 0.08 * M, yend = M + 0.01 * abs(M), col = "gray40") +
     annotate("segment", x = x0, y = M + 0.07 * abs(M), xend = x0 + 0.08 * M, yend = M + 0.01 * abs(M), col = "gray40")
+
+  data_meta <- attr(data, "diegr_metadata")
+  mesh_meta <- attr(mesh, "diegr_metadata")
+  scale_meta <- attr(col_scale, "diegr_metadata")
+
+  if (is.null(data_meta)) data_meta <- list(history = list())
+  if (is.null(mesh_meta)) mesh_meta <- list(mesh_parameters = list())
+  if (is.null(scale_meta)) scale_meta <- list(scale_parameters = list())
+
+  plot_step <- list(
+    step = "topo_plot",
+    timestamp = Sys.time(),
+    params = list(
+      amplitude_column = amplitude,
+      template = active_template
+    )
+  )
+
+  plot_metadata <- list(
+    package_version = tryCatch(as.character(utils::packageVersion("diegr")), error = function(e) "unknown"),
+    data_history = data_meta$history,
+    mesh_info = mesh_meta$mesh_parameters,
+    scale_info = scale_meta$scale_parameters,
+    plot_info = plot_step
+  )
+
+  attr(g, "diegr_metadata") <- plot_metadata
+
+  return(g)
 
 }
 
@@ -259,6 +291,9 @@ topo_plot <- function(data,
 #' When custom \code{coords} are provided, they are always used for plotting the sensor locations. The \code{template} parameter (or \code{mesh$template}) is then used only for generating the background \code{mesh} if it is not provided.
 #'
 #' @return A \code{ggplot} object showing the static topographic map of the signal divided into three panels: CI lower, mean, CI upper.
+#'
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata such as details about the mesh used for plotting.
+#'
 #' @export
 #'
 #' @seealso \code{\link{topo_plot}}, \code{\link{compute_mean}}, animated version: \code{\link{animate_topo_mean}}
@@ -375,8 +410,6 @@ plot_topo_mean <- function(data,
     coords <- coords[coords$sensor %in% sensor_select, ]
   }
 
-  #stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
-
   if (missing(mesh)) {
     mesh <- point_mesh(dimension = 2, template = active_template,
                        sensor_select = sensor_select)
@@ -470,8 +503,36 @@ plot_topo_mean <- function(data,
     g <- g + geom_text(data = coords, aes(x = .data$x, y = .data$y, label = .data$sensor), size = 2, vjust = -0.9) #label = rep(coords$sensor, 3)
   }
 
-  g +
+  g <- g +
     annotate("segment", x = x0, y = M + 0.07 * abs(M), xend = x0 - 0.08 * M, yend = M + 0.01 * abs(M), col = "gray40") +
     annotate("segment", x = x0, y = M + 0.07 * abs(M), xend = x0 + 0.08 * M, yend = M + 0.01 * abs(M), col = "gray40")
+
+  data_meta <- attr(data, "diegr_metadata")
+  mesh_meta <- attr(mesh, "diegr_metadata")
+  scale_meta <- attr(col_scale, "diegr_metadata")
+
+  if (is.null(data_meta)) data_meta <- list(history = list())
+  if (is.null(mesh_meta)) mesh_meta <- list(mesh_parameters = list())
+  if (is.null(scale_meta)) scale_meta <- list(scale_parameters = list())
+
+  plot_step <- list(
+    step = "topo_plot",
+    timestamp = Sys.time(),
+    params = list(
+      template = active_template
+    )
+  )
+
+  plot_metadata <- list(
+    package_version = tryCatch(as.character(utils::packageVersion("diegr")), error = function(e) "unknown"),
+    data_history = data_meta$history,
+    mesh_info = mesh_meta$mesh_parameters,
+    scale_info = scale_meta$scale_parameters,
+    plot_info = plot_step
+  )
+
+  attr(g, "diegr_metadata") <- plot_metadata
+
+  return(g)
 
 }

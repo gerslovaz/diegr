@@ -49,7 +49,7 @@
 #' - `ci_low` for lower bound of the confidence interval and
 #' - `ci_up` for upper bound of the confidence interval.
 #'
-#' Additionally, the returned object carries an `"diegr_metadata"` attribute with metadata such as level and domain used in computing etc.
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata such as level and domain used in computing.
 #'
 #' @export
 #'

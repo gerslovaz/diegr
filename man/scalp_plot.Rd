@@ -38,6 +38,8 @@ scalp_plot(
 \value{
 Called for its side effect of drawing a 3D scalp map in an interactive \code{rgl} window.
 It returns an object of class \code{"rglLowLevel"} (an integer vector) containing the IDs of the drawn objects.
+
+Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata such as details about the mesh used for plotting.
 }
 \description{
 Plot a scalp polygon map of the EEG signal amplitude using topographic colour scale. The thin-plate spline interpolation model \eqn{\text{IM:}\; \mathbb{R}^3 \rightarrow \mathbb{R}} is used for signal interpolation between the sensor locations. The \code{\link[rgl]{shape3d}} function is used for plotting.

@@ -44,7 +44,7 @@
 #' \item{template}{A character indicating the template of the sensor coordinates used for mesh computing.}
 #' \item{r}{A radius of the circle used for mesh creating.}
 #'
-#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata such as the actual number of generated mesh points, the template used, etc.
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata such as the actual number of generated mesh points or the template used.
 #'
 #' @references EGI Geodesic Sensor Net Technical Manual (2024)
 #' Oostenveld, R., & Praamstra, P. (2001). The five percent electrode system for high-resolution EEG and ERP measurements. \emph{Clinical Neurophysiology},
@@ -284,7 +284,7 @@ point_mesh <- function(dimension = c(2,3),
 #'
 #' When both \code{names_vec} and \code{own_coordinates} are provided, it is essential that the length of \code{names_vec} matches the number of rows in \code{own_coordinates}, otherwise the names are not plotted (despite the setting \code{label_sensors = TRUE}).
 #'
-#' @return A \code{ggplot} object when \code{plot_dim = 2}. Additionally, the returned ggplot object carries an `"diegr_metadata"` attribute with metadata such as the actual number of generated mesh points, the template used, etc.
+#' @return A \code{ggplot} object when \code{plot_dim = 2}. Additionally, the returned ggplot object carries a `"diegr_metadata"` attribute with metadata such as the actual number of generated mesh points or the template used.
 #'
 #' For \code{plot_dim = 3}, the mesh and sensors are drawn in the active \code{rgl} device.
 #'

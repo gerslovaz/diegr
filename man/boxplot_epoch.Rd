@@ -32,7 +32,7 @@ boxplot_epoch(
 \value{
 A \code{plotly} or \code{ggplot2} object with boxplots of EEG amplitude for individual epochs.
 
-Additionally, the returned object carries an \code{"diegr_metadata"} attribute with metadata.
+Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata.
 }
 \description{
 Function for plotting interactive or static boxplots of EEG amplitude in individual epochs within the chosen time interval. The function assumes data from a single subject and a single sensor.

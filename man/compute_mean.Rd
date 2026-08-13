@@ -42,7 +42,7 @@ A tibble with resulting average and CI bounds according to the chosen \code{leve
 \item \code{ci_up} for upper bound of the confidence interval.
 }
 
-Additionally, the returned object carries an \code{"diegr_metadata"} attribute with metadata such as level and domain used in computing etc.
+Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata such as level and domain used in computing.
 }
 \description{
 Calculate a pointwise or a jackknife (leave-one-out) average signal across temporal or spatial domain together with standard error and pointwise confidence interval (CI) bounds.

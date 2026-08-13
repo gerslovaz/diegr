@@ -18,7 +18,7 @@ A data frame/tibble with added columns:
 \item{signal_base}{Signal corrected by subtracting the baseline for each epoch.}
 \item{baseline}{A baseline value used for correction.}
 
-Additionally, the returned object carries an \code{"diegr_metadata"} attribute with metadata.
+Additionally, the returned object carries a \code{"diegr_metadata"} attribute with metadata.
 }
 \description{
 Compute amplitude values corrected to the selected baseline.

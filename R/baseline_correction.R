@@ -33,7 +33,7 @@
 #' \item{signal_base}{Signal corrected by subtracting the baseline for each epoch.}
 #' \item{baseline}{A baseline value used for correction.}
 #'
-#' Additionally, the returned object carries an `"diegr_metadata"` attribute with metadata.
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata.
 #'
 #' @export
 #'
@@ -109,7 +109,7 @@ baseline_correction <- function(data,
     step = "baseline_correction",
     timestamp = Sys.time(),
     params = list(
-      baseline_range = baseline_range,
+      baseline_range = c(min(baseline_range), max(baseline_range)),
       type = type
     )
   )

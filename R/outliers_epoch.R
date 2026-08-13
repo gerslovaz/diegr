@@ -35,7 +35,7 @@
 #' \item{outliers_data}{A data frame with subset of data corresponding to the outliers found. (The full record for each flagged point from `epoch_table`.)}
 #' With the setting `print_tab = TRUE`, the `epoch_table` is also printed to the console.
 #'
-#' Additionally, the returned object carries an `"diegr_metadata"` attribute with metadata such as method used for outlier detection etc.
+#' Additionally, the returned object carries a `"diegr_metadata"` attribute with metadata such as method used for outlier detection.
 #'
 #' @importFrom grDevices boxplot.stats
 #' @importFrom stats lm mad median quantile sd
