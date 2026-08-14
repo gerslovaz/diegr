@@ -3,6 +3,7 @@
 * Added functions for creating interactive surface plots and checking data structure.
 * Added new sensor templates: BioSemi 128, BioSemi 256, and system 10-05.
 * Updated graphical functions to ensure compatibility with the new templates.
+* Added metadata to computing and graphic functions.
 * Changed default palette in `create_scale()` to a perceptually uniform `"redblue"` scale and added range symmetrization around zero.
 * Updated dealing with `NA` values within `compute_mean()`, `outliers_epoch()` and `baseline_correction()`.
 * Added a fallback to `MASS::ginv()` for ill-conditioned interpolation matrices.
