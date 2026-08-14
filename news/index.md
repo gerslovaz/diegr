@@ -8,6 +8,7 @@
   10-05.
 - Updated graphical functions to ensure compatibility with the new
   templates.
+- Added metadata to computing and graphic functions.
 - Changed default palette in
   [`create_scale()`](https://gerslovaz.github.io/diegr/reference/create_scale.md)
   to a perceptually uniform `"redblue"` scale and added range

@@ -72,13 +72,13 @@
 <p>The package <code>diegr</code> includes:</p>
 <ul>
 <li>interactive boxplots (<code>boxplot_epoch</code>, <code>boxplot_subject</code>, <code>boxplot_rt</code>)</li>
-<li>interactive waveforms (<code>interactive_waveforms</code>)</li>
+<li>interactive waveforms (<code>interactive_waveforms</code>) and surface plots (<code>interactive_surfaceplot</code>, <code>interactive_surfaceplot_curves</code>)</li>
 <li>topographic maps in 2D (<code>topo_plot</code>)</li>
 <li>scalp plots in 3D (<code>scalp_plot</code>)</li>
-<li>functions for computing summary statistics, baseline correction, pointwise and jackknife mean (<code>summary_stats_rt</code>,<code>baseline_correction</code>, <code>compute_mean</code>)</li>
-<li>functions for easy selection of subdata or region of interest (<code>pick_data</code>, <code>pick_region</code>)</li>
-<li>functions for plotting the mean with pointwise confidence interval (<code>plot_time_mean</code>, <code>plot_topo_mean</code>)</li>
-<li>animations of time course of the raw signal or the average in 2D and 3D (<code>animate_topo</code>, <code>animate_topo_mean</code>, <code>animate_scalp</code>)</li>
+<li>functions for computing summary statistics, baseline correction, pointwise and jackknife means (<code>summary_stats_rt</code>,<code>baseline_correction</code>, <code>compute_mean</code>)</li>
+<li>functions for easy selection of data subsets or regions of interest (<code>pick_data</code>, <code>pick_region</code>)</li>
+<li>functions for plotting the mean with pointwise confidence intervals (<code>plot_time_mean</code>, <code>plot_topo_mean</code>)</li>
+<li>animations of time course of raw signals or averages in 2D and 3D (<code>animate_topo</code>, <code>animate_topo_mean</code>, <code>animate_scalp</code>)</li>
 </ul>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -94,35 +94,42 @@
 <div class="section level2">
 <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
 </h2>
-<p>Because of large volumes of data obtained from HD-EEG measurements, the package allows users to work directly with database tables (in addition to common formats such as data frames or tibbles). Such a procedure is more efficient in terms of memory usage.</p>
+<p>Due to the large volumes of data obtained from HD-EEG measurements, the package allows users to work directly with database tables (in addition to common formats such as data frames or tibbles). This approach is much more memory-efficient.</p>
 <p>The database you want to use as input to <code>diegr</code> functions must contain columns with the following structure:</p>
 <ul>
 <li>
-<code>group</code> - ID of groups,</li>
+<code>group</code> - group IDs,</li>
 <li>
-<code>subject</code> - ID of subjects,</li>
+<code>subject</code> - subject IDs,</li>
 <li>
 <code>sensor</code> - sensor labels,</li>
 <li>
 <code>epoch</code> - epoch numbers,</li>
 <li>
-<code>condition</code> - labels of experimental condition,</li>
+<code>condition</code> - experimental condition labels,</li>
 <li>
-<code>time</code> - numbers of time points (as sampling points, not in ms),</li>
+<code>time</code> - numbers of time points (as sampling indices, not in ms),</li>
 <li>
-<code>signal</code> - the EEG signal amplitude in microvolts (in most functions it is possible to set the name of the column containing the amplitude arbitrarily).</li>
+<code>signal</code> - the EEG signal amplitude in microvolts (in most functions, the name of the column containing the amplitude can be customized arbitrarily).</li>
 </ul>
-<p>Note: It is not necessary for the data to contain all variables, but if it does, they must be named according to the structure presented above.</p>
-<p>The package contains some included training datasets:</p>
+<p>Note: It is not necessary for the data to contain all variables, but if it does, they must be named according to the structure presented above. You can use the <code><a href="reference/check_structure.html">check_structure()</a></code> function, which checks the data structure and prints the inferred hierarchy.</p>
+<p>The package includes several training datasets:</p>
 <ul>
 <li>
-<code>epochdata</code>: epoched HD-EEG data (anonymized short slice from big HD-EEG study presented in Madetko-Alster, 2025) for 2 subjects and 204 selected sensors in 50 time points,</li>
+<code>epochdata</code>: epoched HD-EEG data (anonymized short slice from big HD-EEG study presented in Madetko-Alster, 2025) for 2 subjects and 204 selected sensors in 50 time points (measured using the EGI HCGSN256 system),</li>
 <li>
-<code>HCGSN256</code>: a list with Cartesian coordinates of HD-EEG sensor positions in 3D space on the scalp surface and their projection into 2D space</li>
-<li>
-<code>rtdata</code>: response times (time between stimulus presentation and pressing the button) from the experiment involving a simple visual motor task (anonymized short slice from big HD-EEG study presented in Madetko-Alster, 2025).</li>
+<code>rtdata</code>: response times (time between stimulus presentation and pressing the button) from the experiment involving a simple visual motor task (anonymized short slice from big HD-EEG study presented in Madetko-Alster, 2025)</li>
 </ul>
-<p>For more information about the structure of built-in data see the package vignette <code><a href="articles/diegr.html">vignette("diegr", package = "diegr")</a></code>.</p>
+<p>as well as datasets containing sensor position coordinates:</p>
+<ul>
+<li>
+<code>HCGSN256</code>: a list with Cartesian coordinates of HD-EEG sensor positions in 3D space on the scalp surface and their projection into 2D space according to the EGI HCGSN256 template,</li>
+<li>
+<code>biosemi128</code> and <code>biosemi256</code>: lists with Cartesian coordinates of HD-EEG sensor positions in 3D space on the scalp surface and their projection into 2D space according to the BioSemi system with 128 and 256 electrodes,</li>
+<li>
+<code>system1005</code>: a list with Cartesian coordinates of HD-EEG sensor positions in 3D space on the scalp surface and their projection into 2D space according to the standard 10-05 system.</li>
+</ul>
+<p>For more information about the structure of the built-in data see the package vignette <code><a href="articles/diegr.html">vignette("diegr", package = "diegr")</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="quick-examples">Quick examples<a class="anchor" aria-label="anchor" href="#quick-examples"></a>
@@ -130,7 +137,7 @@
 <div class="section level4">
 <h4 id="interactive-boxplot">Interactive boxplot<a class="anchor" aria-label="anchor" href="#interactive-boxplot"></a>
 </h4>
-<p>This is a basic example which shows how to plot interactive epoch boxplots from chosen electrode in different time points for one subject:</p>
+<p>This is a basic example which shows how to plot interactive epoch boxplots from a chosen electrode at different time points for one subject:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://gerslovaz.github.io/diegr/">diegr</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"epochdata"</span><span class="op">)</span></span></code></pre></div>
@@ -139,7 +146,7 @@
 <span>  <span class="fu"><a href="reference/pick_data.html">pick_data</a></span><span class="op">(</span>subject_rg <span class="op">=</span> <span class="fl">1</span>, sensor_rg <span class="op">=</span> <span class="st">"E65"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span><span class="fu"><a href="reference/boxplot_epoch.html">boxplot_epoch</a></span><span class="op">(</span>amplitude <span class="op">=</span> <span class="st">"signal"</span>, time_lim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="./reference/figures/README-boxplot.png" alt="" width="100%"></p>
-<p>Note: The README format does not allow the inclusion of <code>plotly</code> interactive elements, only the static preview of the result is shown.</p>
+<p>Note: The README format does not allow the inclusion of <code>plotly</code> interactive elements, therefore, only a static preview of the result is shown.</p>
 </div>
 <div class="section level4">
 <h4 id="topographic-map">Topographic map<a class="anchor" aria-label="anchor" href="#topographic-map"></a>
@@ -147,7 +154,9 @@
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"HCGSN256"</span><span class="op">)</span></span>
 <span><span class="co"># creating a mesh</span></span>
-<span><span class="va">M1</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/point_mesh.html">point_mesh</a></span><span class="op">(</span>dimension <span class="op">=</span> <span class="fl">2</span>, n <span class="op">=</span> <span class="fl">30000</span>, type <span class="op">=</span> <span class="st">"polygon"</span>, sensor_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">epochdata</span><span class="op">$</span><span class="va">sensor</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">M1</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/point_mesh.html">point_mesh</a></span><span class="op">(</span>dimension <span class="op">=</span> <span class="fl">2</span>, n <span class="op">=</span> <span class="fl">30000</span>, type <span class="op">=</span> <span class="st">"polygon"</span>,</span>
+<span>                 template <span class="op">=</span> <span class="st">"HCGSN256"</span>, </span>
+<span>                 sensor_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">epochdata</span><span class="op">$</span><span class="va">sensor</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co"># filtering a subset of data to display </span></span>
 <span><span class="va">data_short</span> <span class="op">&lt;-</span> <span class="va">epochdata</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/pick_data.html">pick_data</a></span><span class="op">(</span>subject_rg <span class="op">=</span> <span class="fl">1</span>, time_rg <span class="op">=</span> <span class="fl">15</span>, epoch_rg <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
@@ -158,9 +167,9 @@
 <p><img src="reference/figures/README-topoplot-1.png" alt="" width="100%"></p>
 </div>
 <div class="section level4">
-<h4 id="computing-and-displaying-the-average-in-time-domain">Computing and displaying the average in time domain<a class="anchor" aria-label="anchor" href="#computing-and-displaying-the-average-in-time-domain"></a>
+<h4 id="computing-and-displaying-the-average-in-the-time-domain">Computing and displaying the average in the time domain<a class="anchor" aria-label="anchor" href="#computing-and-displaying-the-average-in-the-time-domain"></a>
 </h4>
-<p>Compute the average signal for subject 2 from the channels E65 and E34 (exclude the oulier epochs 14 and 15) and then display it along with CI bounds (use plot_time_mean conditioned by sensor)</p>
+<p>Compute the average signal for subject 2 from channels E65 and E34 (excluding the oulier epochs 14 and 15) and then display it along with CI bounds (using <code><a href="reference/plot_time_mean.html">plot_time_mean()</a></code> conditioned by sensor)</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># extract required data</span></span>
 <span><span class="va">edata</span> <span class="op">&lt;-</span> <span class="va">epochdata</span> <span class="op">|&gt;</span></span>

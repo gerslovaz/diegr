@@ -11,18 +11,19 @@ The package `diegr` includes:
 
 - interactive boxplots (`boxplot_epoch`, `boxplot_subject`,
   `boxplot_rt`)
-- interactive waveforms (`interactive_waveforms`)
+- interactive waveforms (`interactive_waveforms`) and surface plots
+  (`interactive_surfaceplot`, `interactive_surfaceplot_curves`)
 - topographic maps in 2D (`topo_plot`)
 - scalp plots in 3D (`scalp_plot`)
 - functions for computing summary statistics, baseline correction,
-  pointwise and jackknife mean
+  pointwise and jackknife means
   (`summary_stats_rt`,`baseline_correction`, `compute_mean`)
-- functions for easy selection of subdata or region of interest
+- functions for easy selection of data subsets or regions of interest
   (`pick_data`, `pick_region`)
-- functions for plotting the mean with pointwise confidence interval
+- functions for plotting the mean with pointwise confidence intervals
   (`plot_time_mean`, `plot_topo_mean`)
-- animations of time course of the raw signal or the average in 2D and
-  3D (`animate_topo`, `animate_topo_mean`, `animate_scalp`)
+- animations of time course of raw signals or averages in 2D and 3D
+  (`animate_topo`, `animate_topo_mean`, `animate_scalp`)
 
 ## Installation
 
@@ -43,41 +44,56 @@ pak::pak("gerslovaz/diegr")
 
 ## Data
 
-Because of large volumes of data obtained from HD-EEG measurements, the
+Due to the large volumes of data obtained from HD-EEG measurements, the
 package allows users to work directly with database tables (in addition
-to common formats such as data frames or tibbles). Such a procedure is
-more efficient in terms of memory usage.
+to common formats such as data frames or tibbles). This approach is much
+more memory-efficient.
 
 The database you want to use as input to `diegr` functions must contain
 columns with the following structure:
 
-- `group` - ID of groups,
-- `subject` - ID of subjects,
+- `group` - group IDs,
+- `subject` - subject IDs,
 - `sensor` - sensor labels,
 - `epoch` - epoch numbers,
-- `condition` - labels of experimental condition,
-- `time` - numbers of time points (as sampling points, not in ms),
-- `signal` - the EEG signal amplitude in microvolts (in most functions
-  it is possible to set the name of the column containing the amplitude
+- `condition` - experimental condition labels,
+- `time` - numbers of time points (as sampling indices, not in ms),
+- `signal` - the EEG signal amplitude in microvolts (in most functions,
+  the name of the column containing the amplitude can be customized
   arbitrarily).
 
 Note: It is not necessary for the data to contain all variables, but if
 it does, they must be named according to the structure presented above.
+You can use the
+[`check_structure()`](https://gerslovaz.github.io/diegr/reference/check_structure.md)
+function, which checks the data structure and prints the inferred
+hierarchy.
 
-The package contains some included training datasets:
+The package includes several training datasets:
 
 - `epochdata`: epoched HD-EEG data (anonymized short slice from big
   HD-EEG study presented in Madetko-Alster, 2025) for 2 subjects and 204
-  selected sensors in 50 time points,
-- `HCGSN256`: a list with Cartesian coordinates of HD-EEG sensor
-  positions in 3D space on the scalp surface and their projection into
-  2D space
+  selected sensors in 50 time points (measured using the EGI HCGSN256
+  system),
 - `rtdata`: response times (time between stimulus presentation and
   pressing the button) from the experiment involving a simple visual
   motor task (anonymized short slice from big HD-EEG study presented in
-  Madetko-Alster, 2025).
+  Madetko-Alster, 2025)
 
-For more information about the structure of built-in data see the
+as well as datasets containing sensor position coordinates:
+
+- `HCGSN256`: a list with Cartesian coordinates of HD-EEG sensor
+  positions in 3D space on the scalp surface and their projection into
+  2D space according to the EGI HCGSN256 template,
+- `biosemi128` and `biosemi256`: lists with Cartesian coordinates of
+  HD-EEG sensor positions in 3D space on the scalp surface and their
+  projection into 2D space according to the BioSemi system with 128 and
+  256 electrodes,
+- `system1005`: a list with Cartesian coordinates of HD-EEG sensor
+  positions in 3D space on the scalp surface and their projection into
+  2D space according to the standard 10-05 system.
+
+For more information about the structure of the built-in data see the
 package vignette
 [`vignette("diegr", package = "diegr")`](https://gerslovaz.github.io/diegr/articles/diegr.md).
 
@@ -86,7 +102,8 @@ package vignette
 #### Interactive boxplot
 
 This is a basic example which shows how to plot interactive epoch
-boxplots from chosen electrode in different time points for one subject:
+boxplots from a chosen electrode at different time points for one
+subject:
 
 ``` r
 
@@ -104,7 +121,8 @@ boxplot_epoch(amplitude = "signal", time_lim = c(10:20))
 ![](./reference/figures/README-boxplot.png)
 
 Note: The README format does not allow the inclusion of `plotly`
-interactive elements, only the static preview of the result is shown.
+interactive elements, therefore, only a static preview of the result is
+shown.
 
 #### Topographic map
 
@@ -112,7 +130,9 @@ interactive elements, only the static preview of the result is shown.
 
 data("HCGSN256")
 # creating a mesh
-M1 <- point_mesh(dimension = 2, n = 30000, type = "polygon", sensor_select = unique(epochdata$sensor))
+M1 <- point_mesh(dimension = 2, n = 30000, type = "polygon",
+                 template = "HCGSN256", 
+                 sensor_select = unique(epochdata$sensor))
 # filtering a subset of data to display 
 data_short <- epochdata |>
   pick_data(subject_rg = 1, time_rg = 15, epoch_rg = 10)
@@ -124,11 +144,13 @@ topo_plot(data_short, amplitude = "signal", mesh = M1)
 
 ![](reference/figures/README-topoplot-1.png)
 
-#### Computing and displaying the average in time domain
+#### Computing and displaying the average in the time domain
 
-Compute the average signal for subject 2 from the channels E65 and E34
-(exclude the oulier epochs 14 and 15) and then display it along with CI
-bounds (use plot_time_mean conditioned by sensor)
+Compute the average signal for subject 2 from channels E65 and E34
+(excluding the oulier epochs 14 and 15) and then display it along with
+CI bounds (using
+[`plot_time_mean()`](https://gerslovaz.github.io/diegr/reference/plot_time_mean.md)
+conditioned by sensor)
 
 ``` r
 
