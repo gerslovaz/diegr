@@ -79,8 +79,8 @@ elements or animations for a comprehensive overview of data.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"diegr"</span><span class="op">)</span> </span>
 <span><span class="co"># or for development version:</span></span>
-<span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"gerslovaz/diegr"</span><span class="op">)</span> </span></code></pre></div>
+<span><span class="co"># install.packages("pak")</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"gerslovaz/diegr"</span><span class="op">)</span> </span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
@@ -121,30 +121,6 @@ subject, 2 - representative patient subject).</li>
 </ul>
 </div>
 <div class="section level4">
-<h4 id="hcgsn256">HCGSN256<a class="anchor" aria-label="anchor" href="#hcgsn256"></a>
-</h4>
-<p>The Cartesian coordinates of HD-EEG sensor positions in 3D space on
-the scalp surface and their projection into 2D space according to
-256-channel HydroCel Geodesic Sensor Net average template montage.</p>
-<p>The data is organized into a list with the following elements:</p>
-<ul>
-<li>
-<code>D2</code>: A tibble with coordinates and labels of sensors in
-2D.</li>
-<li>
-<code>D3</code>: A tibble with coordinates and labels of sensors in
-3D.</li>
-<li>
-<code>ROI</code>:A vector with the region of interest (ROI)
-assignment for each sensor (“central”, “frontal”, “occipital”,
-“parietal” or “temporal” according to the brain regions and “face” for
-the face area). Sensors are labeled according to Geodesic Sensor Net
-Technical Manual, 2024.</li>
-</ul>
-<p>Axis orientation (3D): - x: left (-) to right (+); - y: posterior (-)
-to anterior (+); - z: inferior (-) to superior (+).</p>
-</div>
-<div class="section level4">
 <h4 id="rtdata">rtdata<a class="anchor" aria-label="anchor" href="#rtdata"></a>
 </h4>
 <p>The response time values in individual experiment epochs for 2
@@ -163,6 +139,61 @@ one, 15 epochs for subject two).</li>
 <li>
 <code>RT</code>: Response time in ms.</li>
 </ul>
+</div>
+<div class="section level4">
+<h4 id="sensor-position-templates">Sensor position templates<a class="anchor" aria-label="anchor" href="#sensor-position-templates"></a>
+</h4>
+<p>For each template, the data is organized into a list with the
+following elements:</p>
+<ul>
+<li>
+<code>D2</code>: A tibble with coordinates and labels of sensors in
+2D.</li>
+<li>
+<code>D3</code>: A tibble with coordinates and labels of sensors in
+3D.</li>
+<li>
+<code>ROI</code>:A vector with the region of interest (ROI)
+assignment for each sensor (“central”, “frontal”, “occipital”,
+“parietal” or “temporal” according to the brain regions, possibly “face”
+for the face area).</li>
+</ul>
+<p>Axis orientation (3D): - x: left (-) to right (+); - y: posterior (-)
+to anterior (+); - z: inferior (-) to superior (+).</p>
+</div>
+<div class="section level4">
+<h4 id="hcgsn256">HCGSN256<a class="anchor" aria-label="anchor" href="#hcgsn256"></a>
+</h4>
+<p>The Cartesian coordinates of HD-EEG sensor positions in 3D space on
+the scalp surface and their projection into 2D space according to
+256-channel HydroCel Geodesic Sensor Net average template montage.
+Sensors are labeled according to Geodesic Sensor Net Technical Manual,
+2024.</p>
+</div>
+<div class="section level4">
+<h4 id="biosemi128">biosemi128<a class="anchor" aria-label="anchor" href="#biosemi128"></a>
+</h4>
+<p>The Cartesian coordinates of HD-EEG sensor positions in 3D space on
+an idealized spherical surface and their projection into 2D space
+according to 128-channel BioSemi system. Sensors are labeled according
+to BioSemi website (<a href="https://www.biosemi.com/headcap2.htm" class="external-link uri">https://www.biosemi.com/headcap2.htm</a>).</p>
+</div>
+<div class="section level4">
+<h4 id="biosemi256">biosemi256<a class="anchor" aria-label="anchor" href="#biosemi256"></a>
+</h4>
+<p>The Cartesian coordinates of HD-EEG sensor positions in 3D space on
+an idealized spherical surface and their projection into 2D space
+according to 256-channel BioSemi system. Sensors are labeled according
+to BioSemi website (<a href="https://www.biosemi.com/headcap2.htm" class="external-link uri">https://www.biosemi.com/headcap2.htm</a>).</p>
+</div>
+<div class="section level4">
+<h4 id="system1005">system1005<a class="anchor" aria-label="anchor" href="#system1005"></a>
+</h4>
+<p>The Cartesian coordinates of HD-EEG sensor positions in 3D space on
+the scalp surface and their projection into 2D space according to
+standard 10-05 system. The template contains 335 electrode positions.
+Sensors are labeled according to the standard 10-05 naming
+convention.</p>
 </div>
 </div>
 <div class="section level3">
@@ -348,14 +379,15 @@ default settings.</p>
 map of the brain signal, the amplitude values are colored by default
 using a topographic colour scale. An alternative to this function
 adapted directly to plot the mean along with the confidence interval
-bounds is <code><a href="../reference/plot_topo_mean.html">plot_topo_mean()</a></code>. In the default topographic
-colour scale, amplitude = 0 is mapped to the blue–green boundary;
-positive values trend towards yellow/red, negative towards dark blue.
-The <code>coulour_scale()</code> function also offers the
-<code>"redblue"</code> palette, with negative values corresponding to
-shades of blue and positive values corresponding to shades of red.
-Additionally, the users can choose their own palettes using
-<code>col_scale</code> argument.</p>
+bounds is <code><a href="../reference/plot_topo_mean.html">plot_topo_mean()</a></code>. The <code><a href="../reference/create_scale.html">create_scale()</a></code>
+function generates two built-in colour palettes used for topographical
+plots. The default <code>"redblue"</code> palette maps negative values
+to shades of blue and positive values to shades of red, with light grey
+shades around zero. In the topographic colour scale
+(<code>type = "topo"</code>), amplitude = 0 is mapped to the blue–green
+boundary; positive values trend towards yellow/red, and negative values
+trend towards dark blue. Additionally, users can choose their own
+palettes for plots using the <code>col_scale</code> argument.</p>
 <p>Both <code>topo_</code> functions allow setting some optionally
 arguments for editing the output appearance (with or without contours,
 sensor names, etc.) and return <code>ggplot</code> object for further
@@ -385,20 +417,23 @@ arguments in all cases is necessary.</p></li>
 <span>  <span class="fu"><a href="../reference/compute_mean.html">compute_mean</a></span><span class="op">(</span>amplitude <span class="op">=</span> <span class="st">"signal_base"</span>, type <span class="op">=</span> <span class="st">"point"</span>,</span>
 <span>               domain <span class="op">=</span> <span class="st">"space"</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># create a topographic scale for plotting</span></span>
+<span><span class="co"># interval (-10,10) is selected in consideration of the signal progress</span></span>
+<span><span class="va">CS_topo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/create_scale.html">create_scale</a></span><span class="op">(</span>col_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"topo"</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># plotting the base topographic polygon map with contours and legend</span></span>
-<span><span class="co"># interval (-30,15) is selected in consideration of the signal progress</span></span>
 <span><span class="fu"><a href="../reference/topo_plot.html">topo_plot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data_mean</span>, amplitude <span class="op">=</span> <span class="st">"average"</span>, </span>
-<span>          col_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>, <span class="fl">15</span><span class="op">)</span>, contour <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>          col_scale <span class="op">=</span> <span class="va">CS_topo</span>, contour <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># plotting the same map without contours and legend </span></span>
 <span><span class="co"># but with sensor labels and adding the title</span></span>
 <span><span class="va">g1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/topo_plot.html">topo_plot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data_mean</span>, amplitude <span class="op">=</span> <span class="st">"average"</span>,</span>
-<span>                col_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>, <span class="fl">15</span><span class="op">)</span>,</span>
+<span>                col_scale <span class="op">=</span> <span class="va">CS_topo</span>,</span>
 <span>                label_sensors <span class="op">=</span> <span class="cn">TRUE</span>, show_legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">g1</span> <span class="op">+</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ggtitle</a></span><span class="op">(</span><span class="st">"Subject 1, time of the stimulus"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># plotting the average together with CI bounds using plot_topo_mean</span></span>
-<span><span class="fu"><a href="../reference/plot_topo_mean.html">plot_topo_mean</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data_mean</span>, template <span class="op">=</span> <span class="st">"HCGSN256"</span>, col_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>, <span class="fl">15</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/plot_topo_mean.html">plot_topo_mean</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data_mean</span>, template <span class="op">=</span> <span class="st">"HCGSN256"</span>, col_scale <span class="op">=</span> <span class="va">CS_topo</span><span class="op">)</span></span></code></pre></div>
 <p><img src="diegr_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="Fig 1: A top-down topographic map of a high-density EEG amplitude in topographic colour scale with contours and black points on sensor locations. The amplitude legend is on the left side of the scalp projection. Fig 2: The same plot without contours and legend, but with sensor labels as text displayed together with black point on sensor positions. Fig 3: A ggplot divided into three panels with topographic maps of average signal (middle) and its lower (left) and upper (right) confidence interval bounds. The colour legend position is bottom of the facets." width="700"><img src="diegr_files/figure-html/unnamed-chunk-8-2.png" class="r-plt" alt="Fig 1: A top-down topographic map of a high-density EEG amplitude in topographic colour scale with contours and black points on sensor locations. The amplitude legend is on the left side of the scalp projection. Fig 2: The same plot without contours and legend, but with sensor labels as text displayed together with black point on sensor positions. Fig 3: A ggplot divided into three panels with topographic maps of average signal (middle) and its lower (left) and upper (right) confidence interval bounds. The colour legend position is bottom of the facets." width="700"><img src="diegr_files/figure-html/unnamed-chunk-8-3.png" class="r-plt" alt="Fig 1: A top-down topographic map of a high-density EEG amplitude in topographic colour scale with contours and black points on sensor locations. The amplitude legend is on the left side of the scalp projection. Fig 2: The same plot without contours and legend, but with sensor labels as text displayed together with black point on sensor positions. Fig 3: A ggplot divided into three panels with topographic maps of average signal (middle) and its lower (left) and upper (right) confidence interval bounds. The colour legend position is bottom of the facets." width="700"></p>
 </div>
 <div class="section level4">
@@ -406,10 +441,10 @@ arguments in all cases is necessary.</p></li>
 </h4>
 <p>The <code><a href="../reference/scalp_plot.html">scalp_plot()</a></code> function is created for plotting a
 scalp polygon map of the EEG signal amplitude using by default the same
-topographic colour scale as in <code><a href="../reference/topo_plot.html">topo_plot()</a></code>). The result
-plot is rendered using <code><a href="https://dmurdoch.github.io/rgl/dev/reference/mesh3d.html" class="external-link">rgl::shape3d</a></code> function and the signal
-interpolation between sensor locations is based on thin-plate spline
-interpolation model.<br>
+colour scale as in <code><a href="../reference/topo_plot.html">topo_plot()</a></code>. The result plot is rendered
+using <code><a href="https://dmurdoch.github.io/rgl/dev/reference/mesh3d.html" class="external-link">rgl::shape3d</a></code> function and the signal interpolation
+between sensor locations is based on thin-plate spline interpolation
+model.<br>
 Correct mesh triangulation is required for appropriate colour rendering.
 This triangulation is constructed by <code><a href="../reference/make_triangulation.html">make_triangulation()</a></code>,
 which creates a Delaunay type-I triangulation (Lai &amp; Schumaker,
@@ -428,6 +463,27 @@ setting the same values of <code>col_range</code> and
 <span><span class="co"># note: the output is not plotted to reduce the vignette file size</span></span></code></pre></div>
 <p>The <code>rgl</code> output enables to zoom and rotate the image with
 default view of the back of the head.</p>
+</div>
+<div class="section level4">
+<h4 id="surface-plots">Surface plots<a class="anchor" aria-label="anchor" href="#surface-plots"></a>
+</h4>
+<p>At the intersection of temporal and spatial visualization is the
+<code><a href="../reference/interactive_surfaceplot_curves.html">interactive_surfaceplot_curves()</a></code>, which allows to display
+the time courses of all (or selected) electrodes in a single figure.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># computing mean across epochs 1:13 for Subject 2</span></span>
+<span><span class="va">edata</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pick_data.html">pick_data</a></span><span class="op">(</span><span class="va">epochdata</span>, subject_rg <span class="op">=</span> <span class="fl">2</span>, epoch_rg <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">13</span><span class="op">)</span></span>
+<span><span class="va">data_base</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/baseline_correction.html">baseline_correction</a></span><span class="op">(</span><span class="va">edata</span>, baseline_range <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span></span>
+<span><span class="va">data_mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_mean.html">compute_mean</a></span><span class="op">(</span><span class="va">data_base</span>, amplitude <span class="op">=</span> <span class="st">"signal_base"</span>, type <span class="op">=</span> <span class="st">"point"</span>, domain <span class="op">=</span> <span class="st">"time"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># select sensor labels to display on the axis</span></span>
+<span><span class="va">selected_sensors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"E1"</span>, <span class="st">"E21"</span>, <span class="st">"E41"</span>, <span class="st">"E61"</span>, <span class="st">"E81"</span>, <span class="st">"E101"</span>,</span>
+<span> <span class="st">"E121"</span>, <span class="st">"E141"</span>, <span class="st">"E161"</span>, <span class="st">"E181"</span>, <span class="st">"E201"</span>, <span class="st">"E221"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># render the interactive plot</span></span>
+<span><span class="fu"><a href="../reference/interactive_surfaceplot_curves.html">interactive_surfaceplot_curves</a></span><span class="op">(</span><span class="va">data_mean</span>, amplitude <span class="op">=</span> <span class="st">"average"</span>, sensor_ticks <span class="op">=</span> <span class="va">selected_sensors</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># note: the output is not plotted to reduce the vignette file size</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -457,7 +513,7 @@ course of the EEG signal for subject 1 and epoch 5 (from
 <code>epochdata</code>) between time points 10 and 20 with the whole
 range of time 0:50 is created as follows (the output is not rendered to
 reduce the vignette file size):</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># filtering the example data </span></span>
 <span><span class="va">s1e05</span> <span class="op">&lt;-</span> <span class="va">epochdata</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/pick_data.html">pick_data</a></span><span class="op">(</span>subject_rg <span class="op">=</span> <span class="fl">1</span>, epoch_rg <span class="op">=</span> <span class="fl">5</span>, time_rg <span class="op">=</span> <span class="fl">10</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span></span>
@@ -479,7 +535,7 @@ video. The video resolution quality can be affected using
 <code>rgl::par3d(windowRect = c(100, 100, 800, 800))</code>. Example of
 scalp animation with the same data as above (the output is not rendered
 to reduce the vignette file size):</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot animation with default mesh and triangulation:</span></span>
 <span><span class="fu"><a href="../reference/animate_scalp.html">animate_scalp</a></span><span class="op">(</span><span class="va">s1e05</span>, amplitude <span class="op">=</span> <span class="st">"signal"</span><span class="op">)</span></span>
 <span><span class="co"># export the video - the .mp4 extension is required for correct functioning</span></span>
@@ -491,7 +547,7 @@ to reduce the vignette file size):</p>
 fixed time point, you can easily achieve this by using the combination
 of <code><a href="https://dmurdoch.github.io/rgl/dev/reference/play3d.html" class="external-link">rgl::play3d</a></code> and <code><a href="https://dmurdoch.github.io/rgl/dev/reference/spin3d.html" class="external-link">rgl::spin3d</a></code> functions
 according to the following code.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#open3d()</span></span>
 <span><span class="fu"><a href="../reference/scalp_plot.html">scalp_plot</a></span><span class="op">(</span><span class="va">s1</span>, amplitude <span class="op">=</span> <span class="st">"average"</span>, col_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>,<span class="fl">15</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">rgl</span><span class="fu">::</span><span class="fu"><a href="https://dmurdoch.github.io/rgl/dev/reference/play3d.html" class="external-link">play3d</a></span><span class="op">(</span><span class="fu">rgl</span><span class="fu">::</span><span class="fu"><a href="https://dmurdoch.github.io/rgl/dev/reference/spin3d.html" class="external-link">spin3d</a></span><span class="op">(</span>axis <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, rpm <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, duration <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
@@ -507,7 +563,7 @@ maps across subjects:</p>
 <ol style="list-style-type: decimal">
 <li>Outliers detection</li>
 </ol>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># using IQR method for selected sensor from central region </span></span>
 <span><span class="va">dataE59</span> <span class="op">&lt;-</span> <span class="va">epochdata</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/pick_data.html">pick_data</a></span><span class="op">(</span>sensor_rg <span class="op">=</span> <span class="st">"E59"</span><span class="op">)</span></span>
@@ -535,7 +591,7 @@ input data, the <code><a href="../reference/baseline_correction.html">baseline_c
 grouping structure, so the baseline calculation is provided separately
 for unique combinations of these variables. This procedure allows to
 compute baseline correction for both subjects in one step.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subjects_base</span> <span class="op">&lt;-</span> <span class="va">epochdata</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/pick_data.html">pick_data</a></span><span class="op">(</span>epoch_rg <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">13</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/baseline_correction.html">baseline_correction</a></span><span class="op">(</span>baseline_range <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span></span></code></pre></div>
@@ -545,7 +601,7 @@ compute baseline correction for both subjects in one step.</p>
 <p>We compute average topographic map in time point 35 (100 ms after
 stimulus) for both subjects. We use standard (un-weighted) pointwise
 average with bootstrap confidence intervals.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subjects_mean</span> <span class="op">&lt;-</span> <span class="va">subjects_base</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">time</span> <span class="op">==</span> <span class="fl">35</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/compute_mean.html">compute_mean</a></span><span class="op">(</span>amplitude <span class="op">=</span> <span class="st">"signal_base"</span>, domain <span class="op">=</span> <span class="st">"space"</span>,</span>
@@ -555,7 +611,7 @@ average with bootstrap confidence intervals.</p>
 </ol>
 <p>To maintain consistency between both subjects, we first construct a
 mesh and set colour range that we will use in both figures:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># prepare a mesh for plotting</span></span>
 <span><span class="va">M</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/point_mesh.html">point_mesh</a></span><span class="op">(</span>dimension <span class="op">=</span> <span class="fl">2</span>, n <span class="op">=</span> <span class="fl">4000</span>, template <span class="op">=</span> <span class="st">"HCGSN256"</span>,</span>
 <span>                sensor_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">subjects_mean</span><span class="op">$</span><span class="va">sensor</span><span class="op">)</span>,</span>
@@ -571,7 +627,7 @@ mesh and set colour range that we will use in both figures:</p>
 which is directly adapted for rendering topographic map of the average
 EEG amplitude together with its lower and upper confidence interval (CI)
 bounds.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># plot the average topographic maps with the same color range for both subjects</span></span>
 <span><span class="va">subjects_mean</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">subject</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -588,9 +644,9 @@ bounds.</p>
 <li>Average difference plot</li>
 </ol>
 <p>To display difference in the average of both subjects considered in
-the example, we can also use the red-blue colour palette inside the
-<code><a href="../reference/topo_plot.html">topo_plot()</a></code> function.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+the example, we can use the <code><a href="../reference/topo_plot.html">topo_plot()</a></code> function with the
+built-in red-blue colour palette.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># compute difference</span></span>
 <span><span class="va">subjects_diff</span> <span class="op">&lt;-</span> <span class="va">subjects_mean</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">sensor</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -603,7 +659,7 @@ the example, we can also use the red-blue colour palette inside the
 <span><span class="co"># are displayed in shades of red, negative values in shades of blue</span></span>
 <span><span class="fu"><a href="../reference/topo_plot.html">topo_plot</a></span><span class="op">(</span><span class="va">subjects_diff</span>, amplitude <span class="op">=</span> <span class="st">"diff"</span>, mesh <span class="op">=</span> <span class="va">M</span>,</span>
 <span>          template <span class="op">=</span> <span class="st">"HCGSN256"</span>, col_scale <span class="op">=</span> <span class="va">CS1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="diegr_files/figure-html/unnamed-chunk-18-1.png" class="r-plt" alt="A top-down topographic map of a high-density EEG amplitude difference of two subjects in red-blue colour scale with contours and black points on sensor locations. The amplitude legend is on the left side of the scalp projection." width="700"></p>
+<p><img src="diegr_files/figure-html/unnamed-chunk-19-1.png" class="r-plt" alt="A top-down topographic map of a high-density EEG amplitude difference of two subjects in red-blue colour scale with contours and black points on sensor locations. The amplitude legend is on the left side of the scalp projection." width="700"></p>
 <div class="section level4">
 <h4 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h4>
@@ -622,6 +678,9 @@ Neurophysiology.</em> 2025, vol. 171, 11-17. <a href="https://doi.org/10.1016/j
 Springer; 2016.</p>
 <p>Electrical Geodesics, Inc.: <em>Geodesic Sensor Net Technical
 Manual</em>. 2024. <a href="https://www.egi.com/knowledge-center" class="external-link uri">https://www.egi.com/knowledge-center</a></p>
+<p>Oostenveld, R., Praamstra, P. The five percent electrode system for
+high-resolution EEG and ERP measurements. <em>Clinical
+Neurophysiology.</em> 2001, 112(4), 713-719. <a href="https://doi.org/10.1016/s1388-2457(00)00527-7" class="external-link uri">https://doi.org/10.1016/s1388-2457(00)00527-7</a></p>
 </div>
 <div class="section level4">
 <h4 id="reproducibility-system-requirements-troubleshooting">Reproducibility, System Requirements &amp; Troubleshooting<a class="anchor" aria-label="anchor" href="#reproducibility-system-requirements-troubleshooting"></a>
@@ -665,7 +724,7 @@ display (headless servers, such as those often used for package checks
 or continuous integration). If you are reproducing this vignette on a
 headless system, ensure the following command is run
 <strong>before</strong> loading <code>rgl</code>:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>rgl.useNULL <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co"># Alternatively, set the environment variable RGL_USE_NULL="true"</span></span></code></pre></div>
 </li>
@@ -686,7 +745,7 @@ system.</p>
 <p><strong>LaTeX Labels:</strong> Figures containing LaTeX
 mathematical labels require a working TeX distribution. Installing
 TinyTeX via the <code>tinytex</code> package is recommended:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"tinytex"</span><span class="op">)</span></span>
 <span><span class="fu">tinytex</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tinytex/man/install_tinytex.html" class="external-link">install_tinytex</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </li>

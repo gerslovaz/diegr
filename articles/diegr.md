@@ -10,8 +10,8 @@ for a comprehensive overview of data.
 
 install.packages("diegr") 
 # or for development version:
-# install.packages("devtools")
-devtools::install_github("gerslovaz/diegr") 
+# install.packages("pak")
+pak::pak("gerslovaz/diegr") 
 ```
 
 ### Data
@@ -45,24 +45,6 @@ The data is organized into a data frame with the following columns:
 - `subject`: Subject ID (1 - representative healthy control subject, 2 -
   representative patient subject).
 
-#### HCGSN256
-
-The Cartesian coordinates of HD-EEG sensor positions in 3D space on the
-scalp surface and their projection into 2D space according to
-256-channel HydroCel Geodesic Sensor Net average template montage.
-
-The data is organized into a list with the following elements:
-
-- `D2`: A tibble with coordinates and labels of sensors in 2D.
-- `D3`: A tibble with coordinates and labels of sensors in 3D.
-- `ROI`:A vector with the region of interest (ROI) assignment for each
-  sensor (“central”, “frontal”, “occipital”, “parietal” or “temporal”
-  according to the brain regions and “face” for the face area). Sensors
-  are labeled according to Geodesic Sensor Net Technical Manual, 2024.
-
-Axis orientation (3D): - x: left (-) to right (+); - y: posterior (-) to
-anterior (+); - z: inferior (-) to superior (+).
-
 #### rtdata
 
 The response time values in individual experiment epochs for 2
@@ -77,6 +59,49 @@ The data is organized into a data frame with the following columns:
 - `epoch`: Epoch number (there are 14 epochs for subject one, 15 epochs
   for subject two).
 - `RT`: Response time in ms.
+
+#### Sensor position templates
+
+For each template, the data is organized into a list with the following
+elements:
+
+- `D2`: A tibble with coordinates and labels of sensors in 2D.
+- `D3`: A tibble with coordinates and labels of sensors in 3D.
+- `ROI`:A vector with the region of interest (ROI) assignment for each
+  sensor (“central”, “frontal”, “occipital”, “parietal” or “temporal”
+  according to the brain regions, possibly “face” for the face area).
+
+Axis orientation (3D): - x: left (-) to right (+); - y: posterior (-) to
+anterior (+); - z: inferior (-) to superior (+).
+
+#### HCGSN256
+
+The Cartesian coordinates of HD-EEG sensor positions in 3D space on the
+scalp surface and their projection into 2D space according to
+256-channel HydroCel Geodesic Sensor Net average template montage.
+Sensors are labeled according to Geodesic Sensor Net Technical Manual,
+2024.
+
+#### biosemi128
+
+The Cartesian coordinates of HD-EEG sensor positions in 3D space on an
+idealized spherical surface and their projection into 2D space according
+to 128-channel BioSemi system. Sensors are labeled according to BioSemi
+website (<https://www.biosemi.com/headcap2.htm>).
+
+#### biosemi256
+
+The Cartesian coordinates of HD-EEG sensor positions in 3D space on an
+idealized spherical surface and their projection into 2D space according
+to 256-channel BioSemi system. Sensors are labeled according to BioSemi
+website (<https://www.biosemi.com/headcap2.htm>).
+
+#### system1005
+
+The Cartesian coordinates of HD-EEG sensor positions in 3D space on the
+scalp surface and their projection into 2D space according to standard
+10-05 system. The template contains 335 electrode positions. Sensors are
+labeled according to the standard 10-05 naming convention.
 
 ### Tools useful in preprocessing
 
@@ -306,12 +331,16 @@ amplitude values are colored by default using a topographic colour
 scale. An alternative to this function adapted directly to plot the mean
 along with the confidence interval bounds is
 [`plot_topo_mean()`](https://gerslovaz.github.io/diegr/reference/plot_topo_mean.md).
-In the default topographic colour scale, amplitude = 0 is mapped to the
-blue–green boundary; positive values trend towards yellow/red, negative
-towards dark blue. The `coulour_scale()` function also offers the
-`"redblue"` palette, with negative values corresponding to shades of
-blue and positive values corresponding to shades of red. Additionally,
-the users can choose their own palettes using `col_scale` argument.
+The
+[`create_scale()`](https://gerslovaz.github.io/diegr/reference/create_scale.md)
+function generates two built-in colour palettes used for topographical
+plots. The default `"redblue"` palette maps negative values to shades of
+blue and positive values to shades of red, with light grey shades around
+zero. In the topographic colour scale (`type = "topo"`), amplitude = 0
+is mapped to the blue–green boundary; positive values trend towards
+yellow/red, and negative values trend towards dark blue. Additionally,
+users can choose their own palettes for plots using the `col_scale`
+argument.
 
 Both `topo_` functions allow setting some optionally arguments for
 editing the output appearance (with or without contours, sensor names,
@@ -344,20 +373,23 @@ data_mean <- data_base |>
   compute_mean(amplitude = "signal_base", type = "point",
                domain = "space")
 
+# create a topographic scale for plotting
+# interval (-10,10) is selected in consideration of the signal progress
+CS_topo <- create_scale(col_range = c(-10, 10), type = "topo")
+
 # plotting the base topographic polygon map with contours and legend
-# interval (-30,15) is selected in consideration of the signal progress
 topo_plot(data = data_mean, amplitude = "average", 
-          col_range = c(-30, 15), contour = TRUE)
+          col_scale = CS_topo, contour = TRUE)
 
 # plotting the same map without contours and legend 
 # but with sensor labels and adding the title
 g1 <- topo_plot(data = data_mean, amplitude = "average",
-                col_range = c(-30, 15),
+                col_scale = CS_topo,
                 label_sensors = TRUE, show_legend = FALSE)
 g1 + ggplot2::ggtitle("Subject 1, time of the stimulus")
 
 # plotting the average together with CI bounds using plot_topo_mean
-plot_topo_mean(data = data_mean, template = "HCGSN256", col_range = c(-30, 15))
+plot_topo_mean(data = data_mean, template = "HCGSN256", col_scale = CS_topo)
 ```
 
 ![Fig 1: A top-down topographic map of a high-density EEG amplitude in
@@ -393,8 +425,8 @@ facets.](diegr_files/figure-html/unnamed-chunk-8-3.png)
 The
 [`scalp_plot()`](https://gerslovaz.github.io/diegr/reference/scalp_plot.md)
 function is created for plotting a scalp polygon map of the EEG signal
-amplitude using by default the same topographic colour scale as in
-[`topo_plot()`](https://gerslovaz.github.io/diegr/reference/topo_plot.md)).
+amplitude using by default the same colour scale as in
+[`topo_plot()`](https://gerslovaz.github.io/diegr/reference/topo_plot.md).
 The result plot is rendered using
 [`rgl::shape3d`](https://dmurdoch.github.io/rgl/dev/reference/mesh3d.html)
 function and the signal interpolation between sensor locations is based
@@ -421,6 +453,30 @@ scalp_plot(s1, amplitude = "average", col_range = c(-30, 15))
 
 The `rgl` output enables to zoom and rotate the image with default view
 of the back of the head.
+
+#### Surface plots
+
+At the intersection of temporal and spatial visualization is the
+[`interactive_surfaceplot_curves()`](https://gerslovaz.github.io/diegr/reference/interactive_surfaceplot_curves.md),
+which allows to display the time courses of all (or selected) electrodes
+in a single figure.
+
+``` r
+
+# computing mean across epochs 1:13 for Subject 2
+edata <- pick_data(epochdata, subject_rg = 2, epoch_rg = 1:13)
+data_base <- baseline_correction(edata, baseline_range = 1:9)
+data_mean <- compute_mean(data_base, amplitude = "signal_base", type = "point", domain = "time")
+
+# select sensor labels to display on the axis
+selected_sensors <- c("E1", "E21", "E41", "E61", "E81", "E101",
+ "E121", "E141", "E161", "E181", "E201", "E221")
+
+# render the interactive plot
+interactive_surfaceplot_curves(data_mean, amplitude = "average", sensor_ticks = selected_sensors)
+
+# note: the output is not plotted to reduce the vignette file size
+```
 
 ### Animations
 
@@ -616,9 +672,9 @@ subjects_mean |>
 5.  Average difference plot
 
 To display difference in the average of both subjects considered in the
-example, we can also use the red-blue colour palette inside the
+example, we can use the
 [`topo_plot()`](https://gerslovaz.github.io/diegr/reference/topo_plot.md)
-function.
+function with the built-in red-blue colour palette.
 
 ``` r
 
@@ -639,7 +695,7 @@ topo_plot(subjects_diff, amplitude = "diff", mesh = M,
 ![A top-down topographic map of a high-density EEG amplitude difference
 of two subjects in red-blue colour scale with contours and black points
 on sensor locations. The amplitude legend is on the left side of the
-scalp projection.](diegr_files/figure-html/unnamed-chunk-18-1.png)
+scalp projection.](diegr_files/figure-html/unnamed-chunk-19-1.png)
 
 #### References
 
@@ -662,6 +718,10 @@ Wickham H. *ggplot2: Elegant Graphics for Data Analysis.* Springer;
 
 Electrical Geodesics, Inc.: *Geodesic Sensor Net Technical Manual*.
 2024. <https://www.egi.com/knowledge-center>
+
+Oostenveld, R., Praamstra, P. The five percent electrode system for
+high-resolution EEG and ERP measurements. *Clinical Neurophysiology.*
+2001, 112(4), 713-719. <https://doi.org/10.1016/s1388-2457(00)00527-7>
 
 #### Reproducibility, System Requirements & Troubleshooting
 
