@@ -194,9 +194,8 @@ animate_topo <- function(data,
     geom_raster(aes(fill = .data$amplitude_IM)) +
     scale_fill_gradientn(
       colors = col_scale$colors,
-      breaks = col_scale$breaks,
       limits = range(col_scale$breaks),
-      labels = round(col_scale$breaks, 2),
+      breaks = dynamic_breaks(range(col_scale$breaks)),
       values = scales::rescale(col_scale$breaks)
     ) +
     coord_fixed(ratio = 1) +
@@ -223,7 +222,10 @@ animate_topo <- function(data,
   if (show_legend == TRUE) {
     g <- g  +
       labs(fill = expression(paste("Amplitude (", mu, "V)"))) +
-      guides(fill = guide_colorbar(barwidth = 0.7, barheight = 20)) +
+      guides(fill = guide_colorbar(
+        barwidth = unit(0.7, "lines"),
+        barheight = unit(0.8, "npc")
+      )) +
       theme(
         legend.position = "right",
         legend.text = element_text(size = 7),
@@ -945,9 +947,8 @@ animate_topo_mean <- function(data,
     geom_raster(aes(fill = .data$stats_value)) +
     scale_fill_gradientn(
       colors = col_scale$colors,
-      breaks = col_scale$breaks,
       limits = range(col_scale$breaks),
-      labels = round(col_scale$breaks, 2),
+      breaks = dynamic_breaks(range(col_scale$breaks)),
       values = scales::rescale(col_scale$breaks)
     ) +
     facet_wrap(~ stats, ncol = 3) +
@@ -963,7 +964,10 @@ animate_topo_mean <- function(data,
   if (show_legend == TRUE) {
     g <- g  +
       labs(fill = expression(paste("Amplitude (", mu, "V)"))) +
-      guides(fill = guide_colorbar(barwidth = 20, barheight = 0.7)) +
+      guides(fill = guide_colorbar(
+        barheight = unit(0.7, "lines"),
+        barwidth = unit(0.7, "npc")
+      )) +
       theme(
         legend.position = "bottom",
         legend.text = element_text(size = 5),
