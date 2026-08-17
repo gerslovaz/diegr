@@ -151,9 +151,8 @@ topo_plot <- function(data,
       ))
     }
       coords <- coords[coords$sensor %in% sensor_select, ]
-    }
+  }
 
-  #stop_if_missing_cols(coords, required_cols = c("x", "y", "sensor"))
 
   if (missing(mesh)) {
     mesh <- point_mesh(dimension = 2, template = active_template,
@@ -190,9 +189,8 @@ topo_plot <- function(data,
     geom_raster(aes(fill = ycp_IM)) +
     scale_fill_gradientn(
       colors = col_scale$colors,
-      breaks = col_scale$breaks,
       limits = range(col_scale$breaks),
-      labels = round(col_scale$breaks, 2),
+      breaks = dynamic_breaks(range(col_scale$breaks)),
       values = scales::rescale(col_scale$breaks)
     ) +
     coord_fixed(ratio = 1) +
@@ -208,7 +206,10 @@ topo_plot <- function(data,
   if (show_legend == TRUE) {
     g <- g  +
       labs(fill = expression(paste("Amplitude (", mu, "V)"))) +
-      guides(fill = guide_colorbar(barwidth = 0.7, barheight = 20)) +
+      guides(fill = guide_colorbar(
+        barwidth = unit(0.7, "lines"),
+        barheight = unit(0.8, "npc")
+        )) +
       theme(
         legend.position = "right",
         legend.text = element_text(size = 7),
@@ -463,9 +464,8 @@ plot_topo_mean <- function(data,
     geom_raster(aes(fill = .data$stats_value)) +
     scale_fill_gradientn(
       colors = col_scale$colors,
-      breaks = col_scale$breaks,
       limits = range(col_scale$breaks),
-      labels = round(col_scale$breaks, 2),
+      breaks = dynamic_breaks(range(col_scale$breaks)),
       values = scales::rescale(col_scale$breaks)
     ) +
     facet_wrap(~ stats, ncol = 3) +
@@ -481,11 +481,14 @@ plot_topo_mean <- function(data,
   if (show_legend == TRUE) {
     g <- g  +
       labs(fill = expression(paste("Amplitude (", mu, "V)"))) +
-      guides(fill = guide_colorbar(barwidth = 20, barheight = 0.7)) +
+      guides(fill = guide_colorbar(
+        barheight = unit(0.7, "lines"),
+        barwidth = unit(0.7, "npc")
+      )) +
       theme(
         legend.position = "bottom",
         legend.text = element_text(size = 5),
-        legend.title = element_text(size = 8)
+        legend.title = element_text(size = 6)
       )
   } else {
     g <- g +
@@ -535,4 +538,43 @@ plot_topo_mean <- function(data,
 
   return(g)
 
+}
+
+#' Create dynamic axis breaks
+#'
+#' @description
+#' This function calculates appropriate step sizes and generates
+#' sequence breaks based on the numerical span of the provided limits.
+#'
+#' @param limits A numeric vector of length 2 specifying the range `c(min, max)`.
+#'
+#' @return A numeric vector of calculated breaks that fall strictly within
+#'   the provided `limits`.
+#'
+#' @keywords internal
+#' @noRd
+dynamic_breaks <- function(limits) {
+  span <- diff(limits)
+
+  if (span <= 2) {
+    step <- 0.2
+  } else if (span <= 6) {
+    step <- 0.5
+  } else if (span <= 15) {
+    step <- 1
+  } else if (span <= 30) {
+    step <- 2
+  } else if (span <= 60) {
+    step <- 5
+  } else {
+    step <- 10
+  }
+
+  brks <- seq(
+    from = floor(limits[1] / step) * step,
+    to   = ceiling(limits[2] / step) * step,
+    by   = step
+  )
+
+  return(brks[brks >= limits[1] & brks <= limits[2]])
 }

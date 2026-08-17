@@ -32,7 +32,7 @@
 #'
 #' @keywords dataset
 #'
-#' @references Oostenveld, R., & Praamstra, P. (2001). The five percent electrode system
+#' @references Oostenveld, R., Praamstra, P. (2001). The five percent electrode system
 #' for high-resolution EEG and ERP measurements. \emph{Clinical Neurophysiology},
 #' 112(4), 713-719. \doi{10.1016/s1388-2457(00)00527-7}
 #'
