@@ -65,8 +65,8 @@ The coordinates originate from the MNE-Python GitHub repository.
 
 ## References
 
-Oostenveld, R., & Praamstra, P. (2001). The five percent electrode
-system for high-resolution EEG and ERP measurements. *Clinical
+Oostenveld, R., Praamstra, P. (2001). The five percent electrode system
+for high-resolution EEG and ERP measurements. *Clinical
 Neurophysiology*, 112(4), 713-719.
 [doi:10.1016/s1388-2457(00)00527-7](https://doi.org/10.1016/s1388-2457%2800%2900527-7)
 
