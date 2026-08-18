@@ -34,7 +34,7 @@ The x-axis represents time, the y-axis represents the sensors, and the z-axis (a
 }
 \examples{
 \donttest{
-# Prepare data: Mean across epochs 1:13 for Subject 1 over a specific time range
+# Prepare data: Mean across epochs 1:13 for Subject 2
 edata <- pick_data(epochdata, subject_rg = 2, epoch_rg = 1:13)
 data_base <- baseline_correction(edata, baseline_range = 1:9)
 data_mean <- compute_mean(data_base, amplitude = "signal_base", type = "point", domain = "time")

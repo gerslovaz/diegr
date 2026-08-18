@@ -1,16 +1,16 @@
 # diegr 0.3.0
 
-* Added functions for creating interactive surface plots and checking data structure.
-* Added new sensor templates: BioSemi 128, BioSemi 256, and system 10-05.
+* Added functions for creating interactive surface plots and checking data structures.
+* Added new sensor templates: BioSemi 128, BioSemi 256, and the international 10-05 system.
 * Updated graphical functions to ensure compatibility with the new templates.
-* Added metadata to computing and graphic functions.
+* Added metadata to computational and graphical functions.
 * Changed default palette in `create_scale()` to a perceptually uniform `"redblue"` scale and added range symmetrization around zero.
-* Updated dealing with `NA` values within `compute_mean()`, `outliers_epoch()` and `baseline_correction()`.
+* Improved handling of `NA` values within `compute_mean()`, `outliers_epoch()`, and `baseline_correction()`.
 * Added a fallback to `MASS::ginv()` for ill-conditioned interpolation matrices.
 * Rewrote `point_mesh()` using `sf` instead of the `sp` package.
-* Fixed bugs in `outliers_epoch()`, timeline rendering in animations and baseline range in examples and documentation.
-* Added static version of outputs for boxplots.
-* Updated the installation method for the development version in the README, edited troubleshooting section in vignette. 
+* Fixed bugs in `outliers_epoch()`, animation timeline rendering, and the baseline ranges used in examples and documentation.
+* Added static versions of boxplot outputs.
+* Updated the installation instructions for the development version in the README and revised the vignette's troubleshooting section. 
 
 
 # diegr 0.2.0
