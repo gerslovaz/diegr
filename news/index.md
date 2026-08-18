@@ -3,19 +3,19 @@
 ## diegr 0.3.0
 
 - Added functions for creating interactive surface plots and checking
-  data structure.
-- Added new sensor templates: BioSemi 128, BioSemi 256, and system
-  10-05.
+  data structures.
+- Added new sensor templates: BioSemi 128, BioSemi 256, and the
+  international 10-05 system.
 - Updated graphical functions to ensure compatibility with the new
   templates.
-- Added metadata to computing and graphic functions.
+- Added metadata to computational and graphical functions.
 - Changed default palette in
   [`create_scale()`](https://gerslovaz.github.io/diegr/reference/create_scale.md)
   to a perceptually uniform `"redblue"` scale and added range
   symmetrization around zero.
-- Updated dealing with `NA` values within
+- Improved handling of `NA` values within
   [`compute_mean()`](https://gerslovaz.github.io/diegr/reference/compute_mean.md),
-  [`outliers_epoch()`](https://gerslovaz.github.io/diegr/reference/outliers_epoch.md)
+  [`outliers_epoch()`](https://gerslovaz.github.io/diegr/reference/outliers_epoch.md),
   and
   [`baseline_correction()`](https://gerslovaz.github.io/diegr/reference/baseline_correction.md).
 - Added a fallback to
@@ -26,11 +26,11 @@
   using `sf` instead of the `sp` package.
 - Fixed bugs in
   [`outliers_epoch()`](https://gerslovaz.github.io/diegr/reference/outliers_epoch.md),
-  timeline rendering in animations and baseline range in examples and
-  documentation.
-- Added static version of outputs for boxplots.
-- Updated the installation method for the development version in the
-  README, edited troubleshooting section in vignette.
+  animation timeline rendering, and the baseline ranges used in examples
+  and documentation.
+- Added static versions of boxplot outputs.
+- Updated the installation instructions for the development version in
+  the README and revised the vignette’s troubleshooting section.
 
 ## diegr 0.2.0
 

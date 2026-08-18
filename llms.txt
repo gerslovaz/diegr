@@ -9,21 +9,34 @@ sensor-level brain signals.
 
 The package `diegr` includes:
 
-- interactive boxplots (`boxplot_epoch`, `boxplot_subject`,
-  `boxplot_rt`)
-- interactive waveforms (`interactive_waveforms`) and surface plots
-  (`interactive_surfaceplot`, `interactive_surfaceplot_curves`)
-- topographic maps in 2D (`topo_plot`)
-- scalp plots in 3D (`scalp_plot`)
+- interactive boxplots
+  ([`boxplot_epoch()`](https://gerslovaz.github.io/diegr/reference/boxplot_epoch.md),
+  [`boxplot_subject()`](https://gerslovaz.github.io/diegr/reference/boxplot_subject.md),
+  [`boxplot_rt()`](https://gerslovaz.github.io/diegr/reference/boxplot_rt.md))
+- interactive waveforms
+  ([`interactive_waveforms()`](https://gerslovaz.github.io/diegr/reference/interactive_waveforms.md))
+  and surface plots
+  ([`interactive_surfaceplot()`](https://gerslovaz.github.io/diegr/reference/interactive_surfaceplot.md),
+  [`interactive_surfaceplot_curves()`](https://gerslovaz.github.io/diegr/reference/interactive_surfaceplot_curves.md))
+- topographic maps in 2D
+  ([`topo_plot()`](https://gerslovaz.github.io/diegr/reference/topo_plot.md))
+- scalp plots in 3D
+  ([`scalp_plot()`](https://gerslovaz.github.io/diegr/reference/scalp_plot.md))
 - functions for computing summary statistics, baseline correction,
   pointwise and jackknife means
-  (`summary_stats_rt`,`baseline_correction`, `compute_mean`)
+  ([`summary_stats_rt()`](https://gerslovaz.github.io/diegr/reference/summary_stats_rt.md),
+  [`baseline_correction()`](https://gerslovaz.github.io/diegr/reference/baseline_correction.md),
+  [`compute_mean()`](https://gerslovaz.github.io/diegr/reference/compute_mean.md))
 - functions for easy selection of data subsets or regions of interest
-  (`pick_data`, `pick_region`)
+  ([`pick_data()`](https://gerslovaz.github.io/diegr/reference/pick_data.md),
+  [`pick_region()`](https://gerslovaz.github.io/diegr/reference/pick_region.md))
 - functions for plotting the mean with pointwise confidence intervals
-  (`plot_time_mean`, `plot_topo_mean`)
-- animations of time course of raw signals or averages in 2D and 3D
-  (`animate_topo`, `animate_topo_mean`, `animate_scalp`)
+  ([`plot_time_mean()`](https://gerslovaz.github.io/diegr/reference/plot_time_mean.md),
+  [`plot_topo_mean()`](https://gerslovaz.github.io/diegr/reference/plot_topo_mean.md))
+- animations of the time course of raw signals or averages in 2D and 3D
+  ([`animate_topo()`](https://gerslovaz.github.io/diegr/reference/animate_topo.md),
+  [`animate_topo_mean()`](https://gerslovaz.github.io/diegr/reference/animate_topo_mean.md),
+  [`animate_scalp()`](https://gerslovaz.github.io/diegr/reference/animate_scalp.md))
 
 ## Installation
 
@@ -57,7 +70,7 @@ columns with the following structure:
 - `sensor` - sensor labels,
 - `epoch` - epoch numbers,
 - `condition` - experimental condition labels,
-- `time` - numbers of time points (as sampling indices, not in ms),
+- `time` - time-point indices (as sampling indices, not in ms),
 - `signal` - the EEG signal amplitude in microvolts (in most functions,
   the name of the column containing the amplitude can be customized
   arbitrarily).
@@ -69,16 +82,16 @@ You can use the
 function, which checks the data structure and prints the inferred
 hierarchy.
 
-The package includes several training datasets:
+The package includes several example datasets:
 
-- `epochdata`: epoched HD-EEG data (anonymized short slice from big
-  HD-EEG study presented in Madetko-Alster, 2025) for 2 subjects and 204
-  selected sensors in 50 time points (measured using the EGI HCGSN256
-  system),
-- `rtdata`: response times (time between stimulus presentation and
-  pressing the button) from the experiment involving a simple visual
-  motor task (anonymized short slice from big HD-EEG study presented in
-  Madetko-Alster, 2025)
+- `epochdata`: epoched HD-EEG data (anonymized small subset of a large
+  HD-EEG study presented in Madetko-Alster et al., 2025) for two
+  subjects and 204 selected sensors at 50 time points (measured using
+  the EGI HCGSN256 system),
+- `rtdata`: response times (time between stimulus presentation and a
+  button press) from the experiment involving a simple visual motor task
+  (anonymized small subset of a large HD-EEG study presented in
+  Madetko-Alster et al., 2025)
 
 as well as datasets containing sensor position coordinates:
 
@@ -93,7 +106,7 @@ as well as datasets containing sensor position coordinates:
   positions in 3D space on the scalp surface and their projection into
   2D space according to the standard 10-05 system.
 
-For more information about the structure of the built-in data see the
+For more information about the structure of the built-in data, see the
 package vignette
 [`vignette("diegr", package = "diegr")`](https://gerslovaz.github.io/diegr/articles/diegr.md).
 
@@ -101,9 +114,8 @@ package vignette
 
 #### Interactive boxplot
 
-This is a basic example which shows how to plot interactive epoch
-boxplots from a chosen electrode at different time points for one
-subject:
+This basic example shows how to plot interactive epoch boxplots from a
+chosen electrode at different time points for one subject:
 
 ``` r
 
@@ -115,14 +127,15 @@ data("epochdata")
 
 epochdata |>
   pick_data(subject_rg = 1, sensor_rg = "E65") |>
-boxplot_epoch(amplitude = "signal", time_lim = c(10:20))
+  boxplot_epoch(amplitude = "signal", time_lim = 10:20)
 ```
 
-![](./reference/figures/README-boxplot.png)
+![A static screen of plotly interactive graph with boxplots of amplitude
+values from sensor E65 at time points 10:20 for Subject
+1.](./reference/figures/README-boxplot.png)
 
-Note: The README format does not allow the inclusion of `plotly`
-interactive elements, therefore, only a static preview of the result is
-shown.
+Note: The README format does not support interactive `plotly` elements,
+therefore, only a static preview of the result is shown.
 
 #### Topographic map
 
@@ -142,15 +155,18 @@ data_short <- epochdata |>
 topo_plot(data_short, amplitude = "signal", mesh = M1)
 ```
 
-![](reference/figures/README-topoplot-1.png)
+![A top-down topographic map of a high-density EEG amplitude in red-blue
+colour scale with contours and black points on sensor locations. The
+amplitude legend is on the right side of the scalp
+projection.](reference/figures/README-topoplot-1.png)
 
 #### Computing and displaying the average in the time domain
 
 Compute the average signal for subject 2 from channels E65 and E34
-(excluding the oulier epochs 14 and 15) and then display it along with
-CI bounds (using
+(excluding the outlier epochs 14 and 15) and then display it along with
+confidence interval (CI) bounds (using
 [`plot_time_mean()`](https://gerslovaz.github.io/diegr/reference/plot_time_mean.md)
-conditioned by sensor)
+conditioned by sensor).
 
 ``` r
 
@@ -166,7 +182,13 @@ data_mean <- data_base |>
 plot_time_mean(data = data_mean, t0 = 10, condition_column = "sensor", legend_title = "Sensor")
 ```
 
-![](reference/figures/README-timemean-1.png)
+![An average amplitude time-series plot showing the brain's electrical
+activity (in microvolts) over time (in milliseconds), time-locked to a
+stimulus event at 0 ms. The red line represents the average amplitude
+from sensor E34, and the shaded red area represents the corespondign
+confidence interval. The cyan line represents the average amplitude from
+sensor E65, and the shaded cyan area represents the corespondign
+confidence interval.](reference/figures/README-timemean-1.png)
 
 For detailed examples, usage instructions, and troubleshooting
 information, including system requirements, see the package vignette:
@@ -178,7 +200,7 @@ in self-paced movement impairment in Parkinson’s disease. *Clinical
 Neurophysiology.* 2025, vol. 171, 11-17.
 <https://doi.org/10.1016/j.clinph.2025.01.001>
 
-**License** This package is distributed under the MIT license. See
+**License** This package is distributed under the MIT license. See the
 LICENSE file for details.
 
 **Citation** Use `citation("diegr")` to cite this package.

@@ -21,29 +21,29 @@ experiment and the size of the data, this is only a small section which
 serves as a demonstration of the implemented functions and it is not
 possible to reconstruct the real signal of a specific sensor or subject
 from it. Details of the experiment from which the original data comes
-can be found in Madetko-Alster and col., 2025.
+can be found in Madetko-Alster et al. (2025).
 
 #### epochdata
 
-The brain signal originally measured by 256-channel HydroCel Geodesic
-Sensor Net with sampling frequency 250 Hz. Example dataset contains
-amplitude values from 204 selected channels at 50 time points (stimulus
-at time point 10) for 2 representative subjects (one healthy control,
-one patient). Out of 50 epochs per subject, 14 (or 15, respectively)
-were selected.
+The brain signal was originally measured by 256-channel HydroCel
+Geodesic Sensor Net with a sampling frequency of 250 Hz. The example
+dataset contains amplitude values from 204 selected channels at 50 time
+points (stimulus at time point 10) for 2 representative subjects (one
+healthy control, one patient). Out of 50 epochs per subject, 14 (or 15,
+respectively) were selected.
 
 The data is organized into a data frame with the following columns:
 
-- `time`: Number of time point. Number 10 indicates the time of stimulus
-  (0 ms), the interval between two time points corresponds to 4 ms
-  (sampling frequency 250 Hz).
+- `time`: Numbers of time points (as sampling indices, not in ms).
+  Number 10 indicates the time of stimulus (0 ms), the interval between
+  two time points corresponds to 4 ms (sampling frequency 250 Hz).
 - `signal`: HD-EEG signal amplitude (in microvolts).
-- `epoch`: Epoch number (there are 14 epochs for subject one, 15 epochs
+- `epoch`: Epoch numbers (there are 14 epochs for subject one, 15 epochs
   for subject two).
-- `sensor`: Sensor label (labeling corresponds to the Geodesic Sensor
+- `sensor`: Sensor labels (labeling corresponds to the Geodesic Sensor
   Net Technical Manual, 2024).
-- `subject`: Subject ID (1 - representative healthy control subject, 2 -
-  representative patient subject).
+- `subject`: Subject IDs (1 - representative healthy control subject,
+  2 - representative patient subject).
 
 #### rtdata
 
@@ -67,7 +67,7 @@ elements:
 
 - `D2`: A tibble with coordinates and labels of sensors in 2D.
 - `D3`: A tibble with coordinates and labels of sensors in 3D.
-- `ROI`:A vector with the region of interest (ROI) assignment for each
+- `ROI`: A vector with the region of interest (ROI) assignment for each
   sensor (“central”, “frontal”, “occipital”, “parietal” or “temporal”
   according to the brain regions, possibly “face” for the face area).
 
@@ -110,8 +110,8 @@ The package assumes that the input data have already been preprocessed
 …), but may still contain outliers that should be excluded for specific
 statistical analyses.
 
-The useful tool in outliers detection is interactive plot with boxplots
-of amplitudes
+A useful tool for outlier detection is interactive plot with boxplots of
+amplitudes
 ([`boxplot_epoch()`](https://gerslovaz.github.io/diegr/reference/boxplot_epoch.md))
 or response times
 ([`boxplot_rt()`](https://gerslovaz.github.io/diegr/reference/boxplot_rt.md))
@@ -155,7 +155,7 @@ criteria (interquartile range - IQR, percentile approach or Hampel
 filter).  
 The output of this function is a table containing epoch IDs and the
 number of time points in which the epochs were evaluated as outliers
-(according to chosen criteria) for unique combinations of input
+(according to chosen criterion) for unique combinations of input
 variables (e.g. group, subject, sensor).
 
 ``` r
@@ -187,16 +187,16 @@ subjects.
 
 The baseline correction of the amplitude is enabled through the function
 [`baseline_correction()`](https://gerslovaz.github.io/diegr/reference/baseline_correction.md).
-In the first release of the package, only most commonly used absolute
-correction (`type = "absolute"`), which subtracts mean over `base_int`,
-is available.
+In the first release of the package, only the most commonly used
+absolute correction (`type = "absolute"`), which subtracts the mean over
+`base_int`, is available.
 
 The calculation of the average signal can be performed using the
 function
 [`compute_mean()`](https://gerslovaz.github.io/diegr/reference/compute_mean.md),
-which computes pointwise standard/weighted or jackknife (leave one out)
+which computes pointwise standard/weighted or jackknife (leave-one-out)
 mean of the signal at different levels. In addition to the mean itself,
-the function also calculates the boundaries of the point confidence
+the function also calculates the boundaries of the pointwise confidence
 interval (`ci_low` and `ci_up` in the output). The argument `domain`
 determines whether the average is calculated within individual time
 points (for curves) - `domain = "time"` or sensors (for topographic
@@ -260,24 +260,24 @@ necessary to generate a denser mesh of points. This refined mesh
 provides better spatial resolution and enhances the quality of
 visualizations. Creating a new mesh is available through
 [`point_mesh()`](https://gerslovaz.github.io/diegr/reference/point_mesh.md)
-function. This function computes the coordinates of mesh in 2D and/or 3D
-and enables to control a density (argument `n`) or the shape (argument
-`type`) of the result mesh.  
-The default setting creates a polygonal mesh with starting number 10000
+function. This function computes the coordinates of the mesh in 2D
+and/or 3D and allows control of the density (argument `n`) or the shape
+(argument `type`) of the result mesh.  
+The default setting creates a polygonal mesh with an initial 10,000
 points and computes the coordinates in both dimensions, which are
 available in `$D2` and `$D3` parts of a result list (class `"mesh"`).
 
-For simple created mesh plotting use the function
+To plot a created mesh use the function
 [`plot_point_mesh()`](https://gerslovaz.github.io/diegr/reference/plot_point_mesh.md),
-which results in two dimensional `ggplot` of point mesh or three
-dimensional `rgl` plot depending on the input dimension.
+which results in two-dimensional `ggplot` of point mesh or
+three-dimensional `rgl` plot depending on the input dimension.
 
 Notes:
 
-- Creating and plotting a mesh for subset from the whole template
-  montage is available through `sensor_select` parameter. For
-  consistency between created mesh and its plot use the same vector of
-  sensor labels in both functions.
+- Creating and plotting a mesh for a subset of the full template montage
+  is available through `sensor_select` parameter. For consistency
+  between the created mesh and its plot use the same vector of sensor
+  labels in both functions.
 - The input of
   [`plot_point_mesh()`](https://gerslovaz.github.io/diegr/reference/plot_point_mesh.md)
   must contain the relevant part with coordinates - `$D2` for two
@@ -305,17 +305,17 @@ plot_point_mesh(M2, sensor_select = sensors204, col_sensors = "purple",
                 label_sensors = TRUE, cex = 0.1)
 ```
 
-![A schematic representations of an HD-EEG sensor net, showing the
+![A schematic representation of an HD-EEG sensor net, showing the
 arrangement of 204 labeled channels distributed across the entire scalp
 area together with denser point mesh created for
 interpolation.](diegr_files/figure-html/unnamed-chunk-7-1.png)![A
-schematic representations of an HD-EEG sensor net, showing the
+schematic representation of an HD-EEG sensor net, showing the
 arrangement of 204 labeled channels distributed across the entire scalp
 area together with denser point mesh created for
 interpolation.](diegr_files/figure-html/unnamed-chunk-7-2.png)
 
-`diegr`’s plotting functions also allow users to input the custom mesh
-created in other way, it is only necessary to maintain the structure
+`diegr`’s plotting functions also allow users to input a custom mesh
+created in another way, it is only necessary to maintain the structure
 following a `"mesh"` object.  
 If the `mesh` input is not specified, the graphic functions
 automatically use the mesh created by
@@ -342,9 +342,12 @@ yellow/red, and negative values trend towards dark blue. Additionally,
 users can choose their own palettes for plots using the `col_scale`
 argument.
 
-Both `topo_` functions allow setting some optionally arguments for
-editing the output appearance (with or without contours, sensor names,
-etc.) and return `ggplot` object for further customization.
+Both functions
+([`topo_plot()`](https://gerslovaz.github.io/diegr/reference/topo_plot.md),
+[`plot_topo_mean()`](https://gerslovaz.github.io/diegr/reference/plot_topo_mean.md))
+allow setting some optional arguments for editing the output appearance
+(with or without contours, sensor names, etc.) and return a `ggplot`
+object for further customization.
 
 Notes:
 
@@ -394,7 +397,7 @@ plot_topo_mean(data = data_mean, template = "HCGSN256", col_scale = CS_topo)
 
 ![Fig 1: A top-down topographic map of a high-density EEG amplitude in
 topographic colour scale with contours and black points on sensor
-locations. The amplitude legend is on the left side of the scalp
+locations. The amplitude legend is on the right side of the scalp
 projection. Fig 2: The same plot without contours and legend, but with
 sensor labels as text displayed together with black point on sensor
 positions. Fig 3: A ggplot divided into three panels with topographic
@@ -403,19 +406,19 @@ confidence interval bounds. The colour legend position is bottom of the
 facets.](diegr_files/figure-html/unnamed-chunk-8-1.png)![Fig 1: A
 top-down topographic map of a high-density EEG amplitude in topographic
 colour scale with contours and black points on sensor locations. The
-amplitude legend is on the left side of the scalp projection. Fig 2: The
-same plot without contours and legend, but with sensor labels as text
-displayed together with black point on sensor positions. Fig 3: A ggplot
-divided into three panels with topographic maps of average signal
+amplitude legend is on the right side of the scalp projection. Fig 2:
+The same plot without contours and legend, but with sensor labels as
+text displayed together with black point on sensor positions. Fig 3: A
+ggplot divided into three panels with topographic maps of average signal
 (middle) and its lower (left) and upper (right) confidence interval
 bounds. The colour legend position is bottom of the
 facets.](diegr_files/figure-html/unnamed-chunk-8-2.png)![Fig 1: A
 top-down topographic map of a high-density EEG amplitude in topographic
 colour scale with contours and black points on sensor locations. The
-amplitude legend is on the left side of the scalp projection. Fig 2: The
-same plot without contours and legend, but with sensor labels as text
-displayed together with black point on sensor positions. Fig 3: A ggplot
-divided into three panels with topographic maps of average signal
+amplitude legend is on the right side of the scalp projection. Fig 2:
+The same plot without contours and legend, but with sensor labels as
+text displayed together with black point on sensor positions. Fig 3: A
+ggplot divided into three panels with topographic maps of average signal
 (middle) and its lower (left) and upper (right) confidence interval
 bounds. The colour legend position is bottom of the
 facets.](diegr_files/figure-html/unnamed-chunk-8-3.png)
@@ -425,7 +428,7 @@ facets.](diegr_files/figure-html/unnamed-chunk-8-3.png)
 The
 [`scalp_plot()`](https://gerslovaz.github.io/diegr/reference/scalp_plot.md)
 function is created for plotting a scalp polygon map of the EEG signal
-amplitude using by default the same colour scale as in
+amplitude using, by default, the same colour scale as in
 [`topo_plot()`](https://gerslovaz.github.io/diegr/reference/topo_plot.md).
 The result plot is rendered using
 [`rgl::shape3d`](https://dmurdoch.github.io/rgl/dev/reference/mesh3d.html)
@@ -437,10 +440,14 @@ This triangulation is constructed by
 which creates a Delaunay type-I triangulation (Lai & Schumaker, 2007)
 with consistently oriented edges (Schneider & Eberly, 2003).
 
-Note: - The input values of amplitude outside the chosen `col_range`
-will cause “holes” in the resulting plot. - To obtain comparable results
-between different subjects or conditions, setting the same values of
-`col_range` and `col_scale` arguments in all cases is necessary.
+Notes:
+
+- The input values of amplitude outside the chosen `col_range` will
+  cause “holes” in the resulting plot.
+
+- To obtain comparable results between different subjects or conditions,
+  setting the same values of `col_range` and `col_scale` arguments in
+  all cases is necessary.
 
 ``` r
 
@@ -451,15 +458,15 @@ scalp_plot(s1, amplitude = "average", col_range = c(-30, 15))
 # note: the output is not plotted to reduce the vignette file size
 ```
 
-The `rgl` output enables to zoom and rotate the image with default view
-of the back of the head.
+The `rgl` output allows users to zoom and rotate the image with a
+default view of the back of the head.
 
 #### Surface plots
 
 At the intersection of temporal and spatial visualization is the
 [`interactive_surfaceplot_curves()`](https://gerslovaz.github.io/diegr/reference/interactive_surfaceplot_curves.md),
-which allows to display the time courses of all (or selected) electrodes
-in a single figure.
+which allows users to display the time courses of all (or selected)
+electrodes in a single figure.
 
 ``` r
 
@@ -484,15 +491,15 @@ The package includes the
 [`animate_topo()`](https://gerslovaz.github.io/diegr/reference/animate_topo.md)
 and
 [`animate_topo_mean()`](https://gerslovaz.github.io/diegr/reference/animate_topo_mean.md)
-function for 2D topographic animation in time and
+functions for 2D topographic animation in time and the
 [`animate_scalp()`](https://gerslovaz.github.io/diegr/reference/animate_scalp.md)
 function for 3D scalp animation in time. Both of these functions allow
-to export the output, a gif animation using `gifski` package for 2D case
-and a .mp4 video format using `av` package for 3D case. The topographic
-map animation uses `gganimate` and and accepts additional parameters
-passed to
+to export the output, a GIF animation using `gifski` package for the 2D
+case and a .mp4 video format using `av` package for the 3D case. The
+topographic map animation uses `gganimate` and accepts additional
+parameters passed to
 [`gganimate::animate()`](https://gganimate.com/reference/animate.html)
-via `...`. The most of input parameters of
+via `...`. Most input parameters of
 [`animate_topo()`](https://gerslovaz.github.io/diegr/reference/animate_topo.md)
 are the same as in
 [`topo_plot()`](https://gerslovaz.github.io/diegr/reference/topo_plot.md)
@@ -505,11 +512,12 @@ with pointwise confidence interval bounds displayed as topographic maps
 on the sides of the average map. Usage is almost identical to the
 [`animate_topo()`](https://gerslovaz.github.io/diegr/reference/animate_topo.md)
 function, only input data must contain columns `average`, `ci_up` and
-`ci_low` (like the output from the `compute_mean` function). Example:
-The animation of time course of the EEG signal for subject 1 and epoch 5
-(from `epochdata`) between time points 10 and 20 with the whole range of
-time 0:50 is created as follows (the output is not rendered to reduce
-the vignette file size):
+`ci_low` (like the output from the
+[`compute_mean()`](https://gerslovaz.github.io/diegr/reference/compute_mean.md)
+function). Example: The animation of time course of the EEG signal for
+subject 1 and epoch 5 (from `epochdata`) between time points 10 and 20
+with the whole range of time 0:50 is created as follows (the output is
+not rendered to reduce the vignette file size):
 
 ``` r
 
@@ -526,12 +534,12 @@ animate_topo(s1e05, amplitude = "signal", t_lim = c(0,50),
              t0 = 10, output_path = "example_animation.gif")
 ```
 
-The scalp animation enables to export a video in `.mp4` format using the
-`av` package or save a sequence of frames into chosen directory setting
-the `frames_dir` parameter. The animation speed can be controlled by the
-`sec` parameter in the viewer or by the `framerate` parameter for the
-exported video. The video resolution quality can be affected using
-`par3d` function, for example
+The scalp animation allows users to export a video in `.mp4` format
+using the `av` package or save a sequence of frames to a chosen
+directory setting the `frames_dir` parameter. The animation speed can be
+controlled by the `sec` parameter in the viewer or by the `framerate`
+parameter for the exported video. The video resolution quality can be
+affected using `par3d` function, for example
 `rgl::par3d(windowRect = c(100, 100, 800, 800))`. Example of scalp
 animation with the same data as above (the output is not rendered to
 reduce the vignette file size):
@@ -547,7 +555,7 @@ animate_scalp(s1e05, amplitude = "signal",
               output_path = "your_created_video_path.mp4")
 ```
 
-If you are interested in animation of rotating scalp visualization in
+If you are interested in animation of rotating scalp visualization at a
 fixed time point, you can easily achieve this by using the combination
 of
 [`rgl::play3d`](https://dmurdoch.github.io/rgl/dev/reference/play3d.html)
@@ -569,7 +577,7 @@ rgl::play3d(rgl::spin3d(axis = c(0, 0, 1), rpm = 10), duration = 10)
 In this section we present a sample code for analyzing topographic maps
 across subjects:
 
-1.  Outliers detection
+1.  Outlier detection
 
 ``` r
 
@@ -590,21 +598,20 @@ dataE59 |>
 ```
 
 Subject 1: epoch 14 is an obvious outlier. Subject 2: epoch 15 is an
-obvious outlier, epoch 14 was denoted as outlier for 37 time points - we
-exclude both of them from further analysis.
+obvious outlier, epoch 14 was identified as an outlier for 37 time
+points - we exclude both of them from further analysis.
 
 2.  Baseline correction
 
 We exclude outlier epochs before baseline correction, otherwise they
-would affect the baseline average computing.
+would affect computation of the baseline mean.
 
 Note: If there are multiple subjects (or other variables) in the input
 data, the
 [`baseline_correction()`](https://gerslovaz.github.io/diegr/reference/baseline_correction.md)
-add them into grouping structure, so the baseline calculation is
-provided separately for unique combinations of these variables. This
-procedure allows to compute baseline correction for both subjects in one
-step.
+adds them into grouping structure, so the baseline is calculated
+separately for unique combinations of these variables. This procedure
+allows to compute baseline correction for both subjects in one step.
 
 ``` r
 
@@ -613,10 +620,10 @@ subjects_base <- epochdata |>
   baseline_correction(baseline_range = 1:9)
 ```
 
-3.  Average computing
+3.  Computing the average
 
-We compute average topographic map in time point 35 (100 ms after
-stimulus) for both subjects. We use standard (un-weighted) pointwise
+We compute average topographic map at time point 35 (100 ms after
+stimulus) for both subjects. We use standard (unweighted) pointwise
 average with bootstrap confidence intervals.
 
 ``` r
@@ -642,7 +649,6 @@ M <- point_mesh(dimension = 2, n = 4000, template = "HCGSN256",
 # a) find the range of average amplitude
 range(subjects_mean$average) 
 #> [1] -15.962526   8.671741
-# -15.634288   8.609518
 # b) make the range symmetric
 cr_subjects <- c(-16,16)
 ```
@@ -671,8 +677,8 @@ subjects_mean |>
 
 5.  Average difference plot
 
-To display difference in the average of both subjects considered in the
-example, we can use the
+To display the difference between the two subject averages considered in
+the example, we can use the
 [`topo_plot()`](https://gerslovaz.github.io/diegr/reference/topo_plot.md)
 function with the built-in red-blue colour palette.
 
@@ -725,7 +731,7 @@ high-resolution EEG and ERP measurements. *Clinical Neurophysiology.*
 
 #### Reproducibility, System Requirements & Troubleshooting
 
-> **This document was compiled on 2026-08-17 using R version 4.6.1 and
+> **This document was compiled on 2026-08-18 using R version 4.6.1 and
 > the following package versions:**
 >
 > - **Primary Packages:**
