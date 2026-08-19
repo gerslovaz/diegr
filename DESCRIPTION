@@ -1,6 +1,6 @@
 Package: diegr
 Title: Dynamic and Interactive EEG Graphics
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: 
     c(
     person("Zdeňka", "Geršlová", email = "gerslovaz@math.muni.cz", role = c("aut", "cre"),
@@ -12,7 +12,7 @@ Authors@R:
     )
 Description: Allows to visualize high-density electroencephalography (HD-EEG) data through interactive plots and animations, enabling exploratory and communicative analysis of temporal-spatial brain signals. Funder: Masaryk University (Grant No. MUNI/A/1457/2023).
 License: MIT + file LICENSE
-Date: 2026-07-31
+Date: 2026-08-19
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
