@@ -76,7 +76,7 @@ scalp_plot <- function(data,
                        col_scale = NULL,
                        view) {
 
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 

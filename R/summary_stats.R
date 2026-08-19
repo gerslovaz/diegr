@@ -44,7 +44,7 @@
 #' summary_stats_rt(data_cond[,-1])
 summary_stats_rt <- function(data) {
 
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 
@@ -98,7 +98,7 @@ summary_stats_rt <- function(data) {
 check_structure <- function(data,
                             value_col = "signal") {
 
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 

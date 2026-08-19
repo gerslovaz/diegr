@@ -46,7 +46,7 @@ interactive_surfaceplot <- function(data,
                                     col_scale = NULL,
                                     show_sensors = TRUE
                                     ){
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 
@@ -286,7 +286,7 @@ interactive_surfaceplot_curves <- function(data,
                                            col_range = NULL,
                                            col_scale = NULL
                                            ){
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 

@@ -72,7 +72,7 @@ outliers_epoch <- function(data,
                            p = 0.975,
                            print_tab = TRUE){
 
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 

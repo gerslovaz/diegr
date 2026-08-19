@@ -71,7 +71,7 @@ animate_topo <- function(data,
                          output_path = NULL,
                          ...){
 
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 
@@ -443,7 +443,7 @@ animate_scalp <- function(data,
                           framerate = 3,
                           cleanup = TRUE) {
 
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 
@@ -824,7 +824,7 @@ animate_topo_mean <- function(data,
                               output_path = NULL,
                               ...) {
 
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 

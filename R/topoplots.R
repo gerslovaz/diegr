@@ -80,9 +80,10 @@ topo_plot <- function(data,
                       show_legend = TRUE,
                       label_sensors = FALSE) {
 
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
+
 
   stop_if_missing_cols(data, required_cols = c(amplitude, "sensor"))
 
@@ -339,7 +340,7 @@ plot_topo_mean <- function(data,
                            show_legend = TRUE,
                            label_sensors = FALSE) {
 
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 

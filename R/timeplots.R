@@ -64,7 +64,7 @@ interactive_waveforms <- function(data,
                                   CI = FALSE,
                                   use_latex = TRUE) {
 
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 
@@ -269,7 +269,7 @@ plot_time_mean <- function(data,
                            label_offset = c(0,0),
                            legend_title = "Condition") {
 
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 

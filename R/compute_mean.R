@@ -111,7 +111,7 @@ compute_mean <- function(data,
                          R = NULL,
                          alpha = 0.95){
 
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 

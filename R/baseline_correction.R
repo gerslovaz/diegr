@@ -68,7 +68,7 @@ baseline_correction <- function(data,
                                  baseline_range,
                                  type = "absolute") {
 
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 
