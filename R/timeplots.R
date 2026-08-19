@@ -64,6 +64,10 @@ interactive_waveforms <- function(data,
                                   CI = FALSE,
                                   use_latex = TRUE) {
 
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
+
   if (CI && (!all(c("ci_low", "ci_up") %in% colnames(data)))) {
     stop("To plot confidence bands, the data must include 'ci_low' and 'ci_up' columns.")
   }
@@ -264,6 +268,10 @@ plot_time_mean <- function(data,
                            label_0ms = "stimulus",
                            label_offset = c(0,0),
                            legend_title = "Condition") {
+
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
 
   stop_if_missing_cols(data, required_cols = c("time", "average", "ci_low", "ci_up"))
 

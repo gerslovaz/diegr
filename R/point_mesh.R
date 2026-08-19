@@ -14,6 +14,8 @@
 #' @param type A character indicating the shape of the mesh with 2 possible values: \code{"circle"} for circular mesh, \code{"polygon"} for irregular polygon shape with boundaries defined by sensor locations (default).
 #'
 #' @details
+#' Please note that the input coordinates must be unique. The function execution will automatically stop if duplicate sensor locations are found.
+#'
 #' If neither \code{template} nor \code{own_coordinates} is specified, the \code{"HCGSN256"} template is used by default to create the mesh.
 #'
 #' For the provided built-in templates, the (0,0) point of the resulting 2D mesh generally corresponds to the vertex of the head model (e.g., the Cz electrode).
@@ -127,6 +129,10 @@ point_mesh <- function(dimension = c(2,3),
     stop("Columns 'x', 'y' are required in 'D2' part of a list with coordinates.")
   }
 
+  if (any(duplicated(coords[, c("x", "y")]))) {
+    stop("Duplicate sensor coordinates found. Cannot compute mesh hull.")
+  }
+
   coords_xy <- coords |>
     dplyr::select("x", "y")
   conv_hull <- chull(coords$x, coords$y)
@@ -194,6 +200,10 @@ point_mesh <- function(dimension = c(2,3),
     coords_xyz <- coords_xyz |>
       dplyr::select("x", "y", "z")
 
+    if (any(duplicated(coords_xyz[, c("x", "y", "z")]))) {
+      stop("Duplicate sensor coordinates found in D3. Cannot compute 3D mesh.")
+    }
+
     switch(type,
            "circle" = {
              mesh_out <- list(D3 = recompute_3d(coords_xy, coords_xyz, mesh_circle))
@@ -213,6 +223,10 @@ point_mesh <- function(dimension = c(2,3),
     }
     coords_xyz <- coords_xyz |>
       dplyr::select("x", "y", "z")
+
+    if (any(duplicated(coords_xyz[, c("x", "y", "z")]))) {
+      stop("Duplicate sensor coordinates found in D3. Cannot compute 3D mesh.")
+    }
 
     switch(type,
            "circle" = {
@@ -473,6 +487,8 @@ plot_point_mesh <- function(mesh,
 #' @param mesh A data frame or tibble with named columns: \code{x}, \code{y} (required) and \code{index} (optionally, if missing, it will be generated internally). It should optimally be a \code{D2} element of a \code{"mesh"} object or a list with the same structure of uniformly spaced grid.
 #'
 #' @details
+#' Please note that the input coordinates must be unique. The function execution will automatically stop if duplicate sensor locations are found.
+#'
 #' The type-I Delaunay triangulation is a triangulation obtained by drawing in the north-east diagonals in all subrectangles of the triangulated area.
 #' Due to the regularity of the input mesh (in the sense of distances between mesh points), a simplified procedure is used: The triangulation is created within the individual strips and then bound together.
 #' The order of the vertices is chosen to maintain a consistent orientation of the triangles (for more details see Schneider 2003).
@@ -530,6 +546,10 @@ make_triangulation <- function(mesh) {
 
   if (!is.numeric(mesh$x) || !is.numeric(mesh$y)) {
     stop("Columns 'x' and 'y' must be numeric.")
+  }
+
+  if (any(duplicated(mesh[, c("x", "y")]))) {
+    stop("Duplicate coordinates found in the input mesh. Triangulation requires unique points.")
   }
 
   if (!"index" %in% colnames(mesh) ) {

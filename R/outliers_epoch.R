@@ -72,6 +72,10 @@ outliers_epoch <- function(data,
                            p = 0.975,
                            print_tab = TRUE){
 
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
+
   method <- match.arg(method)
 
   if (!is.numeric(k_iqr) || k_iqr <= 0) {

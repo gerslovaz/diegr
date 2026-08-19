@@ -44,6 +44,10 @@
 #' summary_stats_rt(data_cond[,-1])
 summary_stats_rt <- function(data) {
 
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
+
   stop_if_missing_cols(data, required_cols = c("epoch", "RT"))
 
   group_vars <- intersect(c("group", "subject", "condition"), names(data))
@@ -93,6 +97,10 @@ summary_stats_rt <- function(data) {
 #' check_structure(epochdata)
 check_structure <- function(data,
                             value_col = "signal") {
+
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
 
   if (!inherits(data, c("data.frame", "tbl"))) {
     stop("Input `data` must be a data frame, tibble, or database table.")

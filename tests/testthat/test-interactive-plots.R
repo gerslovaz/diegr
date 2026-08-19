@@ -44,3 +44,21 @@ test_that("check interactive_waveforms structure", {
   expect_s3_class(p_test, "plotly")
 
 })
+
+test_that("check interactive_surfaceplot structure", {
+  skip_on_cran()
+  subdata <- pick_data(epochdata, subject_rg = 1, epoch_rg = 1:13, time_rg = 10)
+  data_mean <- compute_mean(subdata, amplitude = "signal", type = "point", domain = "space")
+  p_test <- interactive_surfaceplot(data_mean, amplitude = "average", col_range = c(-10, 10))
+  expect_s3_class(p_test, "plotly")
+
+})
+
+test_that("check interactive_surfaceplot_curves structure", {
+  skip_on_cran()
+  subdata <- pick_data(epochdata, subject_rg = 1, epoch_rg = 1:13)
+  data_mean <- compute_mean(subdata, amplitude = "signal", type = "point", domain = "time")
+  p_test <- interactive_surfaceplot_curves(data_mean, amplitude = "average")
+  expect_s3_class(p_test, "plotly")
+
+})

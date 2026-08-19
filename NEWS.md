@@ -4,6 +4,8 @@
 * Added new sensor templates: BioSemi 128, BioSemi 256, and the international 10-05 system.
 * Updated graphical functions to ensure compatibility with the new templates.
 * Added metadata to computational and graphical functions.
+* Added validation in `point_mesh()` and `make_triangulation()` to detect duplicate sensor coordinates.
+* Added exit checks for empty input data across all core computational and plotting functions.
 * Changed default palette in `create_scale()` to a perceptually uniform `"redblue"` scale and added range symmetrization around zero.
 * Improved handling of `NA` values within `compute_mean()`, `outliers_epoch()`, and `baseline_correction()`.
 * Added a fallback to `MASS::ginv()` for ill-conditioned interpolation matrices.

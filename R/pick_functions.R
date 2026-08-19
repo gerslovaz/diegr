@@ -197,6 +197,10 @@ pick_data <- function(data,
                       epoch_rg = NULL,
                       time_rg = NULL) {
 
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
+
   conditions <- list()
 
   if (!is.null(group_rg)) {

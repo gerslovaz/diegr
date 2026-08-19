@@ -80,6 +80,10 @@ topo_plot <- function(data,
                       show_legend = TRUE,
                       label_sensors = FALSE) {
 
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
+
   stop_if_missing_cols(data, required_cols = c(amplitude, "sensor"))
 
   if (any(is.na(data[[amplitude]]))) {
@@ -334,6 +338,10 @@ plot_topo_mean <- function(data,
                            contour = FALSE,
                            show_legend = TRUE,
                            label_sensors = FALSE) {
+
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
 
   if (!(is.logical(contour))) {
     stop("Argument 'contour' has to be logical.")

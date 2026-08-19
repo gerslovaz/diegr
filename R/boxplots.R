@@ -52,6 +52,10 @@ boxplot_epoch <- function(data,
                           use_latex = TRUE,
                           interactivity = TRUE) {
 
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
+
   stop_if_missing_cols(data, required_cols = c("time", "epoch", amplitude))
 
   if (!is.numeric(time_lim)) {
@@ -200,6 +204,10 @@ boxplot_subject <- function(data,
                           use_latex = TRUE,
                           interactivity = TRUE) {
 
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
+
   stop_if_missing_cols(data, required_cols = c("time", "subject", amplitude))
 
   if (!is.numeric(time_lim)) {
@@ -332,6 +340,11 @@ boxplot_subject <- function(data,
 boxplot_rt <- function(data,
                        subject = NULL,
                        interactivity = TRUE) {
+
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
+
   stop_if_missing_cols(data, required_cols = c("RT", "epoch", "subject"))
 
   if (!is.null(subject)) {

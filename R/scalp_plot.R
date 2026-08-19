@@ -76,6 +76,10 @@ scalp_plot <- function(data,
                        col_scale = NULL,
                        view) {
 
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
+
   stop_if_missing_cols(data, required_cols = c(amplitude, "sensor"))
 
   if (any(is.na(data[[amplitude]]))) {

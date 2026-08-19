@@ -71,6 +71,10 @@ animate_topo <- function(data,
                          output_path = NULL,
                          ...){
 
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
+
   stop_if_missing_cols(data, required_cols = c(amplitude, "time", "sensor"))
 
   if (any(is.na(data[[amplitude]]))) {
@@ -438,6 +442,10 @@ animate_scalp <- function(data,
                           output_path = NULL,
                           framerate = 3,
                           cleanup = TRUE) {
+
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
 
   stop_if_missing_cols(data, required_cols = c(amplitude, "time", "sensor"))
 
@@ -815,6 +823,10 @@ animate_topo_mean <- function(data,
                               contour = FALSE,
                               output_path = NULL,
                               ...) {
+
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
 
   if (!requireNamespace("magick", quietly = TRUE)) {
     stop("To render the animation, the 'magick' package is required.")

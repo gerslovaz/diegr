@@ -111,6 +111,10 @@ compute_mean <- function(data,
                          R = NULL,
                          alpha = 0.95){
 
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
+
   domain <- match.arg(domain)
   type <- match.arg(type)
   level <- match.arg(level)
@@ -160,11 +164,17 @@ compute_mean <- function(data,
                                 group_vars = group_vars,
                                 weights_col = weights_col,
                                 R = R, alpha = alpha)
+    if (any(output_df$n <= 1, na.rm = TRUE)) {
+      warning("Only one observation found in some groups. Variance and confidence intervals cannot be computed. Returning NA for these statistics.", call. = FALSE)
+    }
   } else if (type == "jack") { # jackknife average
     output_df <- jackknife_mean(data, amp_name = amplitude,
                                 group_vars = group_vars,
                                 id_sym = id_sym,
                                 alpha = alpha)
+    if (any(output_df$n <= 1, na.rm = TRUE)) {
+      warning("Only one observation found in some groups. Leave-one-out mean and related statistics cannot be computed.", call. = FALSE)
+    }
   }
 
   data_meta <- attr(data, "diegr_metadata")
@@ -234,7 +244,7 @@ pointwise_mean <- function(data,
                            group_vars,
                            weights_col,
                            R,
-                           alpha = 0.95) {
+                           alpha) {
 
   avg_data_grouped <- data |>
     summarise(
@@ -323,7 +333,8 @@ leave_one_mean <- function(x,
     vec_ids <- unique(id)
     n <- length(vec_ids)
     if (n <= 1) {
-      return(list(average = NA_real_,
+      return(list(n = n,
+                  average = NA_real_,
                   se = NA_real_,
                   ci_low = NA_real_,
                   ci_up = NA_real_))
@@ -343,7 +354,8 @@ leave_one_mean <- function(x,
     ci_low <- jack_mean - t_idx * jack_se
     ci_up <- jack_mean + t_idx * jack_se
 
-    return(list(average = jack_mean,
+    return(list(n = n,
+                average = jack_mean,
                 se = jack_se,
                 ci_low = ci_low,
                 ci_up = ci_up))
@@ -381,6 +393,7 @@ jackknife_mean <- function(data,
       .by = any_of(group_vars)
       ) |>
     mutate(
+      n = purrr::map_dbl(.data$jack_stats, "n"),
       average = purrr::map_dbl(.data$jack_stats, "average"),
       se = purrr::map_dbl(.data$jack_stats, "se"),
       ci_low = purrr::map_dbl(.data$jack_stats, "ci_low"),

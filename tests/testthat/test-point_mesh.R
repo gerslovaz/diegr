@@ -39,3 +39,22 @@ test_that("make_triangulation output is 3-column matrix", {
   expect_true(is.matrix(TRI))
   expect_equal(ncol(TRI), 3)
 })
+
+test_that("make_triangulation stops for duplicate coordinates", {
+    bad_coords <- data.frame(
+    x = c(0, 0, 1),
+    y = c(0, 0, 1)
+  )
+
+  expect_error(make_triangulation(bad_coords))
+})
+
+test_that("point_mesh stops for duplicate coordinates", {
+  bad_coords <- data.frame(
+    x = c(0, 0, 1),
+    y = c(0, 0, 1)
+  )
+  bad_coords_list <- list(D2 = bad_coords)
+
+  expect_error(point_mesh(dimension = 2, own_coordinates = bad_coords))
+})

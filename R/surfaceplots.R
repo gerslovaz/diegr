@@ -45,7 +45,11 @@ interactive_surfaceplot <- function(data,
                                     col_range = NULL,
                                     col_scale = NULL,
                                     show_sensors = TRUE
-){
+                                    ){
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
+
   stop_if_missing_cols(data, required_cols = c(amplitude, "sensor"))
 
   if (any(is.na(data[[amplitude]]))) {
@@ -281,7 +285,11 @@ interactive_surfaceplot_curves <- function(data,
                                            sensor_ticks = NULL,
                                            col_range = NULL,
                                            col_scale = NULL
-){
+                                           ){
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
+
   stop_if_missing_cols(data, required_cols = c(amplitude, "sensor", "time"))
 
   if (any(is.na(data[[amplitude]]))) {

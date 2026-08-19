@@ -68,6 +68,10 @@ baseline_correction <- function(data,
                                  baseline_range,
                                  type = "absolute") {
 
+  if (nrow(data) == 0) {
+    stop("Input data is empty.")
+  }
+
   if (!is.numeric(baseline_range)) {
     stop("'baseline_range' must be a numeric vector of time points.")
   }

@@ -44,6 +44,8 @@ Function creates an object of class \code{"mesh"}, which is a list of data frame
 For the equivalence between 2D and 3D mesh and the possibility to compare models in different dimensions, the thin-plate spline interpolation model \eqn{\mathbb{R}^2 \rightarrow \mathbb{R}^3} is used for creating 3D mesh.
 }
 \details{
+Please note that the input coordinates must be unique. The function execution will automatically stop if duplicate sensor locations are found.
+
 If neither \code{template} nor \code{own_coordinates} is specified, the \code{"HCGSN256"} template is used by default to create the mesh.
 
 For the provided built-in templates, the (0,0) point of the resulting 2D mesh generally corresponds to the vertex of the head model (e.g., the Cz electrode).

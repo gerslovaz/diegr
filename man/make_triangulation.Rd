@@ -17,6 +17,8 @@ Function for creating Delaunay type-I triangulation (see Schumaker 2007) with co
 See Details for more information.
 }
 \details{
+Please note that the input coordinates must be unique. The function execution will automatically stop if duplicate sensor locations are found.
+
 The type-I Delaunay triangulation is a triangulation obtained by drawing in the north-east diagonals in all subrectangles of the triangulated area.
 Due to the regularity of the input mesh (in the sense of distances between mesh points), a simplified procedure is used: The triangulation is created within the individual strips and then bound together.
 The order of the vertices is chosen to maintain a consistent orientation of the triangles (for more details see Schneider 2003).
