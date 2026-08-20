@@ -1,6 +1,6 @@
 Package: diegr
 Title: Dynamic and Interactive EEG Graphics
-Version: 0.3.0
+Version: 0.3.1
 Authors@R: 
     c(
     person("Zdeňka", "Geršlová", email = "gerslovaz@math.muni.cz", role = c("aut", "cre"),

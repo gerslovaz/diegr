@@ -52,7 +52,7 @@ boxplot_epoch <- function(data,
                           use_latex = TRUE,
                           interactivity = TRUE) {
 
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 
@@ -204,7 +204,7 @@ boxplot_subject <- function(data,
                           use_latex = TRUE,
                           interactivity = TRUE) {
 
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 
@@ -341,7 +341,7 @@ boxplot_rt <- function(data,
                        subject = NULL,
                        interactivity = TRUE) {
 
-  if (nrow(data) == 0) {
+  if (nrow(data |> head(1) |> collect()) == 0) {
     stop("Input data is empty.")
   }
 

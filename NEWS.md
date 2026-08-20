@@ -1,3 +1,6 @@
+# diegr 0.3.1
+* Fixed bug in checks for empty input data.
+
 # diegr 0.3.0
 
 * Added functions for creating interactive surface plots and checking data structures.
