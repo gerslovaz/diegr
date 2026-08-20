@@ -1,5 +1,9 @@
 # Changelog
 
+## diegr 0.3.1
+
+- Fixed bug in checks for empty input data.
+
 ## diegr 0.3.0
 
 - Added functions for creating interactive surface plots and checking
@@ -9,6 +13,13 @@
 - Updated graphical functions to ensure compatibility with the new
   templates.
 - Added metadata to computational and graphical functions.
+- Added validation in
+  [`point_mesh()`](https://gerslovaz.github.io/diegr/reference/point_mesh.md)
+  and
+  [`make_triangulation()`](https://gerslovaz.github.io/diegr/reference/make_triangulation.md)
+  to detect duplicate sensor coordinates.
+- Added exit checks for empty input data across all core computational
+  and plotting functions.
 - Changed default palette in
   [`create_scale()`](https://gerslovaz.github.io/diegr/reference/create_scale.md)
   to a perceptually uniform `"redblue"` scale and added range

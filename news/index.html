@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">diegr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,11 +37,17 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.1" id="diegr-031">diegr 0.3.1<a class="anchor" aria-label="anchor" href="#diegr-031"></a></h2>
+<ul><li>Fixed bug in checks for empty input data.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="diegr-030">diegr 0.3.0<a class="anchor" aria-label="anchor" href="#diegr-030"></a></h2>
 <ul><li>Added functions for creating interactive surface plots and checking data structures.</li>
 <li>Added new sensor templates: BioSemi 128, BioSemi 256, and the international 10-05 system.</li>
 <li>Updated graphical functions to ensure compatibility with the new templates.</li>
 <li>Added metadata to computational and graphical functions.</li>
+<li>Added validation in <code><a href="../reference/point_mesh.html">point_mesh()</a></code> and <code><a href="../reference/make_triangulation.html">make_triangulation()</a></code> to detect duplicate sensor coordinates.</li>
+<li>Added exit checks for empty input data across all core computational and plotting functions.</li>
 <li>Changed default palette in <code><a href="../reference/create_scale.html">create_scale()</a></code> to a perceptually uniform <code>"redblue"</code> scale and added range symmetrization around zero.</li>
 <li>Improved handling of <code>NA</code> values within <code><a href="../reference/compute_mean.html">compute_mean()</a></code>, <code><a href="../reference/outliers_epoch.html">outliers_epoch()</a></code>, and <code><a href="../reference/baseline_correction.html">baseline_correction()</a></code>.</li>
 <li>Added a fallback to <code><a href="https://rdrr.io/pkg/MASS/man/ginv.html" class="external-link">MASS::ginv()</a></code> for ill-conditioned interpolation matrices.</li>

@@ -15,12 +15,12 @@
 ## Citation
 
 Geršlová Z (2026). *diegr: Dynamic and Interactive EEG Graphics*. R
-package version 0.2.0, <https://gerslovaz.github.io/diegr/>.
+package version 0.3.1, <https://gerslovaz.github.io/diegr/>.
 
     @Manual{,
       title = {diegr: Dynamic and Interactive EEG Graphics},
       author = {Zdeňka Geršlová},
       year = {2026},
-      note = {R package version 0.2.0},
+      note = {R package version 0.3.1},
       url = {https://gerslovaz.github.io/diegr/},
     }

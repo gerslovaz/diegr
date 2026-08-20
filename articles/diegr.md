@@ -731,12 +731,12 @@ high-resolution EEG and ERP measurements. *Clinical Neurophysiology.*
 
 #### Reproducibility, System Requirements & Troubleshooting
 
-> **This document was compiled on 2026-08-18 using R version 4.6.1 and
+> **This document was compiled on 2026-08-20 using R version 4.6.1 and
 > the following package versions:**
 >
 > - **Primary Packages:**
 >
->   - `diegr` (version 0.2.0)
+>   - `diegr` (version 0.3.1)
 >   - `dplyr` (version 1.2.1)
 >   - `rlang` (version 1.3.0)
 >   - `ggplot2` (version 4.0.3)

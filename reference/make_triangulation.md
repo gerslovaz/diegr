@@ -29,6 +29,10 @@ pointing to rows in the input mesh.
 
 ## Details
 
+Please note that the input coordinates must be unique. The function
+execution will automatically stop if duplicate sensor locations are
+found.
+
 The type-I Delaunay triangulation is a triangulation obtained by drawing
 in the north-east diagonals in all subrectangles of the triangulated
 area. Due to the regularity of the input mesh (in the sense of distances

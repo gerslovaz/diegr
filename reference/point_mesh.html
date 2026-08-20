@@ -9,7 +9,7 @@ For the equivalence between 2D and 3D mesh and the possibility to compare models
 
     <a class="navbar-brand me-2" href="../index.html">diegr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -109,7 +109,8 @@ For the equivalence between 2D and 3D mesh and the possibility to compare models
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>If neither <code>template</code> nor <code>own_coordinates</code> is specified, the <code>"HCGSN256"</code> template is used by default to create the mesh.</p>
+    <p>Please note that the input coordinates must be unique. The function execution will automatically stop if duplicate sensor locations are found.</p>
+<p>If neither <code>template</code> nor <code>own_coordinates</code> is specified, the <code>"HCGSN256"</code> template is used by default to create the mesh.</p>
 <p>For the provided built-in templates, the (0,0) point of the resulting 2D mesh generally corresponds to the vertex of the head model (e.g., the Cz electrode).</p>
 <p>The number <code>n</code> for controlling the mesh density is only an approximate value. The final number of mesh nodes depends on the exact shape of the polygon (created as a convex hull of the sensor locations), and is only close to, not exactly equal to, the number <code>n</code>.</p>
 <p>The <code>own_coordinates</code> enables computing a mesh from user's own sensor locations. The input must be a list containing following elements:</p><ul><li><p><code>D2</code> a tibble or data frame with sensor coordinates in named <code>x</code> and <code>y</code> columns,</p></li>
@@ -142,10 +143,10 @@ Oostenveld, R., &amp; Praamstra, P. (2001). The five percent electrode system fo
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "point_mesh"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $timestamp</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2026-08-18 07:25:45 UTC"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2026-08-20 07:42:04 UTC"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $package_version</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "0.2.0"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "0.3.1"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $mesh_parameters</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $mesh_parameters$dimension</span>

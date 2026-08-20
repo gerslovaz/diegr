@@ -96,6 +96,10 @@ template used.
 
 ## Details
 
+Please note that the input coordinates must be unique. The function
+execution will automatically stop if duplicate sensor locations are
+found.
+
 If neither `template` nor `own_coordinates` is specified, the
 `"HCGSN256"` template is used by default to create the mesh.
 
@@ -155,10 +159,10 @@ attr(M, "diegr_metadata")
 #> [1] "point_mesh"
 #> 
 #> $timestamp
-#> [1] "2026-08-18 07:25:45 UTC"
+#> [1] "2026-08-20 07:42:04 UTC"
 #> 
 #> $package_version
-#> [1] "0.2.0"
+#> [1] "0.3.1"
 #> 
 #> $mesh_parameters
 #> $mesh_parameters$dimension
